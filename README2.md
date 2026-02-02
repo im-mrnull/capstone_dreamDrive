@@ -283,6 +283,64 @@ Notes:
 - To maximize oracle best-of-K, set `--mode-cls-weight 0` (but top-1 is less meaningful).
 - To maximize top-1, increase `--mode-cls-weight` (may slightly reduce oracle performance).
 
+---
+
+## Trajectron++ (Multi-Agent, Multi-Modal)
+
+We trained the Trajectron++ model from [trajectron-plus-plus](https://github.com/StanfordASL/Trajectron-plus-plus) on IDD-3D. Trajectron++ is a graph-structured CVAE that models multi-modal trajectory distributions using recurrent encoders/decoders with attention mechanisms.
+
+**Data Conversion:**
+- Converted IDD-3D multi-agent scenes to Trajectron++ pickle format using `scripts/6_export_trajectronpp_format.py`
+- Processed data saved to `trajectron-plus-plus/experiments/idd3d/processed/`
+- Scene-level 80/20 train/val split (138 validation scenes)
+
+**Training:**
+- Script: `trajectron-plus-plus/experiments/idd3d/train.py`
+- GPU: RTX 4090 (CUDA)
+- Epochs: 100
+- Configuration: `trajectron-plus-plus/experiments/idd3d/config.json`
+  - obs_len=20, pred_len=60
+  - K=25 modes (during training)
+  - batch_size=64, lr=0.001 with exponential decay
+  - enc_rnn_dim=64, dec_rnn_dim=256
+- Checkpoint: `trajectron-plus-plus/experiments/idd3d/models/models_02_Feb_2026_12_09_06_idd3d_v1/model_registrar-100.pt`
+
+**Evaluation:**
+- Script: `scripts/7_evaluate_trajectronpp.py`
+- Two evaluation modes:
+  - **Multi-Sample (K=50):** Sample 50 trajectories per prediction, report best-of-K (oracle)
+  - **Most-Likely (K=1, mode):** Single deterministic prediction using GMM mode
+
+**Results (Epoch 100, 138 validation scenes):**
+
+| Evaluation Mode | Val ADE | Val FDE | Notes |
+|----------------|---------|---------|-------|
+| Multi-Sample (K=50, oracle) | **13.32** | **14.57** | ✅ Corrected with dt=0.1 |
+| Most-Likely (K=1, mode) | **25.85** | **65.76** | ✅ Corrected with dt=0.1 |
+
+**⚠️ Important Note - dt Parameter Issue:**  
+Initial evaluation showed ADE~163 due to **incorrect dt=0.4** (default) instead of **dt=0.1** (correct for 10fps IDD-3D data). After correction using `scripts/9_evaluate_trajectronpp_corrected_dt.py`, metrics improved significantly (163→13.3 ADE, ~12x reduction).
+
+However, performance still lags behind top baselines:
+- Best single-future: ST-GAT v4 (ADE 1.87) vs Trajectron++ K=50 oracle (ADE 13.32)
+- Best oracle: MFP K=10 (ADE 0.97) vs Trajectron++ K=50 oracle (ADE 13.32)
+
+Possible reasons:
+1. **Hyperparameter tuning needed**: Default config may not be optimal for IDD-3D
+2. **Coordinate representation**: Ego-centric vs global frame differences
+3. **Data preprocessing**: Trajectron++ expects specific normalization/standardization
+4. **Architecture fit**: Model designed for pedestrian datasets, may need adaptation for vehicles
+
+**Files:**
+- Training config: `trajectron-plus-plus/experiments/idd3d/config.json`
+- Final checkpoint: `trajectron-plus-plus/experiments/idd3d/models/models_02_Feb_2026_12_09_06_idd3d_v1/model_registrar-100.pt`
+- Evaluation results (corrected): `trajectron-plus-plus/experiments/idd3d/models/models_02_Feb_2026_12_09_06_idd3d_v1/evaluation_results_corrected_dt.json`
+- Data conversion script: `scripts/6_export_trajectronpp_format.py` (⚠️ use `--dt 0.1` for correct timing)
+- Evaluation script (corrected): `scripts/9_evaluate_trajectronpp_corrected_dt.py` (patches dt=0.1)
+- Original evaluation (incorrect): `scripts/7_evaluate_trajectronpp.py` (used wrong dt=0.4)
+
+---
+
 ## Notes on IDs
 
 - `obj_type` is a category label (many agents share the same type).

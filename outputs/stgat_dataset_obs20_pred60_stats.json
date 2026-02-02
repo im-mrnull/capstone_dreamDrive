@@ -1,0 +1,11 @@
+{
+  "format": "stgat_socialgan_v1",
+  "scenes_dir": "outputs/multiagent_trajpp_v1/scenes",
+  "obs_len": 20,
+  "pred_len": 60,
+  "stride": 3,
+  "min_agents": 2,
+  "num_seqs": 608,
+  "num_agents_total": 4443,
+  "out": "outputs/stgat_dataset_obs20_pred60.npz"
+}

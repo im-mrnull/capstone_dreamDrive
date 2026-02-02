@@ -1,0 +1,27 @@
+{
+  "model": "STGAT_minimal",
+  "data": "outputs/stgat_dataset_obs20_pred60.npz",
+  "obs_len": 20,
+  "pred_len": 60,
+  "split": "scene",
+  "seed": 42,
+  "val_frac": 0.2,
+  "train_seqs": 482,
+  "val_seqs": 126,
+  "best_epoch": 24,
+  "best_val_ade": 2.371985599398613,
+  "best_val_fde": 5.803165078163147,
+  "device": "cpu",
+  "hyper": {
+    "emb_dim": 32,
+    "hidden_dim": 128,
+    "attn_dim": 64,
+    "dropout": 0.0,
+    "batch_size": 16,
+    "epochs": 25,
+    "lr": 0.001,
+    "weight_decay": 0.0001
+  },
+  "when": "2026-01-30T13:53:57",
+  "note": "ST-GAT-inspired: LSTM encoder + single graph-attention pooling + LSTMCell decoder."
+}

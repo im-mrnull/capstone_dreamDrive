@@ -1,0 +1,744 @@
+{
+  "format": "multiagent_trajpp_v1",
+  "source": "outputs/parsed_positions",
+  "scenes_dir": "scenes",
+  "num_scenes": 105,
+  "total_points": 215037,
+  "generated_files": [
+    {
+      "scene_id": "20220118103308_seq_10",
+      "frames": 100,
+      "agents": 18,
+      "points": 775,
+      "file": "scenes/20220118103308_seq_10.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_11",
+      "frames": 100,
+      "agents": 14,
+      "points": 460,
+      "file": "scenes/20220118103308_seq_11.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_12",
+      "frames": 100,
+      "agents": 12,
+      "points": 602,
+      "file": "scenes/20220118103308_seq_12.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_13",
+      "frames": 100,
+      "agents": 6,
+      "points": 270,
+      "file": "scenes/20220118103308_seq_13.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_14",
+      "frames": 100,
+      "agents": 11,
+      "points": 614,
+      "file": "scenes/20220118103308_seq_14.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_15",
+      "frames": 100,
+      "agents": 12,
+      "points": 720,
+      "file": "scenes/20220118103308_seq_15.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_16",
+      "frames": 100,
+      "agents": 31,
+      "points": 922,
+      "file": "scenes/20220118103308_seq_16.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_17",
+      "frames": 100,
+      "agents": 35,
+      "points": 1077,
+      "file": "scenes/20220118103308_seq_17.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_18",
+      "frames": 100,
+      "agents": 39,
+      "points": 962,
+      "file": "scenes/20220118103308_seq_18.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_19",
+      "frames": 100,
+      "agents": 10,
+      "points": 285,
+      "file": "scenes/20220118103308_seq_19.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_20",
+      "frames": 100,
+      "agents": 40,
+      "points": 2113,
+      "file": "scenes/20220118103308_seq_20.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_21",
+      "frames": 100,
+      "agents": 46,
+      "points": 1903,
+      "file": "scenes/20220118103308_seq_21.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_22",
+      "frames": 100,
+      "agents": 27,
+      "points": 1125,
+      "file": "scenes/20220118103308_seq_22.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_23",
+      "frames": 100,
+      "agents": 26,
+      "points": 1272,
+      "file": "scenes/20220118103308_seq_23.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_26",
+      "frames": 100,
+      "agents": 32,
+      "points": 1177,
+      "file": "scenes/20220118103308_seq_26.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_27",
+      "frames": 100,
+      "agents": 40,
+      "points": 1372,
+      "file": "scenes/20220118103308_seq_27.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_28",
+      "frames": 100,
+      "agents": 46,
+      "points": 1294,
+      "file": "scenes/20220118103308_seq_28.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_29",
+      "frames": 97,
+      "agents": 44,
+      "points": 1404,
+      "file": "scenes/20220118103308_seq_29.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_3",
+      "frames": 100,
+      "agents": 33,
+      "points": 1871,
+      "file": "scenes/20220118103308_seq_3.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_4",
+      "frames": 100,
+      "agents": 28,
+      "points": 1518,
+      "file": "scenes/20220118103308_seq_4.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_5",
+      "frames": 100,
+      "agents": 19,
+      "points": 1241,
+      "file": "scenes/20220118103308_seq_5.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_6",
+      "frames": 100,
+      "agents": 25,
+      "points": 1163,
+      "file": "scenes/20220118103308_seq_6.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_7",
+      "frames": 100,
+      "agents": 17,
+      "points": 681,
+      "file": "scenes/20220118103308_seq_7.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_8",
+      "frames": 100,
+      "agents": 31,
+      "points": 915,
+      "file": "scenes/20220118103308_seq_8.npz"
+    },
+    {
+      "scene_id": "20220118103308_seq_9",
+      "frames": 100,
+      "agents": 10,
+      "points": 433,
+      "file": "scenes/20220118103308_seq_9.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_0",
+      "frames": 100,
+      "agents": 33,
+      "points": 1491,
+      "file": "scenes/20220118103808_seq_0.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_1",
+      "frames": 100,
+      "agents": 46,
+      "points": 2661,
+      "file": "scenes/20220118103808_seq_1.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_10",
+      "frames": 100,
+      "agents": 19,
+      "points": 556,
+      "file": "scenes/20220118103808_seq_10.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_11",
+      "frames": 100,
+      "agents": 15,
+      "points": 573,
+      "file": "scenes/20220118103808_seq_11.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_12",
+      "frames": 100,
+      "agents": 13,
+      "points": 569,
+      "file": "scenes/20220118103808_seq_12.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_13",
+      "frames": 100,
+      "agents": 30,
+      "points": 1325,
+      "file": "scenes/20220118103808_seq_13.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_14",
+      "frames": 100,
+      "agents": 26,
+      "points": 1231,
+      "file": "scenes/20220118103808_seq_14.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_15",
+      "frames": 100,
+      "agents": 47,
+      "points": 1743,
+      "file": "scenes/20220118103808_seq_15.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_16",
+      "frames": 100,
+      "agents": 62,
+      "points": 2137,
+      "file": "scenes/20220118103808_seq_16.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_17",
+      "frames": 100,
+      "agents": 77,
+      "points": 2713,
+      "file": "scenes/20220118103808_seq_17.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_18",
+      "frames": 100,
+      "agents": 94,
+      "points": 2778,
+      "file": "scenes/20220118103808_seq_18.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_19",
+      "frames": 100,
+      "agents": 70,
+      "points": 2225,
+      "file": "scenes/20220118103808_seq_19.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_2",
+      "frames": 100,
+      "agents": 36,
+      "points": 2653,
+      "file": "scenes/20220118103808_seq_2.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_20",
+      "frames": 100,
+      "agents": 63,
+      "points": 3331,
+      "file": "scenes/20220118103808_seq_20.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_21",
+      "frames": 100,
+      "agents": 63,
+      "points": 2301,
+      "file": "scenes/20220118103808_seq_21.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_22",
+      "frames": 100,
+      "agents": 48,
+      "points": 1974,
+      "file": "scenes/20220118103808_seq_22.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_23",
+      "frames": 100,
+      "agents": 29,
+      "points": 1419,
+      "file": "scenes/20220118103808_seq_23.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_24",
+      "frames": 100,
+      "agents": 11,
+      "points": 597,
+      "file": "scenes/20220118103808_seq_24.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_25",
+      "frames": 100,
+      "agents": 6,
+      "points": 476,
+      "file": "scenes/20220118103808_seq_25.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_26",
+      "frames": 100,
+      "agents": 3,
+      "points": 235,
+      "file": "scenes/20220118103808_seq_26.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_27",
+      "frames": 100,
+      "agents": 6,
+      "points": 421,
+      "file": "scenes/20220118103808_seq_27.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_28",
+      "frames": 100,
+      "agents": 5,
+      "points": 279,
+      "file": "scenes/20220118103808_seq_28.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_29",
+      "frames": 100,
+      "agents": 28,
+      "points": 917,
+      "file": "scenes/20220118103808_seq_29.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_3",
+      "frames": 100,
+      "agents": 54,
+      "points": 2130,
+      "file": "scenes/20220118103808_seq_3.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_4",
+      "frames": 100,
+      "agents": 63,
+      "points": 2633,
+      "file": "scenes/20220118103808_seq_4.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_5",
+      "frames": 100,
+      "agents": 29,
+      "points": 1142,
+      "file": "scenes/20220118103808_seq_5.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_6",
+      "frames": 100,
+      "agents": 27,
+      "points": 906,
+      "file": "scenes/20220118103808_seq_6.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_7",
+      "frames": 100,
+      "agents": 23,
+      "points": 1133,
+      "file": "scenes/20220118103808_seq_7.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_8",
+      "frames": 100,
+      "agents": 24,
+      "points": 763,
+      "file": "scenes/20220118103808_seq_8.npz"
+    },
+    {
+      "scene_id": "20220118103808_seq_9",
+      "frames": 100,
+      "agents": 19,
+      "points": 660,
+      "file": "scenes/20220118103808_seq_9.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_0",
+      "frames": 100,
+      "agents": 14,
+      "points": 609,
+      "file": "scenes/20220118104308_seq_0.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_1",
+      "frames": 100,
+      "agents": 13,
+      "points": 751,
+      "file": "scenes/20220118104308_seq_1.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_10",
+      "frames": 100,
+      "agents": 39,
+      "points": 1305,
+      "file": "scenes/20220118104308_seq_10.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_11",
+      "frames": 100,
+      "agents": 53,
+      "points": 1943,
+      "file": "scenes/20220118104308_seq_11.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_12",
+      "frames": 100,
+      "agents": 55,
+      "points": 1614,
+      "file": "scenes/20220118104308_seq_12.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_13",
+      "frames": 100,
+      "agents": 51,
+      "points": 1730,
+      "file": "scenes/20220118104308_seq_13.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_14",
+      "frames": 100,
+      "agents": 47,
+      "points": 1291,
+      "file": "scenes/20220118104308_seq_14.npz"
+    },
+    {
+      "scene_id": "20220118104308_seq_22",
+      "frames": 100,
+      "agents": 28,
+      "points": 960,
+      "file": "scenes/20220118104308_seq_22.npz"
+    },
+    {
+      "scene_id": "20220118105341_seq_0",
+      "frames": 100,
+      "agents": 48,
+      "points": 1638,
+      "file": "scenes/20220118105341_seq_0.npz"
+    },
+    {
+      "scene_id": "20220118105838_seq_10",
+      "frames": 100,
+      "agents": 87,
+      "points": 3123,
+      "file": "scenes/20220118105838_seq_10.npz"
+    },
+    {
+      "scene_id": "20220118105838_seq_6",
+      "frames": 100,
+      "agents": 88,
+      "points": 3389,
+      "file": "scenes/20220118105838_seq_6.npz"
+    },
+    {
+      "scene_id": "20220118105838_seq_8",
+      "frames": 100,
+      "agents": 98,
+      "points": 4381,
+      "file": "scenes/20220118105838_seq_8.npz"
+    },
+    {
+      "scene_id": "20220118105838_seq_9",
+      "frames": 100,
+      "agents": 175,
+      "points": 7676,
+      "file": "scenes/20220118105838_seq_9.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_10",
+      "frames": 100,
+      "agents": 120,
+      "points": 5224,
+      "file": "scenes/20220118110338_seq_10.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_11",
+      "frames": 100,
+      "agents": 81,
+      "points": 3065,
+      "file": "scenes/20220118110338_seq_11.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_12",
+      "frames": 100,
+      "agents": 108,
+      "points": 4806,
+      "file": "scenes/20220118110338_seq_12.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_13",
+      "frames": 100,
+      "agents": 87,
+      "points": 3166,
+      "file": "scenes/20220118110338_seq_13.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_14",
+      "frames": 100,
+      "agents": 55,
+      "points": 2456,
+      "file": "scenes/20220118110338_seq_14.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_15",
+      "frames": 100,
+      "agents": 45,
+      "points": 2836,
+      "file": "scenes/20220118110338_seq_15.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_16",
+      "frames": 100,
+      "agents": 53,
+      "points": 2612,
+      "file": "scenes/20220118110338_seq_16.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_17",
+      "frames": 100,
+      "agents": 52,
+      "points": 2080,
+      "file": "scenes/20220118110338_seq_17.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_18",
+      "frames": 100,
+      "agents": 68,
+      "points": 3535,
+      "file": "scenes/20220118110338_seq_18.npz"
+    },
+    {
+      "scene_id": "20220118110338_seq_19",
+      "frames": 100,
+      "agents": 66,
+      "points": 3296,
+      "file": "scenes/20220118110338_seq_19.npz"
+    },
+    {
+      "scene_id": "20220118111338_seq_1",
+      "frames": 100,
+      "agents": 24,
+      "points": 853,
+      "file": "scenes/20220118111338_seq_1.npz"
+    },
+    {
+      "scene_id": "20220118111338_seq_2",
+      "frames": 100,
+      "agents": 16,
+      "points": 675,
+      "file": "scenes/20220118111338_seq_2.npz"
+    },
+    {
+      "scene_id": "20220118111338_seq_3",
+      "frames": 100,
+      "agents": 15,
+      "points": 885,
+      "file": "scenes/20220118111338_seq_3.npz"
+    },
+    {
+      "scene_id": "20220118111338_seq_4",
+      "frames": 100,
+      "agents": 21,
+      "points": 1358,
+      "file": "scenes/20220118111338_seq_4.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_12",
+      "frames": 100,
+      "agents": 26,
+      "points": 1195,
+      "file": "scenes/20220118111739_seq_12.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_13",
+      "frames": 100,
+      "agents": 49,
+      "points": 3226,
+      "file": "scenes/20220118111739_seq_13.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_14",
+      "frames": 100,
+      "agents": 43,
+      "points": 2554,
+      "file": "scenes/20220118111739_seq_14.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_15",
+      "frames": 100,
+      "agents": 60,
+      "points": 2698,
+      "file": "scenes/20220118111739_seq_15.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_16",
+      "frames": 100,
+      "agents": 46,
+      "points": 2489,
+      "file": "scenes/20220118111739_seq_16.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_17",
+      "frames": 100,
+      "agents": 94,
+      "points": 3235,
+      "file": "scenes/20220118111739_seq_17.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_18",
+      "frames": 100,
+      "agents": 67,
+      "points": 2847,
+      "file": "scenes/20220118111739_seq_18.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_19",
+      "frames": 100,
+      "agents": 73,
+      "points": 3213,
+      "file": "scenes/20220118111739_seq_19.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_20",
+      "frames": 100,
+      "agents": 68,
+      "points": 3923,
+      "file": "scenes/20220118111739_seq_20.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_21",
+      "frames": 100,
+      "agents": 77,
+      "points": 4075,
+      "file": "scenes/20220118111739_seq_21.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_23",
+      "frames": 100,
+      "agents": 73,
+      "points": 4273,
+      "file": "scenes/20220118111739_seq_23.npz"
+    },
+    {
+      "scene_id": "20220118111739_seq_24",
+      "frames": 100,
+      "agents": 77,
+      "points": 5346,
+      "file": "scenes/20220118111739_seq_24.npz"
+    },
+    {
+      "scene_id": "20220118112945_seq_22",
+      "frames": 100,
+      "agents": 102,
+      "points": 3089,
+      "file": "scenes/20220118112945_seq_22.npz"
+    },
+    {
+      "scene_id": "20220118112945_seq_23",
+      "frames": 100,
+      "agents": 98,
+      "points": 4213,
+      "file": "scenes/20220118112945_seq_23.npz"
+    },
+    {
+      "scene_id": "20220118112945_seq_24",
+      "frames": 100,
+      "agents": 83,
+      "points": 3129,
+      "file": "scenes/20220118112945_seq_24.npz"
+    },
+    {
+      "scene_id": "20220118112945_seq_25",
+      "frames": 100,
+      "agents": 101,
+      "points": 4650,
+      "file": "scenes/20220118112945_seq_25.npz"
+    },
+    {
+      "scene_id": "20220118112945_seq_26",
+      "frames": 100,
+      "agents": 101,
+      "points": 5166,
+      "file": "scenes/20220118112945_seq_26.npz"
+    },
+    {
+      "scene_id": "20220118112945_seq_28",
+      "frames": 100,
+      "agents": 114,
+      "points": 5991,
+      "file": "scenes/20220118112945_seq_28.npz"
+    },
+    {
+      "scene_id": "20220118115526_seq_18",
+      "frames": 60,
+      "agents": 14,
+      "points": 715,
+      "file": "scenes/20220118115526_seq_18.npz"
+    },
+    {
+      "scene_id": "20220118115526_seq_2",
+      "frames": 100,
+      "agents": 82,
+      "points": 4487,
+      "file": "scenes/20220118115526_seq_2.npz"
+    },
+    {
+      "scene_id": "20220118115526_seq_3",
+      "frames": 100,
+      "agents": 59,
+      "points": 3576,
+      "file": "scenes/20220118115526_seq_3.npz"
+    },
+    {
+      "scene_id": "20220118115526_seq_8",
+      "frames": 100,
+      "agents": 29,
+      "points": 1618,
+      "file": "scenes/20220118115526_seq_8.npz"
+    },
+    {
+      "scene_id": "20220118115526_seq_9",
+      "frames": 100,
+      "agents": 41,
+      "points": 1931,
+      "file": "scenes/20220118115526_seq_9.npz"
+    }
+  ]
+}

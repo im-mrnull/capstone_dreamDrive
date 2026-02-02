@@ -1,0 +1,30 @@
+{
+  "model": "MLP",
+  "input": "outputs/windows_obs20_pred60.npz",
+  "obs_len": 20,
+  "pred_len": 60,
+  "count_total": 4821,
+  "split": "scene",
+  "seed": 42,
+  "val_frac": 0.2,
+  "train_count": 3993,
+  "val_count": 828,
+  "hidden_dim": 256,
+  "depth": 2,
+  "epochs_requested": 300,
+  "best_epoch": 11,
+  "standardize": true,
+  "weight_decay": 0.0001,
+  "lr": 0.001,
+  "batch_size": 256,
+  "train": {
+    "ade": 2.5850331783294678,
+    "fde": 5.966868877410889
+  },
+  "val": {
+    "ade": 2.6952309608459473,
+    "fde": 6.365344524383545
+  },
+  "when": "2026-01-30T13:06:35",
+  "note": "Single-agent MLP mapping flattened obs->future positions (centered windows)."
+}

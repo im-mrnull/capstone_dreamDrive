@@ -1,0 +1,10 @@
+{
+  "model": "CV",
+  "input": "outputs/windows_obs20_pred60.npz",
+  "obs_len": 20,
+  "pred_len": 60,
+  "vel_k": 1,
+  "count": 4821,
+  "ade": 3.4203667640686035,
+  "fde": 7.642622947692871
+}

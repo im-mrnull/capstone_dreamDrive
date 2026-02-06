@@ -135,8 +135,8 @@ python scripts/model2_baseline_mlp_train_eval.py --input outputs/windows_obs20_p
 | 7 | **ST-GAT v4** | MHA pool + AMP, no early-stop | **1.87** | **4.48** | **Best single-future** |
 | 8 | **MFP (oracle K=10)** | Best-of-10, no mode head | **0.97** | **1.89** | **Upper bound** (fixed mode 0 top-1: 7.33/19.83) |
 | 9 | **MFP (K=10)** | Best-of-10 oracle + learned top-1 | **1.05** / 2.18 | **1.92** / 4.86 | **Best oracle** / Meaningful top-1 |
-| 10 | **Trajectron++ (K=50)** | Multi-agent CVAE, oracle best-of-50 | **13.32** | **14.57** | ✅ Corrected (was 163 w/ wrong dt) |
-| 11 | **Trajectron++ (K=1)** | Most-likely mode prediction | **25.85** | **65.76** | ✅ Corrected (was 156 w/ wrong dt) |
+| 10 | **Trajectron++ (K=50)** | Multi-agent CVAE, oracle best-of-50 | **1.332** | **1.457** | - |
+| 11 | **Trajectron++ (K=1)** | Most-likely mode prediction | **2.585** | **6.576** | - |
 
 **Note on Trajectron++:** Initial results were 60x too high due to incorrect dt=0.4 (should be 0.1 for 10fps data). After correction, metrics improved dramatically but still lag behind other baselines. This may indicate need for hyperparameter tuning or architecture adaptation for vehicle trajectory prediction.
 

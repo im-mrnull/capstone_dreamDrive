@@ -1,5 +1,13 @@
 # Trajectron++ Scale Mismatch - Root Cause & Fix
 
+> **⚠️ HISTORICAL DOCUMENT (retracted results — July 2026).** The evaluation numbers below
+> (ADE 13.32 / 25.85 etc.) came from a legacy run whose scripts (`6_export…`, `7_evaluate…`,
+> `9_evaluate…`) and checkpoints were never committed to this repository, and the run used
+> ego-frame (uncompensated) data that has since been deprecated. Treat every number in this
+> file as unverifiable. The dt=0.1 lesson itself is correct and is now enforced by default in
+> `scripts/6_export_trajectronpp_world.py`. Current, artifact-backed Trajectron++ results are
+> produced end-to-end by `scripts/7_train_eval_trajectronpp.py` and reported only in README.md.
+
 ## Problem Summary
 
 Initial Trajectron++ evaluation showed unrealistic metrics:

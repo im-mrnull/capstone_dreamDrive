@@ -1,0 +1,1181 @@
+Dissertation on
+“DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic”
+
+Submitted in partial fulfilment of the requirements for the award of degree of
+
+Bachelor of Technology
+in
+Computer Science & Engineering
+UE23CS320B – Capstone Project Phase - 2
+Project_ID: PW26_CGM_04
+Submitted by:
+
+Idhant Singh
+Rishav Ghosh
+Shagal Verma
+Shourya Rai
+
+PES1UG23CS250
+PES1UG23CS478
+PES1UG23CS531
+PES1UG23CS552
+
+Under the guidance of
+
+Prof. Chitra G M
+Asst. Professor
+PES University
+January - May 2026
+DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+FACULTY OF ENGINEERING
+PES UNIVERSITY
+(Established under Karnataka Act No. 16 of 2013)
+100ft Ring Road, Bengaluru – 560 085, Karnataka, India
+
+PES UNIVERSITY
+(Established under Karnataka Act No. 16 of 2013)
+
+100 Feet Ring Road, Bengaluru – 560 085, Karnataka, India
+
+FACULTY OF ENGINEERING
+
+CERTIFICATE
+This is to certify that the dissertation entitled
+
+“DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic”
+is a bonafide work carried out by
+
+Idhant Singh
+Rishav Ghosh
+Shagal Verma
+Shourya Rai
+
+PES1UG23CS250
+PES1UG23CS478
+PES1UG23CS531
+PES1UG23CS552
+
+in partial fulfilment for the completion of sixth semester Capstone Project Phase - 2
+(UE23CS320B) in the Program of Study - Bachelor of Technology in Computer Science and
+Engineering under rules and regulations of PES University, Bengaluru during the period Jan 2026
+– May 2026. It is certified that all corrections / suggestions indicated for internal assessment have
+been incorporated in the report. The dissertation has been approved as it satisfies the 6 th semester
+academic requirements in respect of project work.
+Signature
+Prof Chitra G M
+Asst Professor
+
+Signature
+Dr. Shylaja S S
+Chairperson
+
+Signature
+Dr. K S Sridhar
+Registrar
+
+External Viva
+Name of the Examiners
+
+Signature with Date
+
+1. __________________________
+
+__________________________
+
+2. __________________________
+
+__________________________
+
+DECLARATION
+
+We hereby declare that the Capstone Project Phase - 2 entitled
+“DreamDrive: Proactive Multi-Future Prediction for Safe Autonomous
+Navigation in Chaotic Mixed Traffic” has been carried out by us under
+the guidance of Prof. Chitra G M, Asst. Professor and submitted in partial
+fulfilment of the course requirements for the award of degree of Bachelor
+of Technology in Computer Science and Engineering of PES University,
+Bengaluru during the academic semester Jan - May 2026. The matter
+embodied in this report has not been submitted to any other university or
+institution for the award of any degree.
+Idhant Singh
+Rishav Ghosh
+Shagal Verma
+Shourya Rai
+
+PES1UG23CS250
+PES1UG23CS478
+PES1UG23CS531
+PES1UG23CS552
+
+ACKNOWLEDGEMENT
+I would like to express my gratitude to Prof. Chitra G M, Department of Computer
+Science and Engineering, PES University, for his/her continuous guidance, assistance,
+and encouragement throughout the development of this UE23CS320B - Capstone
+Project Phase – 2.
+I am grateful to the project coordinator, Prof. Gayathri R S, for organizing, managing,
+and helping with the entire process.
+I take this opportunity to thank Dr. Shylaja S S, Chairperson, Department of
+Computer Science and Engineering, PES University, for all the knowledge and
+support I have received from the department. I would like to thank Dr. K.S. Sridhar,
+Registrar, PES University for his help.
+I am deeply grateful to Prof. Jawahar Doreswamy, Chancellor – PES University,
+Dr. Suryaprasad J, Vice-Chancellor, PES University for providing to me various
+opportunities and enlightenment every step of the way. Finally, this project could not
+have been completed without the continual support and encouragement I have
+received from my family and friends.
+
+ABSTRACT
+Current autonomous driving systems rely primarily on reactive decision-making,
+predicting a single, most-likely future path for surrounding agents. This approach fails
+in chaotic, unstructured traffic environments such as those found in India, where
+pedestrians, rickshaws, and two-wheelers behave unpredictably. There is a pressing need
+for a proactive prediction model that does not depend on a single deterministic forecast
+but instead simulates multiple possible futures.
+DreamDrive addresses this challenge by enabling autonomous vehicles to anticipate
+risks before they occur, ensuring safer navigation in mixed-traffic environments. The
+system imagines and evaluates multiple possible futures — for instance, predicting that
+a pedestrian has an 80% chance of walking straight, a 15% chance of slowing down, and
+a 5% chance of suddenly crossing — thereby allowing the vehicle to proactively plan
+for rare but dangerous events.
+In Phase 2, a benchmarking study was conducted on the IDD-3D dataset, evaluating
+models including Constant Velocity (CV), MLP, an ST-GAT-inspired interaction model,
+a K-mode multi-future decoder (oracle and learned-top-1 variants), and Trajectron++.
+A critical data issue was discovered and corrected during this phase: raw IDD-3D
+annotations are stored in the per-frame ego/LiDAR coordinate frame, so uncompensated
+trajectories mix agent motion with ego motion (median apparent pedestrian speed
+5.05 m/s). An annotation-based ego-motion compensation stage was added to the
+pipeline, restoring physically plausible kinematics (median pedestrian speed 0.91 m/s),
+and all models were re-benchmarked on the corrected world-frame data under a unified
+scene-level split. On this corrected benchmark, oracle best-of-K multi-future prediction
+achieves the lowest displacement errors, while among deployable single-output models
+the simple MLP baseline is currently strongest — indicating that the earlier apparent
+advantage of interaction-aware models was partly an artifact of the uncompensated
+coordinate frame. All reported numbers are backed by committed metric artifacts in the
+project repository.
+Note on prior versions of this report: a previously stated finding that Trajectron++
+degrades by 66% ADE and 131% FDE on collision-intensive scenarios was a placeholder
+that was not supported by any experiment; it has been retracted. Evaluating prediction
+robustness on collision-proximate scenes, together with synthetic collision-scene
+augmentation and CARLA-based scenario evaluation, remains planned future work.
+
+TABLE OF CONTENTS
+Chapter No.
+
+Title
+
+Page No.
+
+1.
+
+INTRODUCTION
+
+9
+
+2.
+
+LITERATURE SURVEY
+
+13
+
+3.
+
+ARCHITECTURE WITH EXPLANATION
+
+20
+
+4.
+
+METHODOLOGY
+
+13
+
+5.
+
+IMPLEMENTATION (Salient Modules)
+
+21
+
+6.
+
+RESULTS
+
+21
+
+7.
+
+CONCLUSION AND FUTURE WORK
+
+26
+
+8.
+
+REFERENCES/BIBLIOGRAPHY
+
+28
+
+LIST OF FIGURES
+Figure No.
+
+Title
+
+5.1
+
+IDD-3D Visual Data Sample – Camera Sequence Frame 1
+
+5.2
+
+IDD-3D Visual Data Sample – Camera Sequence Frame 2
+
+5.3
+
+IDD-3D Visual Data Sample – Camera Sequence Frame 3
+
+5.4
+
+IDD-3D 3D Data Sample – LiDAR Point Cloud View 1
+
+5.5
+
+IDD-3D 3D Data Sample – LiDAR Point Cloud View 2
+
+5.6
+
+IDD-3D 3D Data Sample – LiDAR Point Cloud View 3
+
+6.1
+
+DreamDrive System Architecture – High-Level Pipeline Overview
+
+6.2
+
+DreamDrive Architecture – Data Preparation and Trajectory
+Construction Stage
+
+6.3
+
+DreamDrive Architecture – Model Training and Prediction Stage
+
+6.4
+
+DreamDrive Architecture – Quantitative Evaluation Stage
+
+6.5
+
+Use Case Diagram – DreamDrive Autonomous Navigation System
+
+8.1
+
+Collision Density Heatmap – Distribution of Synthetic Collision
+Scenes
+
+8.2
+
+Trajectory Comparison – Ground Truth vs. Predicted Trajectories on
+Collision Data
+
+8.3
+
+Synthetic Data Composition – Breakdown of Scene Types After
+Filtering
+
+8.4
+
+Change in Near-Miss Augmentation – Before and After Synthetic Data
+Integration
+
+9.1
+
+CARLA Simulation – Indianized Traffic Scenario View 1
+
+9.2
+
+CARLA Simulation – Indianized Traffic Scenario View 2
+
+Page No.
+
+LIST OF TABLES
+Table No.
+3.1.1
+3.4.1
+3.5.1
+4.1
+6.1
+7.1
+7.2
+8.1
+
+Title
+Comparison of Pedestrian Forecasting Performance
+(Trajectron++ vs. S-GAN on ETH Dataset)
+Analysis of Generative Architectures (GAN, CVAE, Diffusion)
+Impact of Vehicle Type Conditions on Traffic Flow in Lane-less
+Scenarios
+Design Constraints – Dataset, Computational, and Simulation
+Limitations
+Data Exploration Summary – IDD-3D Dataset Scale and Format
+Benchmark Comparison – All Models on IDD-3D Dataset
+(Phase 2 Review 1)
+Trajectron++ Performance Degradation on Collision Scenarios
+(Phase 2 Review 2)
+Synthetic Data Validity Checks – Criteria and Results
+
+Page No.
+
+CHAPTER 1
+INTRODUCTION
+1.1 Overview
+Autonomous driving technology has made significant strides in structured environments
+where traffic rules are strictly followed. However, current systems rely primarily on
+reactive decision-making, predicting a single, most-likely future path for surrounding
+agents. For example, a standard model might predict that a pedestrian will keep walking
+straight along the edge of the road.
+This approach fails in the chaotic, unstructured traffic environments typical of
+developing nations like India. In such mixed-traffic scenarios, pedestrians, rickshaws,
+and two-wheelers behave unpredictably, often violating standard traffic norms.
+DreamDrive aims to bridge this gap by introducing a proactive, multi-future prediction
+framework that enables autonomous systems to imagine and evaluate multiple possible
+futures rather than relying on a single forecast.
+Phase 2 of the project advances significantly beyond the foundational work of Phase 1.
+The scope has been refined to focus on vehicle-to-vehicle interactions, a comprehensive
+model benchmarking study has been completed, a critical safety performance gap has
+been identified and quantified, and initial steps toward synthetic data augmentation and
+CARLA simulation have been undertaken.
+
+1.2 Motivation
+The motivation for this project stems from the critical safety limitations of deterministic
+(single-future) models in chaotic environments. The key motivating factors are:
+•
+
+•
+
+•
+
+The Failure of Single-Future Models: In structured traffic, assuming a single
+path is often sufficient. However, in Indian traffic, an agent's intent is rarely
+singular. A pedestrian standing near a curb might continue walking (80%), slow
+down (15%), or suddenly dart across the road (5%). A model that ignores the
+5% risk of crossing creates a significant safety hazard.
+The Need for Proactive Navigation: To navigate safely, an autonomous vehicle
+must not just react to what is happening now, but proactively anticipate what
+might happen next. By continuously estimating the likelihood of diverse agent
+behaviors, the system can anticipate potential hazards — such as a rickshaw
+cut-in or pedestrian dart-out — before they occur.
+Safety-Critical Data Scarcity: Real-world datasets are known to severely
+underrepresent collision and near-collision scenarios (Wang et al., SafeFusion,
+2025). This creates a dangerous blind spot where models may perform adequately
+on routine driving but fail precisely when safety matters most. Quantifying this
+degradation on IDD-3D is planned future work; no experimental measurement of
+it has been completed in this project yet.
+
+•
+
+Bridging the Gap: Most existing research focuses on structured US or European
+datasets (e.g., Argoverse, Waymo, nuScenes). There is a pressing need to
+validate and adapt these advanced multi-future models specifically for the
+chaotic dynamics of the IDD-3D (Indian Driving Dataset).
+
+1.3 Objectives
+The primary objectives of the DreamDrive project are:
+1. Dataset Preparation: To consolidate and standardize the IDD-3D dataset for
+training, and to acquire and process standard American datasets (Argoverse,
+Waymo, or nuScenes) to serve as a structured baseline for comparison.
+2. Multi-Model Evaluation: To implement and compare various trajectory
+prediction models — including Constant Velocity (CV), MLP, ST-GAT, MFP,
+and Trajectron++ — to identify the best performer for chaotic environments
+using ADE and FDE metrics.
+3. Collision Scenario Augmentation: To generate synthetic collision-rich scenes
+that pass physical validity checks, in order to augment training data and
+improve model robustness on safety-critical edge cases.
+4. Simulation Integration: To develop a proactive multi-future prediction system
+integrated into the CARLA autonomous driving simulator, with approximated
+Indian traffic behaviors including lane-less driving and informal overtaking.
+5. Comparative Analysis: To compare simulation results between Indian (chaotic)
+and American (structured) environments to quantifiably demonstrate the
+model's adaptability and robustness.
+
+CHAPTER 2
+PROBLEM DEFINITION
+2.1 The Core Problem
+The fundamental problem addressed by this project is the inadequacy of deterministic
+trajectory prediction in mixed, chaotic traffic conditions. Existing autonomous driving
+stacks typically utilize a modular pipeline where the prediction module outputs a single
+trajectory for each agent. This deterministic output is then passed to the planning module.
+In structured Western traffic, this assumption often holds true. However, in Indian traffic
+conditions, the lane-less behavior of vehicles and the erratic movements of pedestrians
+create a high-entropy environment. A system that assumes a single future path is prone
+to:
+•
+•
+
+•
+
+Collision Risks: Failing to anticipate sudden cut-ins or dart-outs.
+Freezing Robot Problem: Being overly conservative and stopping indefinitely
+because the single predicted path is blocked, whereas a multi-future model
+might find a safe gap.
+Safety-Critical Failure: Models trained predominantly on normal driving data
+are hypothesized to degrade on collision-proximate scenarios because such
+events are rare in training distributions (Wang et al., 2025). Measuring this
+degradation on IDD-3D is a planned experiment; it has not yet been performed.
+
+2.2 Existing Research Gaps
+Through analysis conducted in both Phase 1 and Phase 2, we have identified the
+following critical gaps:
+1. Chaotic Environment Adaptation: Existing models are heavily optimized for
+structured US/European traffic and do not account for chaotic, mixed traffic
+environments like those in India.
+2. Integration of Planning and Prediction: There is limited work that successfully
+integrates multi-future prediction with uncertainty-aware planning in real-time
+within accessible simulation environments like CARLA.
+3. Dataset Bias: Dominant datasets (Argoverse, Waymo, nuScenes) lack the
+density and heterogeneity of Indian traffic.
+4. Collision Scenario Underrepresentation: Real-world datasets naturally contain
+very few collision and near-collision events, causing trained models to perform
+poorly in precisely the scenarios where safety is most critical.
+
+2.3 Proposed Solution Scope
+Based on feedback from Phase 1 reviewers, the project scope was narrowed in Phase 2
+to focus on vehicle-to-vehicle interactions. This allows reliable model development
+before extending to heterogeneous agents. The solution proceeds through three stages:
+
+5. Scoped Focus: The current phase is limited to vehicle-dominant scenes from the
+IDD-3D dataset to ensure reliable model development. Only vehicle-to-vehicle
+interactions are considered for training and evaluation.
+6. Phased Extension: The pipeline is designed to later incorporate pedestrians,
+two-wheelers, and rickshaws without requiring redesign, enabling gradual
+extension of agent heterogeneity.
+7. Collision Augmentation: Synthetic collision data is generated and validated to
+augment real-world training data, directly addressing the underrepresentation of
+safety-critical scenarios.
+The solution measures performance using Average Displacement Error (ADE) and Final
+Displacement Error (FDE) across both normal and collision-intensive data splits,
+ensuring holistic evaluation of safety-relevant prediction quality.
+
+CHAPTER 3
+LITERATURE SURVEY
+3.1 Trajectron++: Dynamically-Feasible Trajectory Forecasting with
+Heterogeneous Data
+Authors: Tim Salzmann, Boris Ivanovic, Punarjay Chakravarty, and Marco Pavone,
+2021
+Methodology and Formulation
+Trajectron++ addresses the challenge of predicting human motion by abstracting the
+scene into a spatiotemporal graph. A key innovation is the integration of vehicle
+dynamics into the prediction loop to ensure dynamic feasibility. Agent influence is
+defined using the perception range formula:
+‖ pi − pj ‖₂ ≤ dSj
+where pi and pj are positions of agents, and dSj is the perception range specific to the
+agent type. To capture uncertainty, the model employs a Conditional Variational
+Autoencoder (CVAE) with a discrete categorical latent variable z (|Z| = 25 distinct highlevel behaviors) representing intents such as turning or accelerating. The CVAE
+maximizes the Evidence Lower Bound (ELBO) to ensure a meaningful learned latent
+space. The model predicts control actions u (acceleration, heading rate) rather than
+positions, ensuring dynamic feasibility.
+Key Findings
+Table 3.1.1: Comparison of Pedestrian Forecasting Performance (Trajectron++ vs. S-GAN on ETH
+Dataset)
+
+Model
+
+ADE
+
+FDE
+
+Note
+
+S-GAN
+
+0.81
+
+1.52
+
+Baseline
+
+Trajectron++
+
+0.39
+
+0.83
+
+Significant reduction
+
+On nuScenes vehicle forecasting, dynamics integration reduced collision rates from
+21.5% to 4.9% in critical edge cases.
+
+3.2 Driving into the Future: Multiview Visual Forecasting and Planning
+with World Model for Autonomous Driving
+Authors: Yuqi Wang, Jiawei He, Lue Fan, Hongxin Li, Yuntao Chen, Zhaoxiang Zhang,
+CVPR 2023/24
+
+Methodology and Formulation
+This paper introduces Drive-WM, a world model using Factorized Generation to ensure
+consistency across multiple camera views. It addresses out-of-distribution (OOD)
+planning failure via the Denoising Score Matching Objective and employs Simplified
+Factorization separating views into Reference (xr) and Stitched (xs) components.
+Key Findings
+• Key Points Matching (KPM): Factorized generation improved the KPM score
+from 45.8% to 94.4%.
+• OOD Recovery: In scenarios where the car was 0.5m off-center, the world
+model allowed the planner to imagine a recovery path, whereas standard
+planners failed.
+
+3.3 EMMA: End-to-End Multimodal Model for Autonomous Driving
+Authors: Jyh-Jing Hwang et al., 2024
+Methodology and Formulation
+EMMA processes driving tasks using Chain-of-Thought (CoT) reasoning, breaking
+decision-making into four explicit steps: (R1) scene description, (R2) critical object
+identification, (R3) behavior analysis, and (R4) meta-decision. It reframes driving as a
+visual Question-Answering task using the Gemini model and predicts trajectory
+waypoints conditioned on intent and ego-history.
+Key Findings
+• On the nuScenes dataset, EMMA outperformed the leading self-supervised
+model (BEV-Planner) by 17.1% in L2 distance error.
+• Co-training on multiple tasks (detection + planning) improved performance on
+all tasks, validating the generalist approach.
+
+3.4 A Survey of Autonomous Driving Trajectory Prediction
+Authors: Miao Xu, Zhi Liu, Bingyi Wang and Shengyan Li, 2022
+Key Metrics Defined
+• Average Displacement Error (ADE): Average Euclidean distance between
+predicted and true trajectories over all time steps.
+• Final Displacement Error (FDE): Euclidean distance at the final predicted
+endpoint only.
+• Negative Log Likelihood (NLL): Measures how well the model-predicted
+trajectory distribution matches the true trajectory.
+Table 3.4.1: Analysis of Generative Architectures (GAN, CVAE, Diffusion)
+
+Model
+
+Core Principle
+
+Key Trade-offs
+
+GAN
+
+Two-player game (Generator vs
+Discriminator)
+
+Realistic paths but prone to mode
+collapse (limited variety)
+
+CVAE
+
+Learns a latent space of intents (z)
+
+Stable training but outputs can be
+overly smooth/conservative
+
+Diffusion
+
+Denoising process (noise →
+trajectory)
+
+Highest quality samples but very
+slow inference speed
+
+3.5 Lane-less to Lane-free: Implications in the Era of Automated Vehicles
+Authors: Abebe Dress Beza, Zhuopeng Xie, Mohsen Ramezani, David Levinson, 2021
+Key Findings
+Table 3.5.1: Impact of Vehicle Type Conditions on Traffic Flow in Lane-less Scenarios
+
+Vehicle Type Condition
+
+Observed Impact
+
+Increased MTWs (TwoWheelers)
+
+Flow values increased by 4x compared to car-only scenarios due to
+percolation (squeezing through gaps)
+
+Increased HCVs (Heavy
+Vehicles)
+
+Acted as moving bottlenecks, significantly reducing flow
+
+A lane-free AV system was simulated to achieve a flow of 14,520 veh/h, compared to
+just 7,812 veh/h for traditional lane-based AVs. Flying Overtaking accounts for 62% of
+maneuvers in lane-less traffic versus just 20% in lane-based traffic.
+
+3.6 Vision-Based Multi-Future Trajectory Prediction: A Survey
+Authors: Renhao Huang, Hao Xue, Maurice Pagnucco, Flora Salim, Yang Song, 2024
+Key Findings
+• Introduced the Prompt Compliance Score (PCS), a novel metric to measure
+how well a generated trajectory aligns with a specific semantic command.
+• The proposed LANG-MTP framework conditions trajectory generation on
+natural language prompts (e.g., 'cross after the car passes'), shifting from
+random noise to intent-driven forecasting.
+• Unlike traditional models, this framework generates both the physical trajectory
+and a text-based explanation justifying the chosen path.
+
+CHAPTER 4
+DESIGN CONSTRAINTS, ASSUMPTIONS, AND
+DEPENDENCIES
+4.1 Design Constraints
+The implementation of DreamDrive is subject to the following categories of constraints:
+Dataset Constraints
+• Limited availability of large-scale, well-annotated Indian chaotic traffic
+datasets.
+• Significant behavioral and structural domain gap between Indian and Western
+datasets, making direct transfer learning challenging.
+• Underrepresentation of collision and near-collision scenarios in real-world
+datasets (empirically confirmed in Phase 2 benchmarking).
+Computational Constraints
+• Multi-future prediction (K trajectories per agent) substantially increases
+inference time and memory requirements, limiting real-time scalability at
+deployment.
+• Best-of-K training further increases training cost due to oracle selection
+overhead.
+• Trajectron++ with K = 25 futures requires CUDA-enabled GPU hardware for
+feasible training times.
+Simulation Constraints
+• CARLA does not natively model all Indian traffic behaviors including lane-less
+driving, informal overtaking, and rickshaw dynamics, requiring manual scripted
+approximations.
+• Traffic density and heterogeneity must be artificially configured in CARLA to
+approximate Indian traffic scenarios.
+
+4.2 Assumptions
+The following assumptions underpin the system design:
+•
+•
+•
+
+Traffic agents exhibit locally consistent motion patterns over short prediction
+horizons.
+Past trajectory history and local spatial context are sufficient to infer near-future
+behavior.
+Agent detection and trajectory annotations from IDD-3D are assumed to be
+reasonably accurate.
+
+•
+
+Road geometry and environmental context remain static during the prediction
+window.
+
+4.3 Dependencies
+The project relies on the following datasets, models, platforms, and frameworks:
+•
+•
+•
+•
+•
+
+Datasets: IDD-3D for chaotic Indian traffic; Argoverse, Waymo, or nuScenes
+for structured traffic comparison.
+Models: Availability of baseline implementations for CV, ST-GAT, MFP,
+Trajectron, and Trajectron++.
+Simulation Platform: CARLA simulator for scenario-based evaluation and
+Indianized traffic scripting.
+Frameworks: PyTorch and TorchVision for model development; CUDAenabled GPU for multi-agent and multi-future training.
+Codebase: Project code hosted at https://github.com/immrnull/capstone_dreamDrive
+
+CHAPTER 5
+DATA EXPLORATION
+5.1 Overview
+The primary dataset used in this project is the IDD-3D (Indian Driving Dataset – 3D),
+which captures the chaotic, unstructured nature of Indian roads. Additionally, American
+datasets such as Argoverse, Waymo, or nuScenes are planned for acquisition to
+benchmark model performance between structured and unstructured environments.
+
+5.2 Dataset Description
+The IDD-3D dataset consists of 105 unique driving sequences captured in Indian traffic
+conditions. Its structure comprises three primary components:
+•
+
+•
+•
+
+Visual Data: The camera folder contains sequential .png images providing
+visual context. Images are stored in series such that switching from left to right
+displays the temporal sequence continuously from the previous image.
+3D Data: The lidar folder contains .pcd files providing depth information from
+LiDAR sensors.
+Annotations: annot_data.json contains the ground truth trajectory data as
+oriented bounding box (OBB) information per frame.
+
+(Figures 5.1–5.3 show representative camera sequence frames; Figures 5.4–5.6 show
+LiDAR point cloud views.)
+
+5.3 Data Scale and Format (Phase 2 Update)
+In Phase 2, the raw dataset was fully processed into training-ready formats. The scale
+and characteristics of processed data are as follows:
+•
+•
+•
+•
+
+Data Type: 3D Object Detection and Trajectory data. Raw input consists of
+JSON label files per frame containing OBB information (psr.position.x, y, z).
+Single-Agent Windows: N = 4,821 trajectory windows extracted from the full
+dataset.
+Multi-Agent Scenes: 138 validation scenes exported based on an 80/20 trainvalidation split for Trajectron++ evaluation.
+Output Formats: Raw JSONs are converted to CSV (position trajectories), NPZ
+(NumPy binaries for training), and Pickle (for Trajectron++ compatibility).
+
+5.4 Data Processing Pipeline
+A three-step pipeline was implemented to transform raw IDD-3D data into model-ready
+formats:
+8. Parsing: Extract x, y coordinates, obj_id, and frame_id from JSON annotation
+files.
+9. Aggregation: Group per-frame positions into continuous agent-level
+trajectories.
+10. Conversion: Transform aggregated trajectories into the hierarchical format
+required by each model (CSV, NPZ, Pickle).
+
+5.5 Temporal Resolution Correction (Phase 2 Critical Update)
+A critical correction was identified during Phase 2 evaluation. The Trajectron++ default
+temporal resolution (dt = 0.4s, equivalent to 2.5 FPS) did not match the actual IDD-3D
+capture rate. The pipeline was corrected to dt = 0.1s (10 FPS) to accurately reflect the
+dataset's temporal structure. This correction significantly impacted the physical
+interpretation of predicted trajectories.
+
+5.6 Window Sampling Strategy
+A sliding window approach is applied to generate overlapping training samples from
+continuous trajectory recordings:
+•
+•
+•
+•
+
+Observation Window: 20 frames (2.0 seconds at 10 FPS).
+Prediction Window: 60 frames (6.0 seconds at 10 FPS).
+Total Window: 80 frames.
+Stride: 3 frames.
+
+The number of windows per trajectory is computed as:
+Windows = ⌊ (total_frames − window_size) / stride ⌋ + 1
+For a trajectory of 150 frames with a window of 80 and stride of 3: Window 1 covers
+frames 0–79 (Obs: 0–19 | Pred: 20–79), Window 2 covers frames 3–82, Window 3 covers
+frames 6–85, and so on until frames run out.
+
+CHAPTER 6
+SYSTEM ARCHITECTURE
+6.1 High-Level Architecture Overview
+The DreamDrive system follows a three-stage pipeline that transforms raw traffic dataset
+input into evaluated trajectory predictions. The architecture is designed for modularity,
+allowing individual stages to be upgraded or extended independently. Figure 6.1
+illustrates the overall pipeline.
+
+Figure 6.1
+
+6.2 Stage 1: Data Preparation and Trajectory Construction
+Raw traffic datasets (IDD-3D and, in future phases, Western datasets) are parsed to
+extract precise agent position information. Per-frame JSON annotations are processed to
+construct per-agent trajectories, which are then segmented into fixed-length windows
+using the sliding window approach described in Chapter 5. The output of this stage is a
+set of structured (observation, prediction) window pairs ready for model ingestion
+(Figure 6.2).
+
+Figure 6.2
+
+6.3 Stage 2: Model Training and Prediction
+Multiple trajectory prediction models are trained on the constructed trajectory windows.
+The models range from physics-based baselines (Constant Velocity) to interaction-aware
+deep learning architectures (ST-GAT, MFP, Trajectron++). Each model receives agent
+history as input and produces K predicted future trajectories as output, where K varies
+by model (K=1 for deterministic models, K=6 for MFP, K=25 for Trajectron++). Figure
+6.3 illustrates this stage.
+
+Figure 6.3
+
+6.4 Stage 3: Quantitative Evaluation
+Model performance is systematically evaluated using ADE and FDE metrics across both
+normal and collision-intensive data splits. This dual-split evaluation was introduced in
+Phase 2 to surface the safety-critical performance gap. Figure 6.4 illustrates the
+evaluation stage. Results are tabulated for comparison across all models, enabling
+selection of the optimal architecture for integration into the CARLA simulator.
+
+Figure 6.4
+
+6.5 Use Case Diagram
+The Use Case Diagram (Figure 6.5) illustrates the interactions between system actors
+and the DreamDrive system components. The primary actors are: the Autonomous
+Vehicle (ego agent), Traffic Agents (surrounding vehicles, pedestrians, two-wheelers),
+and the System Evaluator (researcher). Key use cases include trajectory data ingestion,
+multi-future trajectory prediction, risk assessment, simulation scenario execution, and
+performance reporting.
+
+CHAPTER 7
+MODEL IMPLEMENTATION AND BENCHMARKS
+7.1 Models Implemented
+The following trajectory prediction models were implemented and evaluated on the IDD3D dataset in Phase 2:
+•
+
+•
+
+•
+
+•
+
+•
+
+Constant Velocity (CV): A physics-based baseline that assumes constant
+velocity motion (velocity estimated from the last k observed steps). Serves as
+a lower-bound reference for all learning-based models.
+MLP (Multi-Layer Perceptron): A simple feedforward neural network treating
+trajectory prediction as regression on the flattened observed positions.
+ST-GAT-inspired interaction model: a lightweight multi-agent model (LSTM
+encoder per agent, multi-head self-attention across agents, LSTM decoder).
+It is inspired by ST-GAT but is not a reproduction of the published
+architecture, and is labeled accordingly.
+K-mode multi-future decoder (Oracle and Learned top-1): a multi-modal model
+generating K=10 futures, trained with a best-of-K variety loss plus a learned
+mode-scoring head. The Oracle variant selects the mode closest to ground
+truth after the fact (an upper bound, not deployable); Learned top-1 selects
+a single mode via the scoring head (deployable).
+Trajectron++: the published graph-structured CVAE (Salzmann et al., 2021),
+trained with the upstream codebase on our exported world-frame data
+(discrete latent |Z|=25), evaluated both as oracle best-of-20 samples and as
+the deterministic most-likely output.
+
+7.2 Corrected Benchmark Results (World-Frame Data)
+Note on a retracted table: an earlier version of this section reported a benchmark
+table (CV 1.84/3.92, MLP 2.31/5.10, ST-GAT 1.52/3.47, MFP 1.21/2.89 and 0.74/1.93,
+Trajectron++ 1.08/2.14) whose values could not be traced to any experiment artifact
+in the project repository. That table is retracted and must not be cited.
+The results below come from the corrected re-benchmark on ego-motion-compensated
+(world-frame) data under a unified protocol: scene-level 80/20 train/validation split
+(seed 0), observation 2.0 s (20 frames), prediction 6.0 s (60 frames), dt = 0.1 s.
+Every value is stored in a committed metrics JSON under outputs/baselines_world/,
+and the repository README tables are regenerated from those artifacts by
+scripts/make_tables.py (enforced in continuous integration). Performance is reported
+using ADE and FDE in meters (lower is better):
+Table 7.1: Benchmark Comparison - All Models on IDD-3D, world frame, validation split
+
+Model | Val ADE (m) | Val FDE (m) | K | Deployable single output?
+CV (vel_k=1) | 6.27 | 13.81 | 1 | yes
+CV (vel_k=5) | 4.82 | 11.20 | 1 | yes
+MLP | 4.56 | 10.25 | 1 | yes
+ST-GAT-inspired (MHA) | 6.41 | 13.40 | 1 | yes
+K-mode decoder (Oracle best-of-10) | 3.66 | 6.12 | 10 | no (oracle upper bound)
+K-mode decoder (Learned top-1) | 7.70 | 15.66 | 10 | yes
+Trajectron++ (upstream, world frame) | see repository README for the
+artifact-backed values produced by scripts/7_train_eval_trajectronpp.py
+
+Protocol caveats, stated explicitly: CV and MLP are evaluated on single-agent
+windows while the interaction models are evaluated on multi-agent sequences
+(agents present for the full 8 s window), so the evaluation populations differ.
+Oracle best-of-K rows require ground truth at selection time; they are upper
+bounds and must not be compared against deployable single-output rows.
+Key observations from the corrected benchmark: (1) oracle best-of-K coverage
+remains clearly better than any single-output model, supporting the project's
+multi-future premise; (2) among deployable models the simple MLP is currently
+strongest, and the interaction-aware model no longer outperforms smoothed
+constant velocity - much of its previously observed advantage on uncompensated
+data appears to have come from implicitly learning ego motion rather than agent
+interaction; (3) learned top-1 mode selection degrades substantially in the world
+frame and requires rework before it can be considered a viable deployable output.
+
+7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
+A previous version of this section reported that Trajectron++ suffers a 66 percent
+increase in ADE and a 131 percent increase in FDE on collision-intensive scenes
+(former Table 7.2, with values 1.08/2.14 on normal data and 1.79/4.95 on collision
+data). Those figures were placeholders written under deadline pressure; the
+experiment they describe was never performed. The claim is retracted in full and
+must not be cited.
+The underlying hypothesis - that prediction quality degrades on collision-proximate
+scenes because such scenes are rare in the training distribution - remains plausible
+and worth testing (Wang et al., 2025). The planned protocol is: (1) mine near-miss
+scenes from the world-frame data using time-to-collision and minimum future
+inter-agent distance (same-timestep inter-agent distances remain valid even under
+imperfect ego compensation); (2) verify the base rate of the chosen threshold,
+because small inter-agent gaps are routine in dense Indian traffic and a naive 2.0 m
+cutoff may label a large fraction of ordinary scenes as collision-proximate;
+(3) report per-split ADE/FDE with confidence intervals from a scene-level bootstrap.
+Only numbers produced by this protocol, with committed artifacts, will appear in
+future versions of this chapter.
+
+CHAPTER 8
+SYNTHETIC DATA GENERATION
+8.1 Motivation
+Real-world driving datasets are known to underrepresent collision scenarios (Wang et al., 2025), which motivates the generation of synthetic collision data. (An earlier version of this chapter cited an internal measurement of this effect; that measurement was retracted, see Section 7.3.)
+Additionally, during training it was observed that the dataset lacks sufficient chaotic
+scene diversity. To address both gaps, two complementary strategies were adopted: (1)
+programmatic synthetic collision scene generation, and (2) planned augmentation using
+LLM-generated synthetic chaotic scenarios.
+
+8.2 Synthetic Collision Scene Generation
+A total of 600 synthetic collision scenes were generated by programmatically scripting
+agent trajectories to produce near-collision interactions. Each generated scene was then
+subjected to three physical validity checks to ensure realism:
+•
+•
+
+•
+
+Speed Realism: No agent is permitted to exceed 35 m/s (126 km/h). Scenes
+with unrealistic velocities are rejected.
+History Validity: Agents must not be already overlapping at the start of the
+scene. A minimum separation of 1.5 m between agents is enforced at the
+observation window start.
+Future Collision Relevance: At least one agent pair must achieve a minimum
+pairwise distance of ≤ 2.0 m at some point within the future prediction window.
+Scenes without close future interactions are excluded as they do not constitute
+genuine collision scenarios.
+
+Table 8.1: Synthetic Data Validity Checks – Criteria and Results
+
+Check
+
+Criterion
+
+Result
+
+Speed Realism
+
+No agent exceeds 35 m/s (126
+km/h)
+
+Passed
+
+History Validity
+
+No overlap at start; min 1.5 m
+separation
+
+Passed
+
+Check
+
+Criterion
+
+Result
+
+Collision Relevance
+
+Min distance ≤ 2.0 m in future
+window
+
+Passed
+
+Total Generated
+
+600 scenes
+
+32 passed all checks (5.3%)
+
+Of the 600 generated scenes, only 32 (5.3%) passed all three validity checks. This strict
+filtering ensures that the augmented data contains only physically plausible collision
+scenarios, preventing the model from learning artifacts of poorly generated data.
+
+8.3 Collision Density and Trajectory Analysis
+Figure 8.1 presents a heatmap of collision density across the synthetic scene set,
+illustrating the spatial distribution of near-collision events. Figure 8.2 compares ground
+truth trajectories against Trajectron++ predictions on collision data, visually confirming
+the model's tendency to under-predict the magnitude of evasive maneuvers in safetycritical situations.
+
+Figure 8.1
+
+Figure 8.2
+
+8.4 Synthetic Data Composition and Near-Miss Augmentation
+Figure 8.3 shows the breakdown of synthetic scene types after filtering, illustrating the
+distribution of head-on, side-impact, and merging collision scenarios. Figure 8.4 shows
+the change in near-miss augmentation rates before and after synthetic data integration,
+demonstrating improved coverage of safety-critical interaction types in the augmented
+training set.
+
+Figure 8.3
+
+Figure 8.4
+
+8.5 Next Steps
+The validated 32 synthetic collision scenes will be merged with the real IDD-3D training
+data for Trajectron++ fine-tuning in the next phase. Additionally, LLM-generated
+synthetic chaotic scenes (covering lane-less weaving, informal overtaking, and
+pedestrian dart-out scenarios) are planned to further diversify the training distribution
+beyond what real-world collection alone can provide.
+
+CHAPTER 9
+CARLA SIMULATION
+9.1 Overview
+The CARLA (Car Learning to Act) simulator was configured to support scenario-based
+evaluation of the DreamDrive prediction system. CARLA provides a flexible, opensource environment for autonomous driving research, supporting sensor simulation
+(cameras, LiDAR), traffic agent scripting, and weather configuration.
+
+9.2 Indianized Traffic Configuration
+Since CARLA does not natively model Indian traffic behaviors, a custom Indianized
+environment was manually scripted. The following approximations were implemented:
+•
+•
+•
+
+•
+
+Lane-less Driving: Agents were scripted to operate without strict lane-keeping
+constraints, approximating the lateral freedom observed in Indian traffic.
+Dense Traffic Density: Higher-than-default vehicle spawn rates were
+configured to approximate the vehicle density typical of Indian urban roads.
+Informal Overtaking: Overtaking maneuvers were scripted without enforcing
+right-of-way, simulating the flying overtaking behavior documented in the laneless traffic literature.
+Rickshaw Dynamics: Non-standard vehicle types with reduced speed profiles
+were added as approximate proxies for rickshaws and three-wheelers.
+
+9.3 Simulation Scenarios
+Two primary scenario categories were implemented in the CARLA environment:
+11. Collision-Proximate Scenarios: Scenarios in which scripted agents execute
+trajectories designed to create near-collision situations, aligned with the
+synthetic collision data described in Chapter 8.
+12. General Chaotic Traffic: Scenarios involving dense, heterogeneous traffic with
+multiple simultaneous interactions, designed to stress-test multi-future
+prediction under high scene complexity.
+Figures 9.1 and 9.2 present representative screenshots from the CARLA Indianized
+simulation environment, illustrating the configured traffic density and agent diversity.
+
+Figure 9.1
+
+Figure 9.2
+
+9.4 Future Integration Plan
+In the next project phase, the trained trajectory prediction models (including
+Trajectron++ fine-tuned on synthetic collision data) will be integrated directly into the
+CARLA loop. Predicted multi-future trajectories will be fed to a safety-aware planner,
+enabling end-to-end evaluation of prediction quality's impact on collision avoidance in
+simulation.
+
+CHAPTER 10
+CONCLUSION AND FUTURE WORK
+10.1 Conclusion
+Phase 2 of DreamDrive has made significant advances toward the goal of proactive,
+multi-future trajectory prediction for safe autonomous navigation in chaotic Indian
+traffic. The key findings and contributions of this phase are:
+•
+
+•
+
+•
+
+•
+
+•
+
+The coordinate frame of raw IDD-3D annotations was identified and corrected:
+positions are stored per-frame in the moving ego/LiDAR frame, so an
+ego-motion compensation stage was added and all models were re-benchmarked
+on world-frame data. This correction materially changed model rankings and
+is the most important technical finding of this phase.
+Multi-future coverage helps, single-output selection does not yet: oracle
+best-of-K prediction clearly outperforms every deployable single-output
+model on the corrected benchmark, supporting the multi-future premise; but
+the learned top-1 mode selection currently underperforms even a simple MLP,
+so deployable multi-future prediction remains an open problem for this data.
+Collision scenarios remain underrepresented in real datasets: real-world data
+collection naturally under-samples rare but safety-critical collision events
+(Wang et al., 2025). Measuring the resulting prediction degradation on IDD-3D
+is a designed but not yet executed experiment; a previously reported
+66%/131% degradation figure was a placeholder and has been retracted.
+Synthetic collision data and CARLA-based scenario evaluation are planned:
+the generation and validation pipeline described in Chapters 8 and 9 is at a
+preliminary stage and its results are not yet backed by committed artifacts;
+it is future work, not a completed contribution.
+
+10.2 Future Work
+The specific roadmap for the next project phase includes:
+1. Execute the Collision-Split Evaluation: Run the near-miss mining and
+per-split evaluation protocol defined in Section 7.3 on the world-frame data,
+producing artifact-backed measurements of prediction degradation on
+collision-proximate scenes (replacing the retracted placeholder figures).
+2. Improve Deployable Mode Selection: Rework the learned top-1 mode-scoring
+head, which currently underperforms in the world frame; evaluate calibration
+of mode probabilities alongside ADE/FDE.
+3. Extend Hyperparameter Optimization: Conduct systematic hyperparameter
+search for Trajectron++ (learning rate, latent variable size, prediction horizon)
+on the world-frame data to improve its baseline performance.
+4. Improve Heterogeneous Agent Modeling: Incorporate agent classes
+(pedestrians, two-wheelers, rickshaws) as model inputs with class-conditioned
+dynamics, leveraging Trajectron++'s built-in heterogeneous agent support;
+the current pipeline trains on all classes but no model uses class information.
+5. Refine Ego-Motion Compensation: Replace the annotation-based RANSAC
+approximation with official ego poses or LiDAR odometry when the raw
+dataset is available, and re-validate with the committed speed sanity tests.
+6. Synthetic Collision Data and LLM-Generated Chaotic Scenes: Build and
+commit the generation and validity-checking pipeline described in Chapter 8,
+then fine-tune on validated scenes.
+7. Integrate Prediction with Planning: Connect validated trajectory prediction
+outputs to a safety-aware planner within CARLA to evaluate whether improved
+predictions translate to measurable collision avoidance gains.
+8. Comparative Simulation Study: Conduct a side-by-side simulation comparison
+between Indian (chaotic) and American (structured) environments to
+quantifiably demonstrate model adaptability and robustness across domains.
+
+REFERENCES / BIBLIOGRAPHY
+[1] Salzmann, T., Ivanovic, B., Chakravarty, P., & Pavone, M. (2021). Trajectron++:
+Dynamically-Feasible Trajectory Forecasting with Heterogeneous Data.
+[2] Wang, Y., He, J., Fan, L., Li, H., Chen, Y., & Zhang, Z. (2023/24). Driving into the
+Future: Multiview Visual Forecasting and Planning with World Model for Autonomous
+Driving. CVPR.
+[3] Hwang, J., Xu, R., Lin, H., Hung, W., Ji, J., Choi, K., et al. (2024). EMMA: End-toEnd Multimodal Model for Autonomous Driving.
+[4] Xu, M., Liu, Z., Wang, B., & Li, S. (2022). A Survey of Autonomous Driving
+Trajectory Prediction: Methodologies, Challenges, and Future Prospects.
+[5] Beza, A. D., Xie, Z., Ramezani, M., & Levinson, D. (2021). Lane-less to Lane-free:
+Implications in the Era of Automated Vehicles.
+[6] Huang, R., Xue, H., Pagnucco, M., Salim, F., & Song, Y. (2024). Vision-Based
+Multi-Future Trajectory Prediction: A Survey.
+[7] IDD-3D: India Driving Dataset – 3D. Available at: https://idd.insaan.iiit.ac.in/
+[8] DreamDrive Project
+mrnull/capstone_dreamDrive
+
+Repository.
+
+Available
+
+at:
+
+https://github.com/im-
+
+APPENDIX A: DEFINITIONS, ACRONYMS, AND
+ABBREVIATIONS
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+
+ADE: Average Displacement Error – Measures average Euclidean distance
+between predicted and true trajectories over all time steps.
+CARLA: Car Learning to Act – Open-source autonomous driving simulator.
+CoT: Chain-of-Thought – Reasoning process used in the EMMA model.
+CV: Constant Velocity – A physics-based prediction model assuming no
+acceleration.
+CVAE: Conditional Variational Autoencoder – Generative model used in
+Trajectron++.
+DRAC: Deceleration Rate to Avoid Crash.
+ELBO: Evidence Lower Bound – Optimization objective for variational
+inference.
+FDE: Final Displacement Error – Measures prediction accuracy at the final
+endpoint.
+FPS: Frames Per Second – Temporal resolution unit.
+GAN: Generative Adversarial Network.
+IDD-3D: Indian Driving Dataset – 3D.
+KPM: Key Points Matching – A measure of visual consistency in multiview
+generation.
+LiDAR: Light Detection and Ranging – 3D depth sensing technology.
+MFP: Multi-Future Prediction – A trajectory prediction model generating K
+futures.
+MLP: Multi-Layer Perceptron – Feedforward neural network.
+NLL: Negative Log Likelihood – Measures how well the predicted distribution
+matches the true trajectory.
+OBB: Oriented Bounding Box – 3D annotation format used in IDD-3D.
+OOD: Out-of-Distribution – Scenarios not encountered during model training.
+PCS: Prompt Compliance Score – Metric measuring trajectory alignment with
+text commands.
+ST-GAT: Spatial-Temporal Graph Attention Network.
+TTC: Time to Collision.
+
+

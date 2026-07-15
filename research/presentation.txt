@@ -1,0 +1,602 @@
+UE23CS320B – Capstone Project Phase – 2 ESA
+Project Progress Review #3
+Project Title : DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+Project ID
+: PW26_CGM_04
+Project Guide : Prof. Chitra G M
+Project Team : Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+1
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Outline
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+Abstract and scope.
+Suggestions from phase-1
+Design Constraints, Assumptions, Dependencies
+Data Exploration
+Architecture
+Use Case Diagram
+Benchmarks-1
+Conclusion and Suggestions from Phase 2 Review 1
+Benchmarks-2
+Observations and Conclusion from Phase 2 Review 2
+Additional Info and References
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+2
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Abstract and Scope
+●
+
+Current autonomous driving systems rely primarily on reactive
+decision-making, predicting a single, most-likely future path for surrounding
+agents.
+
+●
+
+This approach fails in chaotic, unstructured traffic environments such as
+those found in India, where pedestrians, rickshaws, and two-wheelers behave
+unpredictably.
+
+●
+
+There is therefore a pressing need for a proactive prediction model that does
+not depend on a single deterministic forecast, but instead simulates multiple
+possible futures.
+
+●
+
+DreamDrive addresses this challenge by enabling autonomous vehicles to
+anticipate risks before they occur, ensuring safer navigation in mixed-traffic
+environments.
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+3
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Suggestions from Phase-1
+●
+
+Suggestion:
+Narrow the project scope by explicitly defining and prioritizing a limited set of traffic
+participants and object categories that have the highest impact on safety in chaotic
+mixed-traffic environments.
+
+●
+
+Feasibility & Current Progress:
+Scoped Focus:
+The current phase is limited to vehicle-to-vehicle interactions to ensure reliable model
+development.
+Targeted Dataset Selection:
+Only vehicle-dominant scenes from the distributed dataset are used for training and evaluation.
+Phased Extension:
+The pipeline is designed to later incorporate pedestrians and other agents without redesign.
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+4
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Design Constraints
+●
+
+Dataset Constraints:
+Limited availability of large-scale, well-annotated Indian chaotic traffic datasets;
+significant behavioral and structural domain gap between Indian and Western
+datasets.
+
+●
+
+Computational Constraints:
+1. Multi-future prediction (K trajectories per agent) increases inference time
+and memory requirements, limiting real-time scalability.
+2. Best-of-K training further increases training cost due to oracle selection.
+
+●
+
+Simulation Constraints:
+1. CARLA does not natively model all Indian traffic behaviors (lane-less driving,
+informal overtaking, rickshaw dynamics), requiring approximations.
+2. Traffic density and heterogeneity must be artificially scripted in CARLA to
+approximate Indian scenarios.
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+5
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Assumptions
+●
+
+Traffic agents exhibit locally consistent motion patterns over short
+prediction horizons.
+
+●
+
+Past trajectory history and local spatial context are sufficient to infer
+near-future behavior.
+
+●
+
+Agent detection and trajectory annotations are assumed to be reasonably
+accurate.
+
+●
+
+Road geometry and environmental context remain static during the
+prediction window.
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+6
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Dependencies
+
+●
+
+Datasets: IDD-3D for chaotic traffic; Argoverse / Waymo / nuScenes for
+structured traffic comparison.
+
+●
+
+Models: Availability of baseline models such as CV, ST-GAT, MFP and
+Trajectron++.
+
+●
+
+Simulation Platform: CARLA simulator for scenario-based evaluation.
+
+●
+
+Frameworks: PyTorch and associated deep learning libraries like TorchVision for
+model development. CUDA-enabled GPU for multi-agent and multi-future training.
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+7
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Data Exploration
+Dataset details:
+Source:
+● The project utilizes the IDD-3D (India Driving Dataset - 3D).
+Data Characteristics:
+● It consists of raw 3D annotations (typically derived from LiDAR or stereo-camera setups)
+focused on unstructured Indian driving scenarios.
+Link: India Driving Dataset
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+8
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Data Exploration
+
+Size and Type of Data
+● Data Type: 3D Object Detection and Trajectory data. The raw input consists of JSON label
+files per frame, containing oriented bounding box (OBB) information ($psr.position.x, y, z$).
+● Scale (Processed):
+○ Single-Agent Windows: N = 4,821 trajectory windows.
+○ Multi-Agent Scenes: Exported as 138 validation scenes (based on the 80/20 split
+mentioned in the Trajectron++ section).
+● Format: The pipeline converts raw JSONs into structured CSV (positions), NPZ (numpy
+binaries for training), and Pickle (for Trajectron++) formats.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+9
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Data Exploration
+
+Time Period / Temporal Resolution
+● Sampling Rate: The data is processed at 10 FPS (dt = 0.1s).
+○ Note: A critical correction was identified during the Trajectron++ evaluation where the
+default dt = 0.4s (2.5 FPS) was corrected to 0.1s to match the actual IDD-3D capture rate.
+● Window Configuration:
+○ Observation Length: 20 frames (2.0 seconds).
+○ Prediction Horizon: 60 frames (6.0 seconds).
+○ Stride: 3 frames.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+10
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Architecture
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+11
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Architecture
+Data Preparation and Trajectory Construction:
+● Raw traffic datasets are parsed to extract precise agent position information, which is then
+segmented into fixed-length trajectory windows suitable for temporal modeling.
+Model Training and Prediction:
+● Multiple trajectory prediction models, ranging from physics-based to interaction-aware
+learning architectures, are trained on the constructed trajectory windows to generate future
+motion predictions.
+Quantitative Evaluation:
+● Model performance is systematically evaluated using standard prediction accuracy metrics,
+namely Average Displacement Error (ADE) and Final Displacement Error (FDE), enabling
+objective comparison across approaches.
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+12
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Architecture
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+13
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Architecture
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+14
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Architecture
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+15
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Use Case Diagram
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+16
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+DreamDrive: Proactive Multi-Future Prediction for Safe
+Autonomous Navigation in Chaotic Mixed Traffic
+
+Conclusion from Phase 2 Review 1
+
+●
+
+Worst Performance: MLP
+
+●
+
+Best ADE: MFP (Oracle) {Best at trajectory shape & uncertainty coverage (low ADE)}
+
+●
+
+Best FDE: Trajectron++* {Best at final goal selection (low FDE)}
+
+●
+
+Best Balanced Realistic Model: MFP(Learned)
+
+* : The ADE and FDE error values obtained for Trajectron++ could potentially be further optimized. However, due to time
+constraints, exhaustive hyperparameter tuning and extended training were not feasible, and therefore the reported
+results do not represent the model’s fully optimized performance.
+
+IDHANT SINGH, SHOURYA RAI, RISHAV GHOSH, SHAGAL VERMA
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Suggestions from Phase 2 Review 1
+During Phase 2, we implemented the Trajectron++ model; however, due to time constraints, we
+were unable to fully optimize its performance.
+Limitations included:
+● Incomplete hyperparameter tuning
+● Limited training time and experimentation
+● Suboptimal handling of Indian traffic-specific behaviors
+Based on the panel’s feedback, we planned to:
+● Perform extensive hyperparameter tuning and longer training cycles
+● Better adapt the model to heterogeneous and dense Indian traffic scenarios
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+19
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Suggestions from Phase 2 Review 1
+The panel recommended improving model performance on rare but critical collision scenarios,
+which are underrepresented in real-world datasets.
+To address this, we are exploring synthetic collision datasets to augment training data
+Planned approach:
+● Use synthetic data to augment collision and near-collision cases
+● Improve model’s ability to predict risky trajectories and edge-case behaviors
+Goal:
+Increase robustness and safety of trajectory prediction by training on collision-rich synthetic
+scenarios that are difficult to capture in real-world data.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+20
+
+21
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+22
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Conclusion from Phase 2 Review 2
+RETRACTED (Jul 2026): a previous version of this slide reported a 66%/131% ADE/FDE
+degradation for Trajectron++ on collision data. That figure was a placeholder not
+backed by any experiment and has been retracted. The collision-split evaluation is
+planned future work (see report Section 7.3 for the protocol).
+● Any planner relying on a prediction model is only as safe as the predictions it receives; poor
+collision-scenario forecasting directly limits collision avoidance capability.
+● In the next phase, we aim to fine-tune Trajectron++ on synthetic collision data to close this
+performance gap.
+● We will evaluate whether improved predictions translate to measurable safety gains when
+integrated into a framework.
+● Once prediction quality is validated, we will identify an architecture best suited to unstructured,
+collision-prone traffic conditions, this will serve as the foundation on which the remainder of the
+project is built.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+23
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Observations
+
+While training we noticed that our data does not have enough chaotic scenes, so we plan to train
+on LLM generated synthetic chaotic data as well.
+Enhancing Autonomous Driving Safety with Collision Scenario Integration
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+24
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Code Part
+
+Github:https://github.com/im-mrnull/capstone_dreamD
+rive
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+25
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Collision Density
+
+●
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+26
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Trajectory Comaparison
+
+●
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+27
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Dataset Composition
+
+●
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+28
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Change in Near Miss Augumentation
+
+●
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+29
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Carla Simulation Images
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+30
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Carla Simulation Images
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+31
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Conclusion
+❖
+
+Single-path prediction is insufficient for chaotic traffic.
+
+❖
+
+Collision scenarios remain underrepresented in real datasets.
+
+❖
+
+Model performance drops significantly in safety-critical cases.
+
+❖
+
+Synthetic data + multi-future prediction improves robustness.
+
+❖
+
+Enables safer autonomous driving in real-world conditions.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+32
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Future Work
+●
+
+Fine-tune Trajectron++ on collision-rich synthetic datasets.
+
+●
+
+Improve modeling of heterogeneous agents (pedestrians, two-wheelers, rickshaws).
+
+●
+
+Enhance realism of simulations to better reflect Indian traffic behavior.
+
+●
+
+Integrate prediction with planning to evaluate real-world safety impact.
+
+●
+
+Scale dataset generation with diverse scenarios and edge cases.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+33
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Additional Information
+
+● Contacted an experienced engineer and researcher currently pursuing PhD research in a domain
+closely aligned with our project.
+● His expertise includes areas such as autonomous vehicle control systems, vehicle dynamics, and
+lane tracking/trajectory-related problems.
+● We plan to actively seek his guidance throughout the project lifecycle for:
+○ Design validation
+○ Technical direction
+○ Problem-solving and optimization strategies
+● This mentorship is expected to enhance the robustness, accuracy, and real-world applicability of
+our solution.
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+34
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+Additional Information
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya
+Rai
+
+35
+
+DreamDrive: Multi-Future Prediction for Autonomous Navigation in Mixed
+Traffic
+
+References
+
+Provide references pertaining to your research according to IEEE format.
+Example:
+[1] G. Eason, B. Noble, and I. N. Sneddon, “On certain integrals of Lipschitz-Hankel
+type involving products of Bessel functions,” Phil. Trans. Roy. Soc. London, vol. AK47,
+pp. 529–551, April 1955. (references)
+
+Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai
+
+36
+
+Thank You!
+
+Idhant Singh, Rishav Ghosh, Shagal Verma,
+Shourya Rai
+
+37
+
+

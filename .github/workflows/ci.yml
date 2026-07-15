@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  sanity:
+    name: Data sanity + provenance checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install test dependencies
+        run: pip install -r requirements.txt
+
+      - name: Unit + data sanity tests
+        run: pytest tests -q
+
+      - name: Results provenance check (README tables == committed artifacts)
+        run: python scripts/make_tables.py --check

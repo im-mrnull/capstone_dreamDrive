@@ -1,0 +1,55 @@
+{
+  "pos": {
+    "shape": [
+      "T",
+      "A",
+      2
+    ],
+    "dtype": "float32",
+    "missing": "NaN"
+  },
+  "mask": {
+    "shape": [
+      "T",
+      "A"
+    ],
+    "dtype": "bool"
+  },
+  "vel": {
+    "shape": [
+      "T",
+      "A",
+      2
+    ],
+    "dtype": "float32",
+    "missing": "NaN"
+  },
+  "vel_mask": {
+    "shape": [
+      "T",
+      "A"
+    ],
+    "dtype": "bool"
+  },
+  "frame_id": {
+    "shape": [
+      "T"
+    ],
+    "dtype": "int32|object",
+    "notes": "ordered unique frames"
+  },
+  "agent_id": {
+    "shape": [
+      "A"
+    ],
+    "dtype": "int32",
+    "notes": "ordered unique obj_id"
+  },
+  "agent_type": {
+    "shape": [
+      "A"
+    ],
+    "dtype": "object",
+    "notes": "mode of obj_type per agent"
+  }
+}

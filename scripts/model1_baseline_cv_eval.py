@@ -102,6 +102,13 @@ def main() -> int:
         action="store_true",
         help="Also compute per-scene ADE/FDE in metrics JSON",
     )
+    parser.add_argument(
+        "--split-by-scene",
+        action="store_true",
+        help="Evaluate on a held-out scene-level val split (same protocol as the learned models)",
+    )
+    parser.add_argument("--seed", type=int, default=0, help="Split seed (used with --split-by-scene)")
+    parser.add_argument("--val-frac", type=float, default=0.2, help="Val fraction (used with --split-by-scene)")
     args = parser.parse_args()
 
     import numpy as np
@@ -115,6 +122,18 @@ def main() -> int:
     fut = data["fut"].astype(np.float32, copy=False)
     scene_id = data["scene_id"]
 
+    split_kind = "all"
+    if args.split_by_scene:
+        # Mirrors make_scene_split in model2/model3/model4 so the val scenes match.
+        rng = np.random.default_rng(int(args.seed))
+        unique = np.unique(scene_id)
+        rng.shuffle(unique)
+        n_val = max(1, int(round(len(unique) * float(args.val_frac))))
+        val_scenes = set(unique[:n_val].tolist())
+        is_val = np.array([sid in val_scenes for sid in scene_id], dtype=bool)
+        obs, fut, scene_id = obs[is_val], fut[is_val], scene_id[is_val]
+        split_kind = "scene"
+
     pred_len = fut.shape[1]
 
     pred = _compute_cv_predictions(obs, pred_len=pred_len, vel_k=args.vel_k)
@@ -126,6 +145,9 @@ def main() -> int:
         "obs_len": int(obs.shape[1]),
         "pred_len": int(pred_len),
         "vel_k": int(args.vel_k),
+        "split": split_kind,
+        "seed": int(args.seed) if args.split_by_scene else None,
+        "val_frac": float(args.val_frac) if args.split_by_scene else None,
         "count": int(obs.shape[0]),
         "ade": ade,
         "fde": fde,

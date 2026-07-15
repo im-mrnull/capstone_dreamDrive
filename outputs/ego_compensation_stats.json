@@ -1,0 +1,670 @@
+{
+  "method": "annotation-based RANSAC SE(2) ego-motion estimation (approximation; prefer official ego poses when available)",
+  "params": {
+    "inlier_thresh_m": 0.12,
+    "ransac_iters": 200,
+    "min_inliers": 3,
+    "seed": 0,
+    "fps": 10.0
+  },
+  "num_scenes": 105,
+  "total_fallback_frames": 2162,
+  "speed_validation_mps": {
+    "Pedestrian": {
+      "raw_ego_frame": {
+        "p50": 5.053413892033769,
+        "p90": 8.850877189429266,
+        "p99": 11.08184039530097
+      },
+      "world_frame": {
+        "p50": 0.9068147004763225,
+        "p90": 2.5993808297196948,
+        "p99": 12.503002145747624
+      }
+    },
+    "Car": {
+      "raw_ego_frame": {
+        "p50": 5.545987174291442,
+        "p90": 17.8884196224443,
+        "p99": 27.291370499498925
+      },
+      "world_frame": {
+        "p50": 3.4718940892829124,
+        "p90": 15.11908440847657,
+        "p99": 31.958136854589867
+      }
+    }
+  },
+  "per_scene": [
+    {
+      "scene_id": "20220118103308_seq_10",
+      "frames": 100,
+      "fallback_frames": 53,
+      "mean_inlier_ratio": 0.4086509504987765
+    },
+    {
+      "scene_id": "20220118103308_seq_11",
+      "frames": 100,
+      "fallback_frames": 93,
+      "mean_inlier_ratio": 0.5214285714285715
+    },
+    {
+      "scene_id": "20220118103308_seq_12",
+      "frames": 100,
+      "fallback_frames": 85,
+      "mean_inlier_ratio": 0.413265306122449
+    },
+    {
+      "scene_id": "20220118103308_seq_13",
+      "frames": 100,
+      "fallback_frames": 99,
+      "mean_inlier_ratio": null
+    },
+    {
+      "scene_id": "20220118103308_seq_14",
+      "frames": 100,
+      "fallback_frames": 65,
+      "mean_inlier_ratio": 0.5599789915966388
+    },
+    {
+      "scene_id": "20220118103308_seq_15",
+      "frames": 100,
+      "fallback_frames": 21,
+      "mean_inlier_ratio": 0.48975885225885246
+    },
+    {
+      "scene_id": "20220118103308_seq_16",
+      "frames": 100,
+      "fallback_frames": 69,
+      "mean_inlier_ratio": 0.35482683982683993
+    },
+    {
+      "scene_id": "20220118103308_seq_17",
+      "frames": 100,
+      "fallback_frames": 42,
+      "mean_inlier_ratio": 0.29496302917355555
+    },
+    {
+      "scene_id": "20220118103308_seq_18",
+      "frames": 100,
+      "fallback_frames": 49,
+      "mean_inlier_ratio": 0.37789210789210786
+    },
+    {
+      "scene_id": "20220118103308_seq_19",
+      "frames": 100,
+      "fallback_frames": 98,
+      "mean_inlier_ratio": 0.75
+    },
+    {
+      "scene_id": "20220118103308_seq_20",
+      "frames": 100,
+      "fallback_frames": 1,
+      "mean_inlier_ratio": 0.426846793064476
+    },
+    {
+      "scene_id": "20220118103308_seq_21",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.327821442118617
+    },
+    {
+      "scene_id": "20220118103308_seq_22",
+      "frames": 100,
+      "fallback_frames": 8,
+      "mean_inlier_ratio": 0.3624049897886356
+    },
+    {
+      "scene_id": "20220118103308_seq_23",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3378485151212425
+    },
+    {
+      "scene_id": "20220118103308_seq_26",
+      "frames": 100,
+      "fallback_frames": 25,
+      "mean_inlier_ratio": 0.28876543876543875
+    },
+    {
+      "scene_id": "20220118103308_seq_27",
+      "frames": 100,
+      "fallback_frames": 11,
+      "mean_inlier_ratio": 0.2758386026851936
+    },
+    {
+      "scene_id": "20220118103308_seq_28",
+      "frames": 100,
+      "fallback_frames": 6,
+      "mean_inlier_ratio": 0.32746477554352316
+    },
+    {
+      "scene_id": "20220118103308_seq_29",
+      "frames": 97,
+      "fallback_frames": 2,
+      "mean_inlier_ratio": 0.44549949507050485
+    },
+    {
+      "scene_id": "20220118103308_seq_3",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3841677331122869
+    },
+    {
+      "scene_id": "20220118103308_seq_4",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4751589657783954
+    },
+    {
+      "scene_id": "20220118103308_seq_5",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5443056382450322
+    },
+    {
+      "scene_id": "20220118103308_seq_6",
+      "frames": 100,
+      "fallback_frames": 25,
+      "mean_inlier_ratio": 0.4378920628920628
+    },
+    {
+      "scene_id": "20220118103308_seq_7",
+      "frames": 100,
+      "fallback_frames": 83,
+      "mean_inlier_ratio": 0.3587301587301587
+    },
+    {
+      "scene_id": "20220118103308_seq_8",
+      "frames": 100,
+      "fallback_frames": 62,
+      "mean_inlier_ratio": 0.29959049959049966
+    },
+    {
+      "scene_id": "20220118103308_seq_9",
+      "frames": 100,
+      "fallback_frames": 95,
+      "mean_inlier_ratio": 0.575
+    },
+    {
+      "scene_id": "20220118103808_seq_0",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.477212692074546
+    },
+    {
+      "scene_id": "20220118103808_seq_1",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.6979386796666034
+    },
+    {
+      "scene_id": "20220118103808_seq_10",
+      "frames": 100,
+      "fallback_frames": 88,
+      "mean_inlier_ratio": 0.5109307359307359
+    },
+    {
+      "scene_id": "20220118103808_seq_11",
+      "frames": 100,
+      "fallback_frames": 73,
+      "mean_inlier_ratio": 0.48640109890109884
+    },
+    {
+      "scene_id": "20220118103808_seq_12",
+      "frames": 100,
+      "fallback_frames": 96,
+      "mean_inlier_ratio": 0.8333333333333334
+    },
+    {
+      "scene_id": "20220118103808_seq_13",
+      "frames": 100,
+      "fallback_frames": 7,
+      "mean_inlier_ratio": 0.33107543742134543
+    },
+    {
+      "scene_id": "20220118103808_seq_14",
+      "frames": 100,
+      "fallback_frames": 3,
+      "mean_inlier_ratio": 0.304687023046398
+    },
+    {
+      "scene_id": "20220118103808_seq_15",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.23398188034528214
+    },
+    {
+      "scene_id": "20220118103808_seq_16",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.28937510824273865
+    },
+    {
+      "scene_id": "20220118103808_seq_17",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.26636673179250564
+    },
+    {
+      "scene_id": "20220118103808_seq_18",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.2932328604279022
+    },
+    {
+      "scene_id": "20220118103808_seq_19",
+      "frames": 100,
+      "fallback_frames": 1,
+      "mean_inlier_ratio": 0.23863645784874643
+    },
+    {
+      "scene_id": "20220118103808_seq_2",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.7295645686523579
+    },
+    {
+      "scene_id": "20220118103808_seq_20",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.2799424585878737
+    },
+    {
+      "scene_id": "20220118103808_seq_21",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.250749871446474
+    },
+    {
+      "scene_id": "20220118103808_seq_22",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3243604832235077
+    },
+    {
+      "scene_id": "20220118103808_seq_23",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3301859014425859
+    },
+    {
+      "scene_id": "20220118103808_seq_24",
+      "frames": 100,
+      "fallback_frames": 46,
+      "mean_inlier_ratio": 0.5019916142557653
+    },
+    {
+      "scene_id": "20220118103808_seq_25",
+      "frames": 100,
+      "fallback_frames": 82,
+      "mean_inlier_ratio": 0.5098039215686274
+    },
+    {
+      "scene_id": "20220118103808_seq_26",
+      "frames": 100,
+      "fallback_frames": 97,
+      "mean_inlier_ratio": 1.0
+    },
+    {
+      "scene_id": "20220118103808_seq_27",
+      "frames": 100,
+      "fallback_frames": 99,
+      "mean_inlier_ratio": null
+    },
+    {
+      "scene_id": "20220118103808_seq_28",
+      "frames": 100,
+      "fallback_frames": 99,
+      "mean_inlier_ratio": null
+    },
+    {
+      "scene_id": "20220118103808_seq_29",
+      "frames": 100,
+      "fallback_frames": 42,
+      "mean_inlier_ratio": 0.35675674228305804
+    },
+    {
+      "scene_id": "20220118103808_seq_3",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.42021773748792896
+    },
+    {
+      "scene_id": "20220118103808_seq_4",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.39605566741604786
+    },
+    {
+      "scene_id": "20220118103808_seq_5",
+      "frames": 100,
+      "fallback_frames": 1,
+      "mean_inlier_ratio": 0.4421791615238731
+    },
+    {
+      "scene_id": "20220118103808_seq_6",
+      "frames": 100,
+      "fallback_frames": 6,
+      "mean_inlier_ratio": 0.46011187140219384
+    },
+    {
+      "scene_id": "20220118103808_seq_7",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.43430539718418504
+    },
+    {
+      "scene_id": "20220118103808_seq_8",
+      "frames": 100,
+      "fallback_frames": 32,
+      "mean_inlier_ratio": 0.4590742176563072
+    },
+    {
+      "scene_id": "20220118103808_seq_9",
+      "frames": 100,
+      "fallback_frames": 65,
+      "mean_inlier_ratio": 0.40726381461675576
+    },
+    {
+      "scene_id": "20220118104308_seq_0",
+      "frames": 100,
+      "fallback_frames": 91,
+      "mean_inlier_ratio": 0.4825892857142857
+    },
+    {
+      "scene_id": "20220118104308_seq_1",
+      "frames": 100,
+      "fallback_frames": 59,
+      "mean_inlier_ratio": 0.39744047619047623
+    },
+    {
+      "scene_id": "20220118104308_seq_10",
+      "frames": 100,
+      "fallback_frames": 11,
+      "mean_inlier_ratio": 0.2895736838918657
+    },
+    {
+      "scene_id": "20220118104308_seq_11",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.32691286140708
+    },
+    {
+      "scene_id": "20220118104308_seq_12",
+      "frames": 100,
+      "fallback_frames": 1,
+      "mean_inlier_ratio": 0.323310850840152
+    },
+    {
+      "scene_id": "20220118104308_seq_13",
+      "frames": 100,
+      "fallback_frames": 3,
+      "mean_inlier_ratio": 0.28317719577054823
+    },
+    {
+      "scene_id": "20220118104308_seq_14",
+      "frames": 100,
+      "fallback_frames": 3,
+      "mean_inlier_ratio": 0.3616185123767844
+    },
+    {
+      "scene_id": "20220118104308_seq_22",
+      "frames": 100,
+      "fallback_frames": 28,
+      "mean_inlier_ratio": 0.37068268195028753
+    },
+    {
+      "scene_id": "20220118105341_seq_0",
+      "frames": 100,
+      "fallback_frames": 1,
+      "mean_inlier_ratio": 0.24477646098136402
+    },
+    {
+      "scene_id": "20220118105838_seq_10",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4826880362909907
+    },
+    {
+      "scene_id": "20220118105838_seq_6",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.23034802791741488
+    },
+    {
+      "scene_id": "20220118105838_seq_8",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4065526153696052
+    },
+    {
+      "scene_id": "20220118105838_seq_9",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5395602266474665
+    },
+    {
+      "scene_id": "20220118110338_seq_10",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5732755449665161
+    },
+    {
+      "scene_id": "20220118110338_seq_11",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3779981735542719
+    },
+    {
+      "scene_id": "20220118110338_seq_12",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.7133464530404102
+    },
+    {
+      "scene_id": "20220118110338_seq_13",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4127370591562434
+    },
+    {
+      "scene_id": "20220118110338_seq_14",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3353797205221401
+    },
+    {
+      "scene_id": "20220118110338_seq_15",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.38368168895233995
+    },
+    {
+      "scene_id": "20220118110338_seq_16",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.28791464469667283
+    },
+    {
+      "scene_id": "20220118110338_seq_17",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3014687288384348
+    },
+    {
+      "scene_id": "20220118110338_seq_18",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.36401841929085793
+    },
+    {
+      "scene_id": "20220118110338_seq_19",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.31173086088954627
+    },
+    {
+      "scene_id": "20220118111338_seq_1",
+      "frames": 100,
+      "fallback_frames": 39,
+      "mean_inlier_ratio": 0.4525294612794613
+    },
+    {
+      "scene_id": "20220118111338_seq_2",
+      "frames": 100,
+      "fallback_frames": 52,
+      "mean_inlier_ratio": 0.47443431273218495
+    },
+    {
+      "scene_id": "20220118111338_seq_3",
+      "frames": 100,
+      "fallback_frames": 36,
+      "mean_inlier_ratio": 0.3670652099223526
+    },
+    {
+      "scene_id": "20220118111338_seq_4",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.33709340108627095
+    },
+    {
+      "scene_id": "20220118111739_seq_12",
+      "frames": 100,
+      "fallback_frames": 9,
+      "mean_inlier_ratio": 0.3094496706996707
+    },
+    {
+      "scene_id": "20220118111739_seq_13",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.33379434910171396
+    },
+    {
+      "scene_id": "20220118111739_seq_14",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.2283393170903961
+    },
+    {
+      "scene_id": "20220118111739_seq_15",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5395600166128341
+    },
+    {
+      "scene_id": "20220118111739_seq_16",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.46731589536376544
+    },
+    {
+      "scene_id": "20220118111739_seq_17",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5857203153285583
+    },
+    {
+      "scene_id": "20220118111739_seq_18",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5008499943165176
+    },
+    {
+      "scene_id": "20220118111739_seq_19",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3811864133914388
+    },
+    {
+      "scene_id": "20220118111739_seq_20",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4942639262807464
+    },
+    {
+      "scene_id": "20220118111739_seq_21",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4877421044905177
+    },
+    {
+      "scene_id": "20220118111739_seq_23",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5373934572941422
+    },
+    {
+      "scene_id": "20220118111739_seq_24",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4644762198603445
+    },
+    {
+      "scene_id": "20220118112945_seq_22",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5888019093189613
+    },
+    {
+      "scene_id": "20220118112945_seq_23",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5927919777400867
+    },
+    {
+      "scene_id": "20220118112945_seq_24",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5462856655028948
+    },
+    {
+      "scene_id": "20220118112945_seq_25",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5204040796181402
+    },
+    {
+      "scene_id": "20220118112945_seq_26",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.7190421377651937
+    },
+    {
+      "scene_id": "20220118112945_seq_28",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.5655305519398217
+    },
+    {
+      "scene_id": "20220118115526_seq_18",
+      "frames": 60,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.28536999723440404
+    },
+    {
+      "scene_id": "20220118115526_seq_2",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.38061063933025024
+    },
+    {
+      "scene_id": "20220118115526_seq_3",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4279297418434194
+    },
+    {
+      "scene_id": "20220118115526_seq_8",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.4449702649909049
+    },
+    {
+      "scene_id": "20220118115526_seq_9",
+      "frames": 100,
+      "fallback_frames": 0,
+      "mean_inlier_ratio": 0.3418227786260822
+    }
+  ]
+}

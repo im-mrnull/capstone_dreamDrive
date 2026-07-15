@@ -1,0 +1,13 @@
+{
+  "model": "CV",
+  "input": "outputs/windows_world_obs20_pred60.npz",
+  "obs_len": 20,
+  "pred_len": 60,
+  "vel_k": 1,
+  "split": "scene",
+  "seed": 0,
+  "val_frac": 0.2,
+  "count": 1004,
+  "ade": 6.270341396331787,
+  "fde": 13.807940483093262
+}

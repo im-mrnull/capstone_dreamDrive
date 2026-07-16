@@ -11,8 +11,11 @@ Protocol notes (recorded in the pickles' companion config):
   (e.g. Unicycle for vehicles) is future work and would need heading.
 - Per agent, only the longest contiguous observed run is kept (Trajectron++
   node data must be gap-free).
-- Scene-level 80/20 split with numpy default_rng(seed=0) over sorted scene
-  names — the same protocol as the other world-frame baselines.
+- Scene split comes from the frozen splits/scene_splits.json (train/val/test),
+  the same file every other model uses; nothing is re-derived from an RNG.
+- node_type_map.json records each node's true IDD-3D class (all nodes are
+  exported as PEDESTRIAN for dynamics purposes, but evaluation reports
+  per-class metrics via this map).
 
 Requires the patched upstream repo on disk (see scripts/patch_trajectronpp.py).
 
@@ -61,8 +64,7 @@ def main() -> int:
     ap.add_argument("--out-dir", default="outputs/trajectronpp_world")
     ap.add_argument("--dt", type=float, default=0.1,
                     help="frame period in seconds; 0.1 for 10 fps IDD-3D (DO NOT use 0.4)")
-    ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--val-frac", type=float, default=0.2)
+    ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--attention-radius", type=float, default=20.0)
     ap.add_argument("--min-node-len", type=int, default=2)
     args = ap.parse_args()
@@ -77,18 +79,19 @@ def main() -> int:
     import pandas as pd
     from environment import Environment, Scene, Node, derivative_of
 
+    # Frozen split (shared with every other model in benchmark v2).
+    import importlib.util as _ilu
+    _spec = _ilu.spec_from_file_location("dd_split", Path(__file__).resolve().parent / "dd_split.py")
+    dd_split = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(dd_split)
+    mapping = dd_split.load_splits(args.splits_file)
+
     scene_paths = sorted(Path(args.scenes_dir).glob("*.npz"))
     if not scene_paths:
         raise SystemExit(f"no scene NPZs in {args.scenes_dir}")
 
-    rng = np.random.default_rng(int(args.seed))
-    names = np.array([p.stem for p in scene_paths])
-    shuffled = names.copy()
-    rng.shuffle(shuffled)
-    n_val = max(1, int(round(len(names) * float(args.val_frac))))
-    val_set = set(shuffled[:n_val].tolist())
-
     data_columns = pd.MultiIndex.from_product([["position", "velocity", "acceleration"], ["x", "y"]])
+    node_type_map: dict[str, dict[str, str]] = {}
 
     def build_env(paths: list[Path]) -> tuple[object, dict]:
         env = Environment(node_type_list=["PEDESTRIAN"], standardization=STANDARDIZATION)
@@ -102,6 +105,11 @@ def main() -> int:
             pos = np.asarray(d["pos"], dtype=np.float64)   # (T, A, 2)
             mask = np.asarray(d["mask"], dtype=bool)        # (T, A)
             agent_ids = d["agent_id"]
+            agent_types = (
+                np.asarray(d["agent_type"], dtype=object)
+                if "agent_type" in d else np.asarray([""] * len(agent_ids), dtype=object)
+            )
+            node_type_map.setdefault(p.stem, {})
             T, A, _ = pos.shape
             scene = Scene(timesteps=T, dt=float(args.dt), name=p.stem, aug_func=None)
             for a in range(A):
@@ -122,24 +130,31 @@ def main() -> int:
                 node = Node(node_type=env.NodeType.PEDESTRIAN, node_id=str(agent_ids[a]),
                             data=node_df, first_timestep=s)
                 scene.nodes.append(node)
+                node_type_map[p.stem][str(agent_ids[a])] = str(agent_types[a])
                 n_nodes += 1
             if scene.nodes:
                 scenes.append(scene)
         env.scenes = scenes
         return env, {"scenes": len(scenes), "nodes": n_nodes}
 
-    train_paths = [p for p in scene_paths if p.stem not in val_set]
-    val_paths = [p for p in scene_paths if p.stem in val_set]
+    by_split: dict[str, list[Path]] = {"train": [], "val": [], "test": []}
+    for p in scene_paths:
+        split = mapping.get(p.stem)
+        if split in by_split:
+            by_split[split].append(p)
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     stats = {}
-    for split, paths in (("train", train_paths), ("val", val_paths)):
+    for split, paths in by_split.items():
         env, st = build_env(paths)
         with open(out_dir / f"{split}.pkl", "wb") as f:
             dill.dump(env, f, protocol=dill.HIGHEST_PROTOCOL)
         stats[split] = st
         print(f"{split}: {st['scenes']} scenes, {st['nodes']} nodes -> {out_dir / (split + '.pkl')}")
+
+    (out_dir / "node_type_map.json").write_text(
+        json.dumps(node_type_map, indent=2), encoding="utf-8")
 
     # Derive the training config from upstream defaults; only the horizon,
     # history length and bookkeeping differ.
@@ -152,13 +167,12 @@ def main() -> int:
 
     meta = {
         "dt": float(args.dt),
-        "seed": int(args.seed),
-        "val_frac": float(args.val_frac),
+        "splits_file": str(args.splits_file),
         "attention_radius_m": float(args.attention_radius),
-        "node_type_treatment": "all agents as PEDESTRIAN (SingleIntegrator point-mass)",
+        "node_type_treatment": "all agents as PEDESTRIAN (SingleIntegrator point-mass); "
+                               "true classes in node_type_map.json",
         "source_scenes_dir": str(args.scenes_dir),
         "splits": stats,
-        "val_scenes": sorted(val_set),
     }
     (out_dir / "export_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"wrote config + export_meta -> {out_dir}")

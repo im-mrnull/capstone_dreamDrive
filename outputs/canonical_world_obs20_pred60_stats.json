@@ -1,0 +1,14 @@
+{
+  "format": "stgat_socialgan_v2",
+  "scenes_dir": "outputs/multiagent_world_v1/scenes",
+  "obs_len": 20,
+  "pred_len": 60,
+  "stride": 3,
+  "min_agents": 2,
+  "presence": "obs+1fut",
+  "num_seqs": 718,
+  "num_agents_total": 10576,
+  "num_fully_observed_agents": 4523,
+  "mean_future_coverage": 0.6753939737771054,
+  "out": "outputs/canonical_world_obs20_pred60.npz"
+}

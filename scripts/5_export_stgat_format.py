@@ -10,10 +10,19 @@ Many ST-GAT implementations expect the ETH/UCY-style arrays:
 This script converts our per-scene tensors from `outputs/multiagent_trajpp_v1/scenes/*.npz`
 into a single NPZ containing the above arrays.
 
-Important:
-- We only keep agents that are present for *all* timesteps in the (obs+pred) window.
-  This matches the assumptions of many ST-GAT repos.
-- Time here is in frame-index order (not real seconds). dt is one frame step.
+Presence rule (--presence):
+- "full"     : agents present for *all* obs+pred timesteps (legacy; survivor-biased —
+               drops exactly the occluded/erratic agents chaotic traffic is about).
+- "obs+1fut" : agents present for the full observation window and at least one future
+               step (canonical benchmark v2). Missing future steps are NaN-filled in
+               pred_traj and marked False in the exported `fut_mask (N, pred_len)`;
+               losses and metrics must be masked accordingly. `pred_traj_rel` holds
+               displacements over *valid* consecutive steps only (0 where invalid).
+
+Additional exported arrays: `fut_mask (N, pred_len) bool`, `agent_type (N,) object`
+(the IDD-3D class of each agent, carried from the per-scene NPZ).
+
+Time here is in frame-index order (not real seconds). dt is one frame step.
 """
 
 from __future__ import annotations
@@ -67,14 +76,19 @@ def export_dataset(
     pred_len: int,
     stride: int,
     min_agents: int,
+    presence: str = "full",
 ) -> Tuple[dict, List[SeqMeta]]:
+    if presence not in ("full", "obs+1fut"):
+        raise SystemExit(f"unknown presence rule: {presence}")
     seq_len = obs_len + pred_len
 
     obs_all: List[np.ndarray] = []
     pred_all: List[np.ndarray] = []
     obs_rel_all: List[np.ndarray] = []
     pred_rel_all: List[np.ndarray] = []
+    fut_mask_all: List[np.ndarray] = []
     agent_id_all: List[np.ndarray] = []
+    agent_type_all: List[np.ndarray] = []
 
     seq_start_end: List[Tuple[int, int]] = []
     seq_meta: List[SeqMeta] = []
@@ -90,6 +104,11 @@ def export_dataset(
         pos = np.asarray(data["pos"], dtype=np.float32)  # (T, A, 2)
         mask = np.asarray(data["mask"], dtype=bool)      # (T, A)
         agent_id = np.asarray(data["agent_id"], dtype=np.int32)  # (A,)
+        agent_type = (
+            np.asarray(data["agent_type"], dtype=object)
+            if "agent_type" in data
+            else np.asarray([""] * agent_id.shape[0], dtype=object)
+        )
 
         T, A, _ = pos.shape
         if T < seq_len:
@@ -97,7 +116,11 @@ def export_dataset(
 
         for t0 in range(0, T - seq_len + 1, stride):
             win_mask = mask[t0 : t0 + seq_len]  # (seq_len, A)
-            keep = win_mask.all(axis=0)         # (A,)
+            obs_ok = win_mask[:obs_len].all(axis=0)  # (A,)
+            if presence == "full":
+                keep = win_mask.all(axis=0)
+            else:  # obs+1fut
+                keep = obs_ok & win_mask[obs_len:].any(axis=0)
             idx = np.where(keep)[0]
             if idx.size < min_agents:
                 continue
@@ -108,18 +131,30 @@ def export_dataset(
 
             obs = traj[:, :, :obs_len]
             pred = traj[:, :, obs_len:]
+            fut_mask = np.transpose(win_mask[obs_len:, idx], (1, 0))  # (M, pred_len)
+
+            # Absent future steps: zero-fill positions; consumers must mask
+            # via fut_mask (NaNs would silently poison unmasked reductions).
+            pred = np.where(fut_mask[:, None, :], pred, 0.0).astype(np.float32)
 
             obs_rel = np.zeros_like(obs, dtype=np.float32)
             _traj_rel_inplace(obs_rel, obs)
 
-            # Pred rel needs to be relative to the last obs point at t=0
+            # Pred rel needs to be relative to the last obs point at t=0.
             pred_rel = _pred_rel(pred, obs)
+            # A displacement at future step t is valid iff both endpoints are
+            # observed (t=0 pairs with the always-valid last obs point).
+            rel_valid = fut_mask.copy()
+            rel_valid[:, 1:] &= fut_mask[:, :-1]
+            pred_rel = np.where(rel_valid[:, None, :], pred_rel, 0.0).astype(np.float32)
 
             obs_all.append(obs)
             pred_all.append(pred)
             obs_rel_all.append(obs_rel)
             pred_rel_all.append(pred_rel)
+            fut_mask_all.append(fut_mask)
             agent_id_all.append(agent_id[idx])
+            agent_type_all.append(agent_type[idx])
 
             start = cursor
             end = cursor + idx.size
@@ -137,7 +172,9 @@ def export_dataset(
     pred_cat = np.concatenate(pred_all, axis=0)
     obs_rel_cat = np.concatenate(obs_rel_all, axis=0)
     pred_rel_cat = np.concatenate(pred_rel_all, axis=0)
+    fut_mask_cat = np.concatenate(fut_mask_all, axis=0)
     agent_id_cat = np.concatenate(agent_id_all, axis=0)
+    agent_type_cat = np.concatenate(agent_type_all, axis=0)
 
     seq_start_end_arr = np.asarray(seq_start_end, dtype=np.int64)
 
@@ -146,8 +183,10 @@ def export_dataset(
         "pred_traj": pred_cat,
         "obs_traj_rel": obs_rel_cat,
         "pred_traj_rel": pred_rel_cat,
+        "fut_mask": fut_mask_cat,
         "seq_start_end": seq_start_end_arr,
         "agent_id": agent_id_cat,
+        "agent_type": agent_type_cat,
         "scene_id": np.asarray([m.scene_id for m in seq_meta], dtype=object),
         "t0": np.asarray([m.t0 for m in seq_meta], dtype=np.int32),
     }
@@ -163,6 +202,9 @@ def main() -> int:
     ap.add_argument("--pred-len", type=int, default=60)
     ap.add_argument("--stride", type=int, default=3)
     ap.add_argument("--min-agents", type=int, default=2)
+    ap.add_argument("--presence", choices=["full", "obs+1fut"], default="full",
+                    help="'full' = legacy all-80-frames rule; 'obs+1fut' = canonical v2 "
+                         "(full observation + at least one future step, fut_mask exported)")
     ap.add_argument("--write-stats", default="outputs/stgat_dataset_obs20_pred60_stats.json")
     args = ap.parse_args()
 
@@ -174,21 +216,26 @@ def main() -> int:
         pred_len=int(args.pred_len),
         stride=int(args.stride),
         min_agents=int(args.min_agents),
+        presence=str(args.presence),
     )
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(out_path, **dataset)
 
+    fut_mask = dataset["fut_mask"]
     stats = {
-        "format": "stgat_socialgan_v1",
+        "format": "stgat_socialgan_v2" if args.presence == "obs+1fut" else "stgat_socialgan_v1",
         "scenes_dir": str(scenes_dir).replace("\\", "/"),
         "obs_len": int(args.obs_len),
         "pred_len": int(args.pred_len),
         "stride": int(args.stride),
         "min_agents": int(args.min_agents),
+        "presence": str(args.presence),
         "num_seqs": int(len(seq_meta)),
         "num_agents_total": int(dataset["obs_traj"].shape[0]),
+        "num_fully_observed_agents": int(fut_mask.all(axis=1).sum()),
+        "mean_future_coverage": float(fut_mask.mean()),
         "out": str(out_path).replace("\\", "/"),
     }
 

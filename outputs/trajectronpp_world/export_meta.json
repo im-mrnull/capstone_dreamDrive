@@ -1,41 +1,21 @@
 {
   "dt": 0.1,
-  "seed": 0,
-  "val_frac": 0.2,
+  "splits_file": "splits/scene_splits.json",
   "attention_radius_m": 20.0,
-  "node_type_treatment": "all agents as PEDESTRIAN (SingleIntegrator point-mass)",
+  "node_type_treatment": "all agents as PEDESTRIAN (SingleIntegrator point-mass); true classes in node_type_map.json",
   "source_scenes_dir": "outputs/multiagent_world_v1/scenes",
   "splits": {
     "train": {
-      "scenes": 84,
-      "nodes": 3623
+      "scenes": 73,
+      "nodes": 3369
     },
     "val": {
-      "scenes": 21,
-      "nodes": 1244
+      "scenes": 10,
+      "nodes": 417
+    },
+    "test": {
+      "scenes": 22,
+      "nodes": 1081
     }
-  },
-  "val_scenes": [
-    "20220118103308_seq_15",
-    "20220118103308_seq_18",
-    "20220118103308_seq_19",
-    "20220118103308_seq_20",
-    "20220118103308_seq_21",
-    "20220118103308_seq_23",
-    "20220118103308_seq_28",
-    "20220118103308_seq_5",
-    "20220118103808_seq_10",
-    "20220118103808_seq_17",
-    "20220118103808_seq_19",
-    "20220118103808_seq_2",
-    "20220118103808_seq_21",
-    "20220118105838_seq_6",
-    "20220118105838_seq_9",
-    "20220118110338_seq_17",
-    "20220118111739_seq_17",
-    "20220118111739_seq_18",
-    "20220118112945_seq_26",
-    "20220118112945_seq_28",
-    "20220118115526_seq_3"
-  ]
+  }
 }

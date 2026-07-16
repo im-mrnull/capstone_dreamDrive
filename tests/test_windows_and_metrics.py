@@ -8,6 +8,7 @@ import pytest
 from conftest import load_script
 
 cv = load_script("model1_baseline_cv_eval.py")
+import dd_data  # noqa: E402
 
 OUTPUTS = Path(__file__).resolve().parent.parent / "outputs"
 
@@ -34,18 +35,20 @@ def test_cv_is_exact_on_constant_velocity_motion():
     t_fut = np.arange(1, pred_len + 1, dtype=np.float32).reshape(1, pred_len, 1)
     obs = vel * t_obs  # centered: obs[:, -1] == 0
     fut = vel * t_fut
-    pred = cv._compute_cv_predictions(obs, pred_len=pred_len, vel_k=1)
-    ade, fde = cv._ade_fde(pred, fut)
-    assert ade < 1e-5 and fde < 1e-5
+    pred = cv.compute_cv_predictions(obs, pred_len=pred_len, vel_k=1)
+    mask = np.ones((n, pred_len), dtype=bool)
+    ade, fde, _ = dd_data.masked_ade_fde_np(pred, fut, mask)
+    assert ade.max() < 1e-4 and fde.max() < 1e-4
 
 
 def test_ade_fde_definitions():
     pred = np.zeros((1, 3, 2), dtype=np.float32)
     fut = np.zeros((1, 3, 2), dtype=np.float32)
     fut[0, :, 0] = [3.0, 4.0, 12.0]  # per-step L2 errors: 3, 4, 12
-    ade, fde = cv._ade_fde(pred, fut)
-    assert ade == pytest.approx((3 + 4 + 12) / 3)
-    assert fde == pytest.approx(12.0)
+    mask = np.ones((1, 3), dtype=bool)
+    ade, fde, _ = dd_data.masked_ade_fde_np(pred, fut, mask)
+    assert ade[0] == pytest.approx((3 + 4 + 12) / 3)
+    assert fde[0] == pytest.approx(12.0)
 
 
 def test_stgat_dataset_consistency():

@@ -1,0 +1,30 @@
+{
+  "source": "outputs/canonical_world_obs20_pred60.npz",
+  "heading_norm": true,
+  "num_agents": 10576,
+  "mean_future_coverage": 0.6753939737771054,
+  "classes": {
+    "Animal": 32,
+    "Bicycle": 31,
+    "BicycleGroup": 32,
+    "BicycleRider": 30,
+    "Bus": 269,
+    "Car": 1758,
+    "Child": 10,
+    "ConcreteTruck": 27,
+    "Crane": 8,
+    "Misc": 29,
+    "Motorcycle": 246,
+    "MotorcyleRider": 1670,
+    "Pedestrian": 2058,
+    "PoliceCar": 29,
+    "Scooter": 324,
+    "ScooterRider": 1436,
+    "TourCar": 1469,
+    "Truck": 955,
+    "Unknown": 87,
+    "Unknown1": 28,
+    "Unknown3": 3,
+    "Van": 45
+  }
+}

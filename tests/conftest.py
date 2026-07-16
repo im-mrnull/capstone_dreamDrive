@@ -7,6 +7,11 @@ import pytest
 REPO = Path(__file__).resolve().parent.parent
 SCRIPTS = REPO / "scripts"
 
+# Model scripts do `import dd_data` / `import dd_split`, which resolves when
+# they run as `python scripts/<name>.py`; make it resolve under pytest too.
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
 
 def load_script(name: str):
     """Import a scripts/*.py module even when the filename starts with a digit."""

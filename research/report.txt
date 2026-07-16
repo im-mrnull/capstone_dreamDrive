@@ -149,11 +149,12 @@ trajectories mix agent motion with ego motion (median apparent pedestrian speed
 pipeline, restoring physically plausible kinematics (median pedestrian speed 0.91 m/s),
 and all models were re-benchmarked on the corrected world-frame data under a unified
 scene-level split. On this corrected benchmark, oracle best-of-K multi-future prediction
-achieves the lowest displacement errors, while among deployable single-output models
-the simple MLP baseline is currently strongest — indicating that the earlier apparent
-advantage of interaction-aware models was partly an artifact of the uncompensated
-coordinate frame. All reported numbers are backed by committed metric artifacts in the
-project repository.
+achieves the lowest displacement errors (Trajectron++ best-of-20 ADE 1.79 m), and
+Trajectron++'s most-likely output is the strongest deployable single-output model
+(ADE 3.99 m), ahead of the simple MLP baseline — while the homegrown interaction
+model's earlier apparent advantage proved to be partly an artifact of the
+uncompensated coordinate frame. All reported numbers are backed by committed metric
+artifacts in the project repository.
 Note on prior versions of this report: a previously stated finding that Trajectron++
 degrades by 66% ADE and 131% FDE on collision-intensive scenarios was a placeholder
 that was not supported by any experiment; it has been retracted. Evaluating prediction
@@ -849,8 +850,13 @@ MLP | 4.56 | 10.25 | 1 | yes
 ST-GAT-inspired (MHA) | 6.41 | 13.40 | 1 | yes
 K-mode decoder (Oracle best-of-10) | 3.66 | 6.12 | 10 | no (oracle upper bound)
 K-mode decoder (Learned top-1) | 7.70 | 15.66 | 10 | yes
-Trajectron++ (upstream, world frame) | see repository README for the
-artifact-backed values produced by scripts/7_train_eval_trajectronpp.py
+Trajectron++ (most-likely) | 3.99 | 8.72 | 1 | yes
+Trajectron++ (Oracle best-of-20) | 1.79 | 2.97 | 20 | no (oracle upper bound)
+
+Trajectron++ rows are from a real end-to-end run of the upstream codebase
+(100 epochs, dt = 0.1, all agents as point-mass nodes), evaluated on
+3,491 validation node-timesteps with full 1.9 s history and 6.0 s future;
+artifact: outputs/baselines_world/trajectronpp_metrics_world_obs20_pred60.json.
 
 Protocol caveats, stated explicitly: CV and MLP are evaluated on single-agent
 windows while the interaction models are evaluated on multi-agent sequences
@@ -858,13 +864,17 @@ windows while the interaction models are evaluated on multi-agent sequences
 Oracle best-of-K rows require ground truth at selection time; they are upper
 bounds and must not be compared against deployable single-output rows.
 Key observations from the corrected benchmark: (1) oracle best-of-K coverage
-remains clearly better than any single-output model, supporting the project's
-multi-future premise; (2) among deployable models the simple MLP is currently
-strongest, and the interaction-aware model no longer outperforms smoothed
-constant velocity - much of its previously observed advantage on uncompensated
-data appears to have come from implicitly learning ego motion rather than agent
-interaction; (3) learned top-1 mode selection degrades substantially in the world
-frame and requires rework before it can be considered a viable deployable output.
+remains clearly better than any single-output model (Trajectron++ best-of-20
+ADE 1.79; K-mode best-of-10 ADE 3.66), supporting the project's multi-future
+premise; (2) Trajectron++'s most-likely output is the strongest deployable
+model (ADE 3.99), ahead of the simple MLP (4.56), while the homegrown
+interaction-aware model no longer outperforms smoothed constant velocity -
+much of its previously observed advantage on uncompensated data appears to
+have come from implicitly learning ego motion rather than agent interaction;
+(3) the homegrown learned top-1 mode selection degrades substantially in the
+world frame (ADE 7.70) and requires rework, whereas Trajectron++'s
+most-likely-mode decoding demonstrates that a deployable multi-modal model is
+achievable on this data.
 
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent
@@ -1054,11 +1064,13 @@ positions are stored per-frame in the moving ego/LiDAR frame, so an
 ego-motion compensation stage was added and all models were re-benchmarked
 on world-frame data. This correction materially changed model rankings and
 is the most important technical finding of this phase.
-Multi-future coverage helps, single-output selection does not yet: oracle
+Multi-future prediction is validated on the corrected benchmark: oracle
 best-of-K prediction clearly outperforms every deployable single-output
-model on the corrected benchmark, supporting the multi-future premise; but
-the learned top-1 mode selection currently underperforms even a simple MLP,
-so deployable multi-future prediction remains an open problem for this data.
+model (Trajectron++ best-of-20 ADE 1.79), and Trajectron++'s most-likely
+output is also the strongest deployable model (ADE 3.99), showing that a
+multi-modal model can win even under single-output evaluation. The
+homegrown learned top-1 mode selection, by contrast, underperforms even a
+simple MLP and requires rework.
 Collision scenarios remain underrepresented in real datasets: real-world data
 collection naturally under-samples rare but safety-critical collision events
 (Wang et al., 2025). Measuring the resulting prediction degradation on IDD-3D

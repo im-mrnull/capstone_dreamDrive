@@ -1,0 +1,29 @@
+{
+  "model": "Trajectron++ (upstream, patched; all agents as point-mass PEDESTRIAN nodes)",
+  "data": "outputs/trajectronpp_world/{train,val}.pkl (world-frame, ego-compensated)",
+  "obs_len_required": 19,
+  "pred_len": 60,
+  "dt": 0.1,
+  "split": {
+    "kind": "scene",
+    "seed": 0,
+    "val_frac": 0.2
+  },
+  "epochs_trained": 100,
+  "model_dir": "C:\\Users\\Student4\\Desktop\\capstone_dreamDrive\\outputs\\trajectronpp_world\\logs\\models_15_Jul_2026_15_43_52_idd3d_world",
+  "best_of_k": {
+    "ade": 1.7924688661793224,
+    "fde": 2.965828684871716,
+    "num_node_timesteps": 3491,
+    "num_samples": 20
+  },
+  "most_likely": {
+    "ade": 3.9934680686386943,
+    "fde": 8.719194412728845,
+    "num_node_timesteps": 3491,
+    "num_samples": 1
+  },
+  "checkpoint_iter": 100,
+  "when": "2026-07-15T17:31:29",
+  "note": "Real end-to-end run. best_of_k uses min-over-samples (oracle); most_likely is the deployable single output (z_mode+gmm_mode)."
+}

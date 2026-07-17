@@ -189,7 +189,12 @@ def audit_rows() -> list[str]:
     best = min(deployable, key=lambda m: m["test_ade_mean"])
     pc = best["per_class_test_seed_last"]
     lines = [f"Best deployable model on test: **{best['label']}** "
-             f"(per-class stats from one representative seed).", ""] + header
+             f"(per-class stats from one representative seed)."]
+    if best["label"].startswith("Trajectron++"):
+        lines.append("Note: Trajectron++ is evaluated at every valid timestep, so `n` counts "
+                     "node@timestep prediction instances — denser than the one-window-per-agent "
+                     "counts of the other models, but over the same test scenes.")
+    lines += [""] + header
     classes = sorted(pc["classes"].items(), key=lambda kv: -kv[1]["n"])
     for cls, v in classes:
         if v["n"] < pc["min_class_n"]:

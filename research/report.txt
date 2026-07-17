@@ -876,6 +876,63 @@ world frame (ADE 7.70) and requires rework, whereas Trajectron++'s
 most-likely-mode decoding demonstrates that a deployable multi-modal model is
 achievable on this data.
 
+7.2.1 Benchmark v2: Canonical Dataset, Frozen Test Set, Multi-Seed Results
+The world-frame benchmark of Section 7.2 retained four protocol weaknesses: no
+held-out test set (model selection and reporting shared the validation split);
+two different evaluation populations (CV/MLP on single-agent windows, interaction
+models on multi-agent sequences); a survivor-biased agent filter that kept only
+agents present for all 80 frames, discarding 58 percent of predictable agents -
+disproportionately the erratic and briefly occluded ones this project targets;
+and unused agent-class labels. Benchmark v2 removes all four and supersedes the
+numbers in Table 7.1.
+Protocol: one canonical world-frame dataset (718 sequences, 10,576 agents;
+outputs/canonical_world_obs20_pred60.npz) in which an agent needs only a full
+2.0 s observation plus at least one future frame, with a per-timestep validity
+mask; ADE is computed over valid future steps only and FDE at each agent's last
+valid step. All five models train and evaluate on this same population under a
+frozen, hash-based scene-level split of 73/10/22 train/val/test scenes committed
+to the repository (splits/scene_splits.json). Random seeds {0, 1, 2} affect model
+initialization and shuffling only, never the split; model selection uses the
+validation split only, and test numbers are final. Cells are mean +/- standard
+deviation over seeds; every value traces to
+outputs/benchmark_v2/summary.json.
+
+Table 7.2: Benchmark v2 - All Models on IDD-3D, world frame, frozen test split
+
+Model | Test ADE (m) | Test FDE (m) | Val ADE (m) | K | Deployable single output?
+CV (vel_k=5) | 4.36 | 9.78 | 2.43 | 1 | yes
+MLP | 3.97 +/- 0.01 | 8.66 +/- 0.05 | 2.31 +/- 0.01 | 1 | yes
+ST-GAT-inspired (MHA) | 3.41 +/- 0.07 | 7.35 +/- 0.16 | 2.38 +/- 0.03 | 1 | yes
+K-mode decoder (Oracle best-of-10) | 1.88 +/- 0.05 | 3.18 +/- 0.11 | 1.32 +/- 0.03 | 10 | no (oracle upper bound)
+K-mode decoder (Learned top-1) | 4.31 +/- 0.05 | 9.48 +/- 0.24 | 3.38 +/- 0.36 | 10 | yes
+Trajectron++ (most-likely) | 2.58 +/- 0.04 | 5.58 +/- 0.07 | 2.14 +/- 0.07 | 1 | yes
+Trajectron++ (Oracle best-of-20) | 1.37 +/- 0.01 | 2.39 +/- 0.02 | 1.09 +/- 0.02 | 20 | no (oracle upper bound)
+
+Trajectron++ is evaluated at every valid timestep of the test scenes (denser
+than the one-window-per-agent evaluation of the other models) but over the same
+frozen test scenes; all agents are modeled as point-mass nodes and reported
+under their true IDD-3D class via a committed node-type map.
+Key observations from Benchmark v2: (1) Trajectron++'s most-likely output is
+the strongest deployable model (test ADE 2.58 +/- 0.04), now followed by the
+ST-GAT-inspired model (3.41 +/- 0.07) - on the canonical population, which
+restores the agents the old survivor filter discarded, the interaction-aware
+model regains a clear margin over the MLP (3.97) and smoothed constant velocity
+(4.36), reversing the v1 ordering; (2) mode selection rather than mode
+diversity remains the bottleneck: the K-mode decoder's oracle best-of-10
+(1.88) approaches Trajectron++'s oracle (1.37), yet its learned top-1 (4.31)
+is worse than constant velocity and shows the largest seed variance in the
+table (val ADE +/- 0.36); (3) every model's test error is 1.2-1.8x its
+validation error, confirming that the previous val-only reporting was
+systematically optimistic and that a frozen test set is necessary; (4) a
+per-class audit on the test split shows raw errors concentrated on fast
+two-wheeler riders and cars (ADE roughly 3.2-4.1 m for MotorcyleRider,
+ScooterRider, Car, TourCar) versus under 1 m for pedestrians and slow classes,
+but normalizing by ground-truth path length inverts the ranking: per meter
+actually traveled, pedestrians err more (0.245 ADE per path-meter) than
+motorcycle riders (0.164), so relative to how far they move the erratic slow
+agents remain the hard case (full per-class tables are in the repository
+README and outputs/benchmark_v2/).
+
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent
 increase in ADE and a 131 percent increase in FDE on collision-intensive scenes
@@ -1064,13 +1121,16 @@ positions are stored per-frame in the moving ego/LiDAR frame, so an
 ego-motion compensation stage was added and all models were re-benchmarked
 on world-frame data. This correction materially changed model rankings and
 is the most important technical finding of this phase.
-Multi-future prediction is validated on the corrected benchmark: oracle
-best-of-K prediction clearly outperforms every deployable single-output
-model (Trajectron++ best-of-20 ADE 1.79), and Trajectron++'s most-likely
-output is also the strongest deployable model (ADE 3.99), showing that a
-multi-modal model can win even under single-output evaluation. The
-homegrown learned top-1 mode selection, by contrast, underperforms even a
-simple MLP and requires rework.
+Multi-future prediction is validated on the corrected benchmark, now with a
+canonical dataset, frozen test set and three seeds per model (Benchmark v2,
+Section 7.2.1): oracle best-of-K prediction clearly outperforms every
+deployable single-output model (Trajectron++ best-of-20 test ADE
+1.37 +/- 0.01), and Trajectron++'s most-likely output is also the strongest
+deployable model (test ADE 2.58 +/- 0.04), showing that a multi-modal model
+can win even under single-output evaluation. On the canonical population the
+interaction-aware ST-GAT-inspired model beats the MLP and constant velocity,
+while the homegrown learned top-1 mode selection underperforms even constant
+velocity and requires rework.
 Collision scenarios remain underrepresented in real datasets: real-world data
 collection naturally under-samples rare but safety-critical collision events
 (Wang et al., 2025). Measuring the resulting prediction degradation on IDD-3D

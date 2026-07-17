@@ -100,7 +100,9 @@ def _node_metrics(pred: np.ndarray, fut: np.ndarray) -> tuple[float, float, floa
     last = int(np.max(np.arange(len(valid)) * valid))
     fde_s = err[:, last]
     both = valid[1:] & valid[:-1]
-    path = float((np.linalg.norm(fut[1:] - fut[:-1], axis=-1) * both).sum()) if len(valid) > 1 else 0.0
+    # fut is NaN-padded; NaN * 0 == NaN, so mask with where() before summing.
+    step_d = np.linalg.norm(fut_f[1:] - fut_f[:-1], axis=-1)
+    path = float(np.where(both, step_d, 0.0).sum()) if len(valid) > 1 else 0.0
     return float(ade_s.min()), float(fde_s.min()), path
 
 

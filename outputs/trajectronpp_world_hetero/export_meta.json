@@ -1,0 +1,55 @@
+{
+  "dt": 0.1,
+  "splits_file": "splits/scene_splits.json",
+  "hetero": true,
+  "augment_copies_train": 8,
+  "attention_radius_m": "nuScenes per-pair (10/20/30)",
+  "node_type_treatment": "VEHICLE (Unicycle, heading from motion direction) for wheeled classes; PEDESTRIAN (SingleIntegrator) otherwise; true classes in node_type_map.json",
+  "vehicle_classes": [
+    "Bicycle",
+    "BicycleRider",
+    "Bus",
+    "Car",
+    "ConcreteTruck",
+    "Crane",
+    "Motorcycle",
+    "MotorcyleRider",
+    "PoliceCar",
+    "Scooter",
+    "ScooterRider",
+    "TourCar",
+    "Truck",
+    "Van"
+  ],
+  "config_derived_from": "third_party\\trajectron-plus-plus\\experiments\\nuScenes\\models\\int_ee\\config.json",
+  "source_scenes_dir": "outputs/multiagent_world_v1/scenes",
+  "splits": {
+    "train": {
+      "scenes": 73,
+      "nodes": 3369,
+      "nodes_by_modeled_type": {
+        "VEHICLE": 2618,
+        "PEDESTRIAN": 751
+      },
+      "augment_copies": 8
+    },
+    "val": {
+      "scenes": 10,
+      "nodes": 417,
+      "nodes_by_modeled_type": {
+        "VEHICLE": 315,
+        "PEDESTRIAN": 102
+      },
+      "augment_copies": 0
+    },
+    "test": {
+      "scenes": 22,
+      "nodes": 1081,
+      "nodes_by_modeled_type": {
+        "VEHICLE": 838,
+        "PEDESTRIAN": 243
+      },
+      "augment_copies": 0
+    }
+  }
+}

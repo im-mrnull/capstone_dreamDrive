@@ -26,6 +26,13 @@ REPO = Path(__file__).resolve().parent.parent
 OUT = REPO / "outputs" / "benchmark_v2"
 SEEDS = [0, 1, 2]
 
+# Trajectron++ heterogeneous variant (VEHICLE=Unicycle for wheeled classes).
+# Runs only if the hetero export exists (scripts/6_... --hetero).
+# TPP_HETERO_AUGMENT is the winner of the 50-epoch val-only grid
+# {no-aug, rotation-aug x8}; see outputs/benchmark_v2/tpp_hetero_grid/.
+TPP_HETERO_DIR = "outputs/trajectronpp_world_hetero"
+TPP_HETERO_AUGMENT = True
+
 
 def run(cmd: list[str]) -> None:
     print("+", " ".join(cmd), flush=True)
@@ -78,6 +85,17 @@ def launch_all(smoke: bool) -> None:
                  "--log-tag", f"_idd3d_world_v2_s{seed}",
                  "--save-metrics-json", str(tpp_json)])
 
+        tpp_h_json = OUT / f"trajectronpp_hetero_seed{seed}.json"
+        if (REPO / TPP_HETERO_DIR / "train.pkl").exists() and not tpp_h_json.exists():
+            cmd = [py, "scripts/7_train_eval_trajectronpp.py",
+                   "--data-dir", TPP_HETERO_DIR,
+                   "--seed", s, "--epochs", tpp_epochs,
+                   "--log-tag", f"_idd3d_hetero_v2_s{seed}",
+                   "--save-metrics-json", str(tpp_h_json)]
+            if TPP_HETERO_AUGMENT:
+                cmd.append("--augment")
+            run(cmd)
+
 
 # --------------------------------------------------------------------------
 # Aggregation
@@ -92,6 +110,8 @@ VARIANTS = [
     ("K-mode decoder — learned top-1", "mfp_seed{seed}.json", ["top1"], 10, True),
     ("Trajectron++ — most-likely", "trajectronpp_seed{seed}.json", ["most_likely"], 1, True),
     ("Trajectron++ — oracle best-of-20", "trajectronpp_seed{seed}.json", ["best_of_k"], 20, False),
+    ("Trajectron++ hetero (unicycle) — most-likely", "trajectronpp_hetero_seed{seed}.json", ["most_likely"], 1, True),
+    ("Trajectron++ hetero (unicycle) — oracle best-of-20", "trajectronpp_hetero_seed{seed}.json", ["best_of_k"], 20, False),
 ]
 
 

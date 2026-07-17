@@ -907,6 +907,8 @@ K-mode decoder (Oracle best-of-10) | 1.88 +/- 0.05 | 3.18 +/- 0.11 | 1.32 +/- 0.
 K-mode decoder (Learned top-1) | 4.31 +/- 0.05 | 9.48 +/- 0.24 | 3.38 +/- 0.36 | 10 | yes
 Trajectron++ (most-likely) | 2.58 +/- 0.04 | 5.58 +/- 0.07 | 2.14 +/- 0.07 | 1 | yes
 Trajectron++ (Oracle best-of-20) | 1.37 +/- 0.01 | 2.39 +/- 0.02 | 1.09 +/- 0.02 | 20 | no (oracle upper bound)
+Trajectron++ hetero/unicycle (most-likely) | 2.84 +/- 0.09 | 6.45 +/- 0.27 | 2.21 +/- 0.08 | 1 | yes
+Trajectron++ hetero/unicycle (Oracle best-of-20) | 1.37 +/- 0.04 | 2.49 +/- 0.05 | 1.00 +/- 0.02 | 20 | no (oracle upper bound)
 
 Trajectron++ is evaluated at every valid timestep of the test scenes (denser
 than the one-window-per-agent evaluation of the other models) but over the same
@@ -931,7 +933,20 @@ but normalizing by ground-truth path length inverts the ranking: per meter
 actually traveled, pedestrians err more (0.245 ADE per path-meter) than
 motorcycle riders (0.164), so relative to how far they move the erratic slow
 agents remain the hard case (full per-class tables are in the repository
-README and outputs/benchmark_v2/).
+README and outputs/benchmark_v2/); (5) an honest negative result: modeling
+wheeled classes as VEHICLE nodes with Unicycle dynamics (nuScenes-style
+configuration; heading approximated from velocity direction because yaw is
+not available in this repository's parsed data) with rotation augmentation
+(selected over no augmentation on the validation split, most-likely ADE 2.12
+vs 2.26 at 50 epochs) degrades deployable most-likely accuracy on test
+(2.84 +/- 0.09 vs 2.58 +/- 0.04), with the degradation concentrated on
+moving vehicles (riders about +0.6 m, cars about +0.5 m; pedestrians
+unchanged) while oracle coverage is statistically unchanged (1.37 +/- 0.04
+vs 1.37 +/- 0.01; validation oracle slightly better, 1.00 vs 1.09). The
+interpretation is that the unicycle model integrates heading-estimate noise
+into its deterministic rollout - sampling absorbs this, most-likely decoding
+cannot - so dynamics-aware modeling requires true yaw from the raw dataset
+or a perception front-end before it can pay off on this data.
 
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent
@@ -1152,11 +1167,15 @@ head, which currently underperforms in the world frame; evaluate calibration
 of mode probabilities alongside ADE/FDE.
 3. Extend Hyperparameter Optimization: Conduct systematic hyperparameter
 search for Trajectron++ (learning rate, latent variable size, prediction horizon)
-on the world-frame data to improve its baseline performance.
-4. Improve Heterogeneous Agent Modeling: Incorporate agent classes
-(pedestrians, two-wheelers, rickshaws) as model inputs with class-conditioned
-dynamics, leveraging Trajectron++'s built-in heterogeneous agent support;
-the current pipeline trains on all classes but no model uses class information.
+on the world-frame data to improve its baseline performance. (A first val-only
+grid - rotation augmentation on/off for the heterogeneous variant - was run in
+Benchmark v2; see Section 7.2.1.)
+4. Improve Heterogeneous Agent Modeling with True Yaw: class-conditioned
+dynamics via Trajectron++'s VEHICLE/Unicycle support was executed in Benchmark
+v2 and produced an honest negative result under velocity-approximated heading
+(Section 7.2.1, observation 5). The follow-up is to obtain true yaw from the
+raw IDD-3D annotations (psr.rotation) or a perception front-end and re-run the
+ablation; only then can class-conditioned dynamics be judged fairly.
 5. Refine Ego-Motion Compensation: Replace the annotation-based RANSAC
 approximation with official ego poses or LiDAR odometry when the raw
 dataset is available, and re-validate with the committed speed sanity tests.

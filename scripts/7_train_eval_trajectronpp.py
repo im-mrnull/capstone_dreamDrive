@@ -36,8 +36,9 @@ import numpy as np
 
 REPO = Path(__file__).resolve().parent.parent
 TRAJECTRON = REPO / "third_party" / "trajectron-plus-plus" / "trajectron"
+# Set from --data-dir in main(); defaults preserve the benchmark v2 baseline.
 DATA_DIR = REPO / "outputs" / "trajectronpp_world"
-LOG_DIR = REPO / "outputs" / "trajectronpp_world" / "logs"
+LOG_DIR = DATA_DIR / "logs"
 
 OBS_LEN = 19   # past timesteps required (2.0 s minus the current frame)
 PRED_LEN = 60  # 6.0 s at 10 fps
@@ -47,7 +48,8 @@ sys.path.insert(0, str(REPO / "scripts"))
 from dd_data import per_class_summary  # noqa: E402
 
 
-def train(epochs: int, device: str, log_tag: str, seed: int) -> Path:
+def train(epochs: int, device: str, log_tag: str, seed: int,
+          augment: bool = False) -> Path:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     cmd = [
         sys.executable, "train.py",
@@ -66,6 +68,8 @@ def train(epochs: int, device: str, log_tag: str, seed: int) -> Path:
         "--preprocess_workers", "0",
         "--offline_scene_graph", "yes",
     ]
+    if augment:
+        cmd.append("--augment")
     print("launching:", " ".join(cmd))
     subprocess.run(cmd, cwd=TRAJECTRON, check=True)
     runs = sorted(LOG_DIR.glob(f"*{log_tag}"), key=os.path.getmtime)
@@ -172,6 +176,7 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
 
 
 def main() -> int:
+    global DATA_DIR, LOG_DIR
     ap = argparse.ArgumentParser()
     ap.add_argument("--epochs", type=int, default=100)
     ap.add_argument("--seed", type=int, default=0)
@@ -180,9 +185,20 @@ def main() -> int:
     ap.add_argument("--k-best-of", type=int, default=20)
     ap.add_argument("--eval-only", action="store_true")
     ap.add_argument("--model-dir", type=str, default=None)
+    ap.add_argument("--data-dir", type=str, default=str(DATA_DIR),
+                    help="export dir from script 6 (use the _hetero dir for "
+                         "VEHICLE/unicycle runs)")
+    ap.add_argument("--augment", action="store_true",
+                    help="pass --augment to upstream train.py (needs an export "
+                         "made with --augment-copies > 0)")
     ap.add_argument("--save-metrics-json",
                     default=str(REPO / "outputs" / "benchmark_v2" / "trajectronpp_metrics.json"))
     args = ap.parse_args()
+
+    DATA_DIR = Path(args.data_dir)
+    if not DATA_DIR.is_absolute():
+        DATA_DIR = REPO / DATA_DIR  # upstream train.py runs with cwd=TRAJECTRON
+    LOG_DIR = DATA_DIR / "logs"
 
     if not (DATA_DIR / "train.pkl").exists():
         raise SystemExit("run scripts/6_export_trajectronpp_world.py first")
@@ -198,15 +214,20 @@ def main() -> int:
                 raise SystemExit("no run dir found; pass --model-dir")
             model_dir = runs[-1]
     else:
-        model_dir = train(args.epochs, args.device, args.log_tag, int(args.seed))
+        model_dir = train(args.epochs, args.device, args.log_tag, int(args.seed),
+                          augment=bool(args.augment))
 
     val_results = evaluate(model_dir, args.device, args.k_best_of, "val", type_map)
     test_results = evaluate(model_dir, args.device, args.k_best_of, "test", type_map)
 
     export_meta = json.loads((DATA_DIR / "export_meta.json").read_text(encoding="utf-8"))
+    hetero = bool(export_meta.get("hetero", False))
     payload = {
-        "model": "Trajectron++ (upstream, patched; all agents as point-mass PEDESTRIAN nodes)",
-        "data": "outputs/trajectronpp_world/{train,val,test}.pkl (world-frame, ego-compensated)",
+        "model": ("Trajectron++ (upstream, patched; VEHICLE=Unicycle for wheeled classes, "
+                  "PEDESTRIAN=point-mass otherwise)" if hetero else
+                  "Trajectron++ (upstream, patched; all agents as point-mass PEDESTRIAN nodes)"),
+        "data": f"{DATA_DIR.name}/{{train,val,test}}.pkl (world-frame, ego-compensated)",
+        "augment": bool(args.augment),
         "obs_len_required": OBS_LEN,
         "pred_len": PRED_LEN,
         "min_future_steps": MIN_FUT,

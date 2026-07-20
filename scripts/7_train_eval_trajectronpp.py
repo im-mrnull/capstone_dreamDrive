@@ -90,10 +90,16 @@ def latest_checkpoint_iter(model_dir: Path) -> int:
     return max(its)
 
 
-def _node_metrics(pred: np.ndarray, fut: np.ndarray) -> tuple[float, float, float] | None:
-    """Masked min-over-samples ADE/FDE + GT path length for one node@timestep.
+# Sample counts for the oracle best-of-K decomposition curve (largest must be
+# <= --k-best-of, the number of samples actually drawn).
+K_CURVE = (1, 2, 5, 10, 20)
 
-    pred: (S, ph, 2) samples; fut: (ph, 2) with NaN beyond availability."""
+
+def _node_sample_errors(pred: np.ndarray, fut: np.ndarray):
+    """Per-sample masked ADE/FDE + GT path length for one node@timestep.
+
+    pred: (S, ph, 2) samples; fut: (ph, 2) with NaN beyond availability.
+    Returns (ade_s (S,), fde_s (S,), path) or None if no valid future step."""
     valid = np.isfinite(fut).all(axis=1)          # (ph,)
     if not valid.any():
         return None
@@ -102,21 +108,58 @@ def _node_metrics(pred: np.ndarray, fut: np.ndarray) -> tuple[float, float, floa
     n_valid = float(valid.sum())
     ade_s = (err * valid[None]).sum(axis=1) / n_valid   # (S,)
     last = int(np.max(np.arange(len(valid)) * valid))
-    fde_s = err[:, last]
+    fde_s = err[:, last]                                 # (S,)
     both = valid[1:] & valid[:-1]
     # fut is NaN-padded; NaN * 0 == NaN, so mask with where() before summing.
     step_d = np.linalg.norm(fut_f[1:] - fut_f[:-1], axis=-1)
     path = float(np.where(both, step_d, 0.0).sum()) if len(valid) > 1 else 0.0
+    return ade_s, fde_s, path
+
+
+def _node_metrics(pred: np.ndarray, fut: np.ndarray) -> tuple[float, float, float] | None:
+    """Masked min-over-samples ADE/FDE + GT path length for one node@timestep."""
+    r = _node_sample_errors(pred, fut)
+    if r is None:
+        return None
+    ade_s, fde_s, path = r
     return float(ade_s.min()), float(fde_s.min()), path
 
 
+def best_of_curve(ade_s: np.ndarray, k_list=K_CURVE) -> list[float]:
+    """Prefix best-of-k ADE from per-sample ADEs (samples are i.i.d. draws).
+
+    best-of-k uses the first k samples; monotone non-increasing in k."""
+    return [float(ade_s[:min(k, len(ade_s))].min()) for k in k_list]
+
+
+def _curve_per_class(curve: np.ndarray, mean_s: np.ndarray, types: np.ndarray,
+                     k_list=K_CURVE, min_class_n: int = 50) -> dict:
+    """Per-class best-of-1, best-of-max, and mean-sample ADE (curve endpoints)."""
+    out = {}
+    for c in np.unique(types):
+        if str(c) == "":
+            continue
+        mask = types == c
+        out[str(c)] = {
+            "n": int(mask.sum()),
+            "best_of_1": float(curve[mask, 0].mean()),
+            "best_of_max": float(curve[mask, -1].mean()),
+            "mean_sample": float(mean_s[mask].mean()),
+        }
+    return {"classes": out, "min_class_n": min_class_n, "k_max": int(k_list[-1])}
+
+
 def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
-             type_map: dict) -> dict:
+             type_map: dict, seed: int = 0) -> dict:
     sys.path.insert(0, str(TRAJECTRON))
     import dill
     import torch
     from model.model_registrar import ModelRegistrar
     from model.trajectron import Trajectron
+
+    # Sampling below is stochastic; seed so the best-of-K curve is reproducible.
+    torch.manual_seed(int(seed))
+    np.random.seed(int(seed))
 
     it = latest_checkpoint_iter(model_dir)
     hyperparams = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
@@ -134,44 +177,70 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
     stg.set_environment(env)
     stg.set_annealing_params()
 
+    def run_mode(kwargs: dict, n_samples: int):
+        """Predict over all scenes; return per-node (ade_s, fde_s, path, class)."""
+        ade_s_all, fde_s_all, paths, classes = [], [], [], []
+        for scene in env.scenes:
+            timesteps = np.arange(scene.timesteps)
+            predictions = stg.predict(
+                scene, timesteps, PRED_LEN, num_samples=n_samples,
+                min_history_timesteps=OBS_LEN, min_future_timesteps=MIN_FUT, **kwargs)
+            scene_types = type_map.get(scene.name, {})
+            for ts, node_preds in predictions.items():
+                for node, pred in node_preds.items():
+                    fut = node.get(np.array([ts + 1, ts + PRED_LEN]),
+                                   {"position": ["x", "y"]}, padding=np.nan)
+                    arr = np.asarray(pred).reshape(-1, PRED_LEN, 2)
+                    r = _node_sample_errors(arr, np.asarray(fut, dtype=np.float64))
+                    if r is None:
+                        continue
+                    ade_s_all.append(r[0]); fde_s_all.append(r[1]); paths.append(r[2])
+                    classes.append(scene_types.get(str(node.id), ""))
+        return ade_s_all, fde_s_all, np.asarray(paths), np.asarray(classes, dtype=object)
+
     results: dict = {"checkpoint_iter": it}
     with torch.no_grad():
-        for mode, kwargs, n_samples in (
-            ("best_of_k", dict(z_mode=False, gmm_mode=False, full_dist=False), k_best_of),
-            ("most_likely", dict(z_mode=True, gmm_mode=True, full_dist=False), 1),
-        ):
-            ades, fdes, paths, classes = [], [], [], []
-            for scene in env.scenes:
-                timesteps = np.arange(scene.timesteps)
-                predictions = stg.predict(
-                    scene, timesteps, PRED_LEN,
-                    num_samples=n_samples,
-                    min_history_timesteps=OBS_LEN,
-                    min_future_timesteps=MIN_FUT,
-                    **kwargs,
-                )
-                scene_types = type_map.get(scene.name, {})
-                for ts, node_preds in predictions.items():
-                    for node, pred in node_preds.items():
-                        fut = node.get(np.array([ts + 1, ts + PRED_LEN]),
-                                       {"position": ["x", "y"]}, padding=np.nan)
-                        arr = np.asarray(pred).reshape(-1, PRED_LEN, 2)
-                        m = _node_metrics(arr, np.asarray(fut, dtype=np.float64))
-                        if m is None:
-                            continue
-                        ades.append(m[0]); fdes.append(m[1]); paths.append(m[2])
-                        classes.append(scene_types.get(str(node.id), ""))
-            ade = np.asarray(ades); fde = np.asarray(fdes)
-            path = np.asarray(paths); types = np.asarray(classes, dtype=object)
-            results[mode] = {
-                "ade": float(ade.mean()) if len(ade) else None,
-                "fde": float(fde.mean()) if len(fde) else None,
+        # Sampling readout: draw k_best_of samples ONCE; oracle best-of-K is the
+        # min, and the best-of-{1..K} curve + mean-sample come from the same draw.
+        ade_s_all, fde_s_all, path, types = run_mode(
+            dict(z_mode=False, gmm_mode=False, full_dist=False), k_best_of)
+        ade = np.asarray([a.min() for a in ade_s_all])
+        fde = np.asarray([f.min() for f in fde_s_all])
+        results["best_of_k"] = {
+            "ade": float(ade.mean()) if len(ade) else None,
+            "fde": float(fde.mean()) if len(fde) else None,
+            "n_node_timesteps": int(len(ade)),
+            "num_samples": k_best_of,
+            "per_class": per_class_summary(ade, fde, path, types) if len(ade) else None,
+        }
+        if len(ade_s_all):
+            curve = np.asarray([best_of_curve(a) for a in ade_s_all])   # (N, |K_CURVE|)
+            mean_s = np.asarray([float(a.mean()) for a in ade_s_all])   # (N,)
+            results["sampling_curve"] = {
+                "k_list": list(K_CURVE),
+                "ade": [float(curve[:, i].mean()) for i in range(len(K_CURVE))],
+                "mean_sample_ade": float(mean_s.mean()),
                 "n_node_timesteps": int(len(ade)),
-                "num_samples": n_samples,
-                "per_class": per_class_summary(ade, fde, path, types) if len(ade) else None,
+                "per_class": _curve_per_class(curve, mean_s, types),
             }
-            print(f"{split}/{mode}: ADE={results[mode]['ade']} FDE={results[mode]['fde']} "
-                  f"(n={len(ade)})")
+            print(f"{split}/curve: " + " ".join(
+                f"K{k}={v:.3f}" for k, v in zip(K_CURVE, results['sampling_curve']['ade']))
+                + f" mean_sample={results['sampling_curve']['mean_sample_ade']:.3f}")
+
+        # Most-likely readout: single argmax latent + GMM mode (deployable).
+        ade_s_all, fde_s_all, path, types = run_mode(
+            dict(z_mode=True, gmm_mode=True, full_dist=False), 1)
+        ade = np.asarray([a.min() for a in ade_s_all])
+        fde = np.asarray([f.min() for f in fde_s_all])
+        results["most_likely"] = {
+            "ade": float(ade.mean()) if len(ade) else None,
+            "fde": float(fde.mean()) if len(fde) else None,
+            "n_node_timesteps": int(len(ade)),
+            "num_samples": 1,
+            "per_class": per_class_summary(ade, fde, path, types) if len(ade) else None,
+        }
+        print(f"{split}/best_of_k: ADE={results['best_of_k']['ade']:.4f} | "
+              f"most_likely: ADE={results['most_likely']['ade']:.4f}")
     return results
 
 
@@ -217,8 +286,10 @@ def main() -> int:
         model_dir = train(args.epochs, args.device, args.log_tag, int(args.seed),
                           augment=bool(args.augment))
 
-    val_results = evaluate(model_dir, args.device, args.k_best_of, "val", type_map)
-    test_results = evaluate(model_dir, args.device, args.k_best_of, "test", type_map)
+    val_results = evaluate(model_dir, args.device, args.k_best_of, "val", type_map,
+                           seed=int(args.seed))
+    test_results = evaluate(model_dir, args.device, args.k_best_of, "test", type_map,
+                            seed=int(args.seed))
 
     export_meta = json.loads((DATA_DIR / "export_meta.json").read_text(encoding="utf-8"))
     hetero = bool(export_meta.get("hetero", False))

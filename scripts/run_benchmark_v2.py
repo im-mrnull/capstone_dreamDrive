@@ -174,9 +174,48 @@ def aggregate() -> dict:
     summary = {"models": models, "seeds": SEEDS,
                "splits_file": "splits/scene_splits.json",
                "data": "outputs/canonical_world_obs20_pred60.npz"}
+    gap = _trajectronpp_gap_decomposition()
+    if gap is not None:
+        summary["trajectronpp_gap_decomposition"] = gap
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(f"wrote {OUT / 'summary.json'}")
     return summary
+
+
+def _trajectronpp_gap_decomposition() -> dict | None:
+    """3-seed test-split decomposition of the T++ oracle-vs-deployable gap.
+
+    Reads the sampling_curve block emitted by scripts/7_train_eval_trajectronpp.py
+    (best-of-{1,2,5,10,20} + mean-sample) and splits the most-likely -> oracle gap
+    into a calibration slice (random draw -> most-likely) and a coverage slice
+    (most-likely -> best-of-20). Returns None if the curve is absent."""
+    curves, means, mls, oracles, k_list = [], [], [], [], None
+    for seed in SEEDS:
+        f = OUT / f"trajectronpp_seed{seed}.json"
+        if not f.exists():
+            return None
+        t = json.loads(f.read_text(encoding="utf-8")).get("test", {})
+        sc = t.get("sampling_curve")
+        if not sc:
+            return None
+        k_list = sc["k_list"]
+        curves.append(sc["ade"]); means.append(sc["mean_sample_ade"])
+        mls.append(t["most_likely"]["ade"]); oracles.append(t["best_of_k"]["ade"])
+    curve = np.asarray(curves)
+    ml = float(np.mean(mls)); ms = float(np.mean(means)); orc = float(np.mean(oracles))
+    return {
+        "k_list": k_list,
+        "best_of_k_ade_mean": [float(curve[:, i].mean()) for i in range(curve.shape[1])],
+        "best_of_k_ade_std": [float(curve[:, i].std(ddof=0)) for i in range(curve.shape[1])],
+        "mean_sample_ade": ms,
+        "most_likely_ade": ml,
+        "oracle_best_of_k_ade": orc,
+        "calibration_value_m": ms - ml,   # random draw -> most-likely (model calibration)
+        "coverage_value_m": ml - orc,     # most-likely -> oracle (multi-future coverage)
+        "note": "test split, 3-seed mean; calibration = mean_sample - most_likely; "
+                "coverage = most_likely - oracle. A best-of-K curve still falling at "
+                "K_max indicates genuine multimodality rather than sampling noise.",
+    }
 
 
 def main() -> int:

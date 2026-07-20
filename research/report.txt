@@ -908,7 +908,7 @@ K-mode decoder (Learned top-1) | 4.31 +/- 0.05 | 9.48 +/- 0.24 | 3.38 +/- 0.36 |
 K-mode decoder, top-1-selected checkpoint (Oracle best-of-10) | 2.01 +/- 0.07 | 3.56 +/- 0.19 | 1.69 +/- 0.09 | 10 | no (oracle upper bound)
 K-mode decoder, top-1-selected checkpoint (Learned top-1) | 4.15 +/- 0.10 | 9.21 +/- 0.26 | 2.61 +/- 0.13 | 10 | yes
 Trajectron++ (most-likely) | 2.58 +/- 0.04 | 5.58 +/- 0.07 | 2.14 +/- 0.07 | 1 | yes
-Trajectron++ (Oracle best-of-20) | 1.37 +/- 0.01 | 2.39 +/- 0.02 | 1.09 +/- 0.02 | 20 | no (oracle upper bound)
+Trajectron++ (Oracle best-of-20) | 1.37 +/- 0.01 | 2.39 +/- 0.02 | 1.10 +/- 0.02 | 20 | no (oracle upper bound)
 Trajectron++ hetero/unicycle (most-likely) | 2.84 +/- 0.09 | 6.45 +/- 0.27 | 2.21 +/- 0.08 | 1 | yes
 Trajectron++ hetero/unicycle (Oracle best-of-20) | 1.37 +/- 0.04 | 2.49 +/- 0.05 | 1.00 +/- 0.02 | 20 | no (oracle upper bound)
 
@@ -944,7 +944,7 @@ vs 2.26 at 50 epochs) degrades deployable most-likely accuracy on test
 (2.84 +/- 0.09 vs 2.58 +/- 0.04), with the degradation concentrated on
 moving vehicles (riders about +0.6 m, cars about +0.5 m; pedestrians
 unchanged) while oracle coverage is statistically unchanged (1.37 +/- 0.04
-vs 1.37 +/- 0.01; validation oracle slightly better, 1.00 vs 1.09). The
+vs 1.37 +/- 0.01; validation oracle slightly better, 1.00 vs 1.10). The
 interpretation is that the unicycle model integrates heading-estimate noise
 into its deterministic rollout - sampling absorbs this, most-likely decoding
 cannot - so dynamics-aware modeling requires true yaw from the raw dataset
@@ -981,6 +981,33 @@ density, or fixed anchor / goal-conditioned modes) rather than the scorer's
 input. Even with the selection-criterion fix, the K-mode decoder's deployable
 output remains well behind the ST-GAT-inspired model (3.41); mode selection
 is improved but not solved.
+
+7.2.2 Decomposing the Oracle-to-Deployable Gap in Trajectron++
+Trajectron++'s 1.21 m test gap between its deployable most-likely output
+(2.58) and its oracle best-of-20 (1.37) invites the question of whether the
+deployable model is simply selecting its mode badly. It is not. Drawing the
+20 samples once and reading, from the same draws, the best-of-K ADE for
+K in {1, 2, 5, 10, 20} together with the mean-over-samples ADE decomposes the
+gap into two mechanistically distinct slices (test split, 3-seed mean;
+artifact outputs/benchmark_v2/summary.json, key trajectronpp_gap_decomposition).
+A random single sample scores 3.04; the deployable most-likely scores 2.58;
+the oracle best-of-20 scores 1.37, with the curve running
+3.04 -> 2.36 -> 1.83 -> 1.57 -> 1.37. The first step, random-draw to
+most-likely, is a calibration slice of 0.47 m: the model's most-likely mode
+is a genuinely better-than-random single guess, which is exactly the
+competence the homegrown K-mode decoder lacks (its learned top-1 is no better
+than its mean sample). The second step, most-likely to oracle, is a coverage
+slice of 1.21 m: the irreducible cost of committing to one future when the
+future is genuinely multimodal. That the best-of-K curve is still falling by
+about 13 percent over its final doubling (1.57 at K=10 to 1.37 at K=20),
+rather than saturating, is the signature of real behavioural branching rather
+than mere sampling noise around a single mode; cross-referenced with the
+per-class audit (Section 7.2.1, observation 4), the coverage slice is largest
+for fast, far-travelling and high-entropy classes. The practical implication
+is central to the project thesis: this gap is not closeable by better
+single-output selection - it is closeable only by carrying multiple modes
+forward into the planner, which is the case for multi-future prediction in
+chaotic traffic.
 
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent

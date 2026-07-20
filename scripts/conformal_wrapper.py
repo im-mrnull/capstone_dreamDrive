@@ -189,31 +189,41 @@ def main() -> int:
     is_val, is_test = split_of == "val", split_of == "test"
 
     weights = {k: np.load(MLP_WEIGHTS)[k] for k in np.load(MLP_WEIGHTS).files}
-    predictors = {
-        "CV (vel_k=5)": lambda o: cv_predict(o, 5),
-        "MLP": lambda o: mlp_predict(o, weights),
-    }
 
-    rng = np.random.default_rng(int(args.fold_seed))
-    test_idx = np.where(is_test)[0]
-    perm = rng.permutation(len(test_idx))
-    half = len(test_idx) // 2
-    fold_cal = test_idx[perm[:half]]; fold_ev = test_idx[perm[half:]]
+    def run_one(s, v, types, tval, ttest, rng) -> dict:
+        """Both regimes for one model's per-(agent,step) scores + masks."""
+        test_i = np.where(ttest)[0]
+        perm = rng.permutation(len(test_i)); half = len(test_i) // 2
+        fc, fe = test_i[perm[:half]], test_i[perm[half:]]
+        A = evaluate_split(s[tval], v[tval], types[tval],
+                           s[ttest], v[ttest], types[ttest], args.alpha, args.min_cal)
+        B = evaluate_split(s[fc], v[fc], types[fc], s[fe], v[fe], types[fe],
+                           args.alpha, args.min_cal)
+        return {"regime_A_val_to_test": A, "regime_B_test_fold": B}
 
     results = {}
-    for name, predict in predictors.items():
-        pred = predict(obs)
-        s, v = scores_and_valid(pred, fut, fut_mask)
-        # Regime A: calibrate on val, evaluate on test.
-        A = evaluate_split(s[is_val], v[is_val], agent_type[is_val],
-                           s[is_test], v[is_test], agent_type[is_test],
-                           args.alpha, args.min_cal)
-        # Regime B: split-conformal within test (exchangeable -> valid coverage).
-        B = evaluate_split(s[fold_cal], v[fold_cal], agent_type[fold_cal],
-                           s[fold_ev], v[fold_ev], agent_type[fold_ev],
-                           args.alpha, args.min_cal)
-        results[name] = {"regime_A_val_to_test": A, "regime_B_test_fold": B}
-        cA, cB = A["marginal"]["coverage"], B["marginal"]["coverage"]
+
+    # CV and MLP: reproduced in numpy from committed artifacts (agent windows).
+    for name, predict in (("CV (vel_k=5)", lambda o: cv_predict(o, 5)),
+                          ("MLP", lambda o: mlp_predict(o, weights))):
+        s, v = scores_and_valid(predict(obs), fut, fut_mask)
+        results[name] = run_one(s, v, agent_type, is_val, is_test,
+                                np.random.default_rng(int(args.fold_seed)))
+
+    # Neural models: consume dumped prediction NPZs if present
+    # (scripts/dump_predictions.py, scripts/7_..._--dump-preds).
+    for npz in sorted(Path(args.save_metrics_json).parent.glob("preds_*.npz")):
+        d = np.load(npz, allow_pickle=True)
+        name = str(d["model"])
+        s, v = scores_and_valid(d["pred"], d["gt"], d["fut_mask"])
+        types = d["agent_type"].astype(object)
+        sp = d["split"].astype(object)
+        results[name] = run_one(s, v, types, sp == "val", sp == "test",
+                                np.random.default_rng(int(args.fold_seed)))
+
+    for name, r in results.items():
+        cA = r["regime_A_val_to_test"]["marginal"]["coverage"]
+        cB = r["regime_B_test_fold"]["marginal"]["coverage"]
         print(f"{name}: marginal coverage  A(val->test)={cA:.3f}  B(test-fold)={cB:.3f}  "
               f"(target {1 - args.alpha:.2f})")
 

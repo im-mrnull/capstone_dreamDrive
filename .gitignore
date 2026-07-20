@@ -11,6 +11,9 @@ outputs/trajectronpp_world_hetero/*.pkl
 # Benchmark v2 model checkpoints (large; the per-seed metrics JSONs are the artifacts)
 outputs/benchmark_v2/*.pt
 outputs/benchmark_v2/mlp_best_seed*.npz
+# Conformal prediction dumps (intermediate; regenerated from checkpoints by
+# dump_predictions.py / 7_..._--dump-preds; conformal_metrics.json is the artifact)
+outputs/benchmark_v2/preds_*.npz
 
 # Python
 __pycache__/

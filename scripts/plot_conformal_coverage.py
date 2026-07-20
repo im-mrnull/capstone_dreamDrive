@@ -1,10 +1,10 @@
 """Plot per-class conformal coverage: marginal vs class-conditional (regime B).
 
-Reads outputs/benchmark_v2/conformal_metrics.json and renders a dumbbell plot of
-per-IDD-3D-class empirical coverage under one global radius (marginal) versus
-per-class radii (class-conditional), against the target. Shows that one radius
-is per-class unfair and class-conditional pulls the under-covered classes back
-toward nominal. Regenerable from the artifact.
+Reads outputs/benchmark_v2/conformal_metrics.json and renders one dumbbell plot
+PER MODEL of per-IDD-3D-class empirical coverage under one global radius
+(marginal) versus per-class radii (class-conditional), against the target. Shows
+that one radius is per-class unfair and class-conditional pulls the under-covered
+classes back toward nominal. Regenerable from the artifact.
 
 Usage:
     python scripts/plot_conformal_coverage.py
@@ -13,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import matplotlib
@@ -21,8 +22,7 @@ import matplotlib.pyplot as plt
 
 REPO = Path(__file__).resolve().parent.parent
 METRICS = REPO / "outputs" / "benchmark_v2" / "conformal_metrics.json"
-OUT_PNG = REPO / "outputs" / "benchmark_v2" / "conformal_coverage.png"
-MODEL = "CV (vel_k=5)"
+OUT_DIR = REPO / "outputs" / "benchmark_v2"
 MIN_N = 250
 
 SURFACE = "#fcfcfb"
@@ -34,15 +34,18 @@ BLUE = "#2a78d6"      # marginal (one global radius)
 ORANGE = "#eb6834"    # class-conditional (per-class radii)
 
 
-def main() -> int:
-    m = json.loads(METRICS.read_text(encoding="utf-8"))
-    target = m["target_coverage"]
-    B = m["models"][MODEL]["regime_B_test_fold"]
-    marg = B["marginal"]["per_class_coverage"]
-    cc = B["class_conditional"]["per_class_coverage"]
-    n = B["marginal"]["per_class_n"]
+def _slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+
+
+def plot_model(name: str, block: dict, target: float, out_png: Path) -> bool:
+    marg = block["marginal"]["per_class_coverage"]
+    cc = block["class_conditional"]["per_class_coverage"]
+    n = block["marginal"]["per_class_n"]
 
     classes = [c for c in marg if n.get(c, 0) >= MIN_N]
+    if not classes:
+        return False
     classes.sort(key=lambda c: marg[c])           # worst-covered at the bottom
     y = range(len(classes))
 
@@ -88,15 +91,29 @@ def main() -> int:
 
     ax.set_title("Class-conditional conformal fixes the coverage one global radius leaves unfair",
                  fontsize=11.5, color=INK, fontweight="bold", pad=16, loc="left")
-    ax.annotate("CV on IDD-3D · test-fold split-conformal (valid) · 90% target · per-class "
-                "radii pull each class toward nominal",
+    ax.annotate(f"{name} on IDD-3D · test-fold split-conformal (valid) · {target:.0%} target · "
+                "per-class radii pull each class toward nominal",
                 xy=(0, 1.02), xycoords="axes fraction", fontsize=9, color=MUTED,
                 ha="left", va="bottom")
 
     fig.tight_layout()
-    OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT_PNG, dpi=150, facecolor=SURFACE, bbox_inches="tight")
-    print(f"wrote {OUT_PNG}")
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png, dpi=150, facecolor=SURFACE, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out_png}")
+    return True
+
+
+def main() -> int:
+    m = json.loads(METRICS.read_text(encoding="utf-8"))
+    target = m["target_coverage"]
+    for name, r in m["models"].items():
+        plot_model(name, r["regime_B_test_fold"], target,
+                   OUT_DIR / f"conformal_coverage_{_slug(name)}.png")
+    # keep a stable primary filename for the README (CV baseline).
+    if "CV (vel_k=5)" in m["models"]:
+        plot_model("CV (vel_k=5)", m["models"]["CV (vel_k=5)"]["regime_B_test_fold"],
+                   target, OUT_DIR / "conformal_coverage.png")
     return 0
 
 

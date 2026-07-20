@@ -150,7 +150,7 @@ def _curve_per_class(curve: np.ndarray, mean_s: np.ndarray, types: np.ndarray,
 
 
 def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
-             type_map: dict, seed: int = 0) -> dict:
+             type_map: dict, seed: int = 0, dump_preds: bool = False) -> dict:
     sys.path.insert(0, str(TRAJECTRON))
     import dill
     import torch
@@ -177,9 +177,13 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
     stg.set_environment(env)
     stg.set_annealing_params()
 
-    def run_mode(kwargs: dict, n_samples: int):
-        """Predict over all scenes; return per-node (ade_s, fde_s, path, class)."""
+    def run_mode(kwargs: dict, n_samples: int, collect: bool = False):
+        """Predict over all scenes; return per-node (ade_s, fde_s, path, class).
+
+        With collect=True also gathers the deployable single trajectory, GT and
+        validity mask per node-timestep (for the conformal predictions dump)."""
         ade_s_all, fde_s_all, paths, classes = [], [], [], []
+        dpred, dgt, dmask = [], [], []
         for scene in env.scenes:
             timesteps = np.arange(scene.timesteps)
             predictions = stg.predict(
@@ -190,13 +194,22 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
                 for node, pred in node_preds.items():
                     fut = node.get(np.array([ts + 1, ts + PRED_LEN]),
                                    {"position": ["x", "y"]}, padding=np.nan)
+                    fut64 = np.asarray(fut, dtype=np.float64)
                     arr = np.asarray(pred).reshape(-1, PRED_LEN, 2)
-                    r = _node_sample_errors(arr, np.asarray(fut, dtype=np.float64))
+                    r = _node_sample_errors(arr, fut64)
                     if r is None:
                         continue
                     ade_s_all.append(r[0]); fde_s_all.append(r[1]); paths.append(r[2])
                     classes.append(scene_types.get(str(node.id), ""))
-        return ade_s_all, fde_s_all, np.asarray(paths), np.asarray(classes, dtype=object)
+                    if collect:
+                        valid = np.isfinite(fut64).all(axis=1)
+                        dpred.append(arr[0].astype(np.float32))
+                        dgt.append(np.where(valid[:, None], fut64, 0.0).astype(np.float32))
+                        dmask.append(valid)
+        base = (ade_s_all, fde_s_all, np.asarray(paths), np.asarray(classes, dtype=object))
+        if collect:
+            return base + (np.asarray(dpred), np.asarray(dgt), np.asarray(dmask))
+        return base
 
     results: dict = {"checkpoint_iter": it}
     with torch.no_grad():
@@ -228,8 +241,9 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
                 + f" mean_sample={results['sampling_curve']['mean_sample_ade']:.3f}")
 
         # Most-likely readout: single argmax latent + GMM mode (deployable).
-        ade_s_all, fde_s_all, path, types = run_mode(
-            dict(z_mode=True, gmm_mode=True, full_dist=False), 1)
+        ml_out = run_mode(dict(z_mode=True, gmm_mode=True, full_dist=False), 1,
+                          collect=dump_preds)
+        ade_s_all, fde_s_all, path, types = ml_out[:4]
         ade = np.asarray([a.min() for a in ade_s_all])
         fde = np.asarray([f.min() for f in fde_s_all])
         results["most_likely"] = {
@@ -239,6 +253,10 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
             "num_samples": 1,
             "per_class": per_class_summary(ade, fde, path, types) if len(ade) else None,
         }
+        if dump_preds:
+            results["_pred_dump"] = {
+                "pred": ml_out[4], "gt": ml_out[5], "fut_mask": ml_out[6],
+                "agent_type": types}
         print(f"{split}/best_of_k: ADE={results['best_of_k']['ade']:.4f} | "
               f"most_likely: ADE={results['most_likely']['ade']:.4f}")
     return results
@@ -260,6 +278,9 @@ def main() -> int:
     ap.add_argument("--augment", action="store_true",
                     help="pass --augment to upstream train.py (needs an export "
                          "made with --augment-copies > 0)")
+    ap.add_argument("--dump-preds", default=None,
+                    help="also save most-likely predictions (val+test) to this NPZ "
+                         "for the conformal wrapper")
     ap.add_argument("--save-metrics-json",
                     default=str(REPO / "outputs" / "benchmark_v2" / "trajectronpp_metrics.json"))
     args = ap.parse_args()
@@ -286,10 +307,24 @@ def main() -> int:
         model_dir = train(args.epochs, args.device, args.log_tag, int(args.seed),
                           augment=bool(args.augment))
 
+    dp = bool(args.dump_preds)
     val_results = evaluate(model_dir, args.device, args.k_best_of, "val", type_map,
-                           seed=int(args.seed))
+                           seed=int(args.seed), dump_preds=dp)
     test_results = evaluate(model_dir, args.device, args.k_best_of, "test", type_map,
-                            seed=int(args.seed))
+                            seed=int(args.seed), dump_preds=dp)
+
+    if dp:
+        vd = val_results.pop("_pred_dump"); td = test_results.pop("_pred_dump")
+        np.savez_compressed(
+            args.dump_preds,
+            pred=np.concatenate([vd["pred"], td["pred"]]).astype(np.float32),
+            gt=np.concatenate([vd["gt"], td["gt"]]).astype(np.float32),
+            fut_mask=np.concatenate([vd["fut_mask"], td["fut_mask"]]).astype(bool),
+            agent_type=np.concatenate([vd["agent_type"], td["agent_type"]]).astype(object),
+            split=np.asarray(["val"] * len(vd["pred"]) + ["test"] * len(td["pred"]),
+                             dtype=object),
+            model="Trajectron++ (most-likely)")
+        print(f"saved predictions dump -> {args.dump_preds}")
 
     export_meta = json.loads((DATA_DIR / "export_meta.json").read_text(encoding="utf-8"))
     hetero = bool(export_meta.get("hetero", False))

@@ -83,6 +83,49 @@ def test_masked_variety_loss_ignores_invalid_displacements():
     assert loss.item() == pytest.approx(0.0, abs=1e-9)
 
 
+def test_ewta_top_w_reduces_to_wta_and_full_mean():
+    rng = np.random.default_rng(11)
+    B, M, K, T = 2, 3, 4, 5
+    gt = torch.from_numpy(rng.normal(size=(B, M, 2, T))).float()
+    pred_k = torch.from_numpy(rng.normal(size=(B, M, K, 2, T))).float()
+    am = torch.ones((B, M), dtype=torch.bool)
+    fm = torch.rand(B, M, T) > 0.3
+    fm[..., 0] = True
+
+    loss_default, bm_default = dd_data.masked_variety_loss(pred_k, gt, am, fm)
+    loss_w1, bm_w1 = dd_data.masked_variety_loss(pred_k, gt, am, fm, top_w=1)
+    assert torch.allclose(loss_default, loss_w1)
+    assert (bm_default == bm_w1).all()
+
+    # top_w=K averages ALL modes: equals mean of per-mode masked SSE / (n*2*K)
+    loss_wK, _ = dd_data.masked_variety_loss(pred_k, gt, am, fm, top_w=K)
+    rv = am.unsqueeze(-1) & dd_data.rel_valid_mask(fm)
+    m = rv.unsqueeze(2).unsqueeze(3).float()
+    diff = (pred_k - gt.unsqueeze(2)) * m
+    expected = (diff * diff).sum() / (rv.float().sum() * 2.0 * K)
+    assert torch.allclose(loss_wK, expected, atol=1e-6)
+
+    # the best-w average can never exceed the all-K average
+    for w in range(1, K + 1):
+        lw, _ = dd_data.masked_variety_loss(pred_k, gt, am, fm, top_w=w)
+        assert lw.item() <= loss_wK.item() + 1e-6
+
+
+def test_ewta_masking_with_relaxed_winners():
+    """Garbage at masked steps must not leak even when w > 1."""
+    B, M, K, T = 1, 1, 3, 4
+    gt_rel = torch.zeros((B, M, 2, T))
+    pred_k = torch.zeros((B, M, K, 2, T))
+    fut_mask = torch.tensor([[[True, True, False, True]]])
+    pred_k[0, 0, 0, :, 2] = 1e6   # only at the masked step
+    pred_k[0, 0, 1, :, 2] = 1e6
+    pred_k[0, 0, 2, :, 2] = 1e6
+    loss, _ = dd_data.masked_variety_loss(pred_k, gt_rel,
+                                          torch.ones((B, M), dtype=torch.bool),
+                                          fut_mask, top_w=2)
+    assert loss.item() == pytest.approx(0.0, abs=1e-9)
+
+
 def test_per_class_summary_consistency():
     rng = np.random.default_rng(7)
     n = 300

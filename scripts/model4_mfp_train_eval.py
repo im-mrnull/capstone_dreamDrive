@@ -35,6 +35,7 @@ from dd_data import (
     masked_variety_loss,
     per_agent_errors,
     per_agent_errors_bestofk,
+    rel_valid_mask,
 )
 
 
@@ -245,6 +246,16 @@ def main() -> int:
     ap.add_argument("--gat-layers", type=int, default=2)
     ap.add_argument("--dropout", type=float, default=0.1)
     ap.add_argument("--mode-cls-weight", type=float, default=0.1)
+    ap.add_argument("--ewta-frac", type=float, default=0.0,
+                    help="anneal the winner set K->1 over this fraction of epochs "
+                         "(0 = classic WTA variety loss)")
+    ap.add_argument("--mode-target", choices=["hard", "soft"], default="hard",
+                    help="mode-head CE target: hard argmin index or detached "
+                         "softmax(-mode_mse/tau) distribution")
+    ap.add_argument("--mode-tau", type=float, default=1.0)
+    ap.add_argument("--select", choices=["oracle", "top1"], default="oracle",
+                    help="val metric for checkpoint selection; top1 selects for "
+                         "the deployable output")
 
     ap.add_argument("--device", default="cuda")
     args = ap.parse_args()
@@ -285,18 +296,53 @@ def main() -> int:
     best_epoch = -1
     patience_left = int(args.patience)
 
+    # EWTA schedule: geometric stages [K, K/2, ..., 2, 1] spread over the
+    # first ewta_frac of epochs; pure WTA (w=1) afterwards / when frac=0.
+    k = int(args.k)
+    stages = []
+    w = k
+    while w > 1:
+        stages.append(w)
+        w //= 2
+    stages.append(1)
+
+    def ewta_w(epoch: int) -> int:
+        anneal = int(round(float(args.ewta_frac) * int(args.epochs)))
+        if anneal <= 0 or epoch > anneal:
+            return 1
+        i = min(len(stages) - 1, (epoch - 1) * len(stages) // anneal)
+        return stages[i]
+
+    def soft_mode_targets(pred_rel_k: torch.Tensor, b) -> torch.Tensor:
+        """Detached per-agent mode distribution: softmax(-masked mode MSE / tau)."""
+        with torch.no_grad():
+            rv = (b.agent_mask.unsqueeze(-1) & rel_valid_mask(b.fut_mask))
+            m = rv.unsqueeze(2).unsqueeze(3).float()
+            diff = (pred_rel_k - b.pred_rel.unsqueeze(2)) * m
+            denom = (rv.float().sum(dim=-1) * 2.0).clamp_min(1.0)  # (B,M)
+            per_mode = (diff * diff).sum(dim=(3, 4)) / denom.unsqueeze(-1)  # (B,M,K)
+            return torch.softmax(-per_mode / float(args.mode_tau), dim=-1)
+
     for epoch in range(1, int(args.epochs) + 1):
         model.train()
         train_losses = []
+        w_now = ewta_w(epoch)
         for batch in train_loader:
             b = batch.to(device)
             opt.zero_grad(set_to_none=True)
             with torch.cuda.amp.autocast(enabled=scaler.is_enabled()):
                 pred_rel_k, mode_logits = model(b.obs_rel, b.agent_mask)
                 reg_loss, best_mode = masked_variety_loss(pred_rel_k, b.pred_rel,
-                                                          b.agent_mask, b.fut_mask)
+                                                          b.agent_mask, b.fut_mask,
+                                                          top_w=w_now)
                 if float(args.mode_cls_weight) > 0.0 and bool(b.agent_mask.any()):
-                    ce = F.cross_entropy(mode_logits[b.agent_mask], best_mode[b.agent_mask])
+                    if str(args.mode_target) == "soft":
+                        tgt = soft_mode_targets(pred_rel_k, b)
+                        logp = torch.log_softmax(mode_logits[b.agent_mask], dim=-1)
+                        ce = -(tgt[b.agent_mask] * logp).sum(dim=-1).mean()
+                    else:
+                        ce = F.cross_entropy(mode_logits[b.agent_mask],
+                                             best_mode[b.agent_mask])
                     loss = reg_loss + float(args.mode_cls_weight) * ce
                 else:
                     loss = reg_loss
@@ -308,7 +354,8 @@ def main() -> int:
             train_losses.append(float(loss.item()))
 
         val = evaluate(model, val_loader, device)
-        val_ade = val["oracle_best_of_k"]["ade"]
+        val_ade = (val["top1"]["ade"] if str(args.select) == "top1"
+                   else val["oracle_best_of_k"]["ade"])
         if scheduler is not None:
             scheduler.step(val_ade)
 
@@ -326,9 +373,10 @@ def main() -> int:
 
         log_every = max(1, int(args.log_every))
         if epoch == 1 or epoch % log_every == 0 or improved:
-            print(f"epoch {epoch:3d} | lr={opt.param_groups[0]['lr']:.2e} "
+            print(f"epoch {epoch:3d} | lr={opt.param_groups[0]['lr']:.2e} w={w_now} "
                   f"| train_loss={float(np.mean(train_losses)):.6f} "
-                  f"| val_bestK_ADE={val_ade:.4f} | val_top1_ADE={val['top1']['ade']:.4f}"
+                  f"| val_bestK_ADE={val['oracle_best_of_k']['ade']:.4f} "
+                  f"| val_top1_ADE={val['top1']['ade']:.4f}"
                   + ("  (best)" if improved else ""))
 
         if int(args.patience) > 0 and patience_left <= 0:

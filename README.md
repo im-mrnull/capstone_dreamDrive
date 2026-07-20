@@ -78,6 +78,8 @@ The current headline benchmark. Protocol:
 | ST-GAT-inspired (MHA) | 1 | yes | 3.41 ± 0.07 | 7.35 ± 0.16 | 2.38 ± 0.03 | 0,1,2 |
 | K-mode decoder — oracle best-of-10 | 10 | no (oracle) | 1.88 ± 0.05 | 3.18 ± 0.11 | 1.32 ± 0.03 | 0,1,2 |
 | K-mode decoder — learned top-1 | 10 | yes | 4.31 ± 0.05 | 9.48 ± 0.24 | 3.38 ± 0.36 | 0,1,2 |
+| K-mode decoder (top-1-selected) — oracle best-of-10 | 10 | no (oracle) | 2.01 ± 0.07 | 3.56 ± 0.19 | 1.69 ± 0.09 | 0,1,2 |
+| K-mode decoder (top-1-selected) — learned top-1 | 10 | yes | 4.15 ± 0.10 | 9.21 ± 0.26 | 2.61 ± 0.13 | 0,1,2 |
 | Trajectron++ — most-likely | 1 | yes | 2.58 ± 0.04 | 5.58 ± 0.07 | 2.14 ± 0.07 | 0,1,2 |
 | Trajectron++ — oracle best-of-20 | 20 | no (oracle) | 1.37 ± 0.01 | 2.39 ± 0.02 | 1.09 ± 0.02 | 0,1,2 |
 | Trajectron++ hetero (unicycle) — most-likely | 1 | yes | 2.84 ± 0.09 | 6.45 ± 0.27 | 2.21 ± 0.08 | 0,1,2 |
@@ -140,7 +142,23 @@ ADE disparity (worst/best class, n ≥ 50): **16.05×**
    pedestrians err *more* (0.245 ADE/path-m) than motorcycle riders (0.164). The raw gap
    mostly tracks path length; relative to how far they move, erratic slow agents remain
    the hard case.
-6. **Unicycle dynamics with approximate heading do not pay off (honest negative result).**
+6. **The K-mode decoder's "mode-selection problem" was partly a checkpoint-selection
+   artifact.** The original pipeline selected the saved checkpoint by val *oracle* ADE, then
+   reported that same checkpoint's top-1 — but the best epoch for coverage isn't the best
+   epoch for the classifier. Selecting on val top-1 ADE instead (same architecture, same
+   loss) improves deployable test ADE from 4.31 ± 0.05 to 4.15 ± 0.10 and sharply stabilizes
+   it across seeds (val ADE std 0.36 → 0.09), at the honest cost of worse oracle coverage
+   (test 1.88 → 2.01, val 1.32 → 1.69 — a real trade-off, not free).
+   **EWTA annealing did not help further (second honest negative result).** A val-only grid
+   (seed 0, 150 epochs) compared plain WTA-with-top-1-selection against evolving-WTA variants
+   (winner set annealed 10→1 over training, with hard or soft mode-classification targets):
+   plain WTA won outright (val top-1 ADE 2.46 vs 2.60 hard-EWTA vs 2.76 soft-EWTA), so no
+   EWTA variant was carried to the final 3-seed run. Even after both fixes, the K-mode
+   decoder's top-1 remains well behind ST-GAT (3.41) — mode selection is improved, not solved.
+   Grid + per-seed artifacts:
+   [`outputs/benchmark_v2/mfp_ewta_grid/`](outputs/benchmark_v2/mfp_ewta_grid/),
+   `mfp_top1sel_seed*.json`.
+7. **Unicycle dynamics with approximate heading do not pay off (honest negative result).**
    Modeling wheeled classes as VEHICLE nodes with Unicycle dynamics (nuScenes-style; heading
    derived from velocity direction since IDD-3D yaw isn't in this repo's parsed data) plus
    rotation augmentation — selected over no-aug on val (2.12 vs 2.26) — *degrades* deployable

@@ -166,24 +166,32 @@ def masked_reg_loss(pred_rel_hat: torch.Tensor, gt_rel: torch.Tensor,
 
 
 def masked_variety_loss(pred_rel_k: torch.Tensor, gt_rel: torch.Tensor,
-                        agent_mask: torch.Tensor, fut_mask: torch.Tensor
+                        agent_mask: torch.Tensor, fut_mask: torch.Tensor,
+                        top_w: int = 1
                         ) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Best-of-K displacement loss over valid steps.
+    """Winner(s)-take-all displacement loss over valid steps.
 
-    pred_rel_k (B,M,K,2,T); returns (loss, best_mode (B,M))."""
+    pred_rel_k (B,M,K,2,T); returns (loss, best_mode (B,M)).
+
+    top_w=1 is the classic variety (best-of-K / WTA) loss. top_w=w>1 is the
+    EWTA relaxation (Makansi et al. 2019): the w best modes per agent share
+    the gradient equally, annealed w: K -> 1 over training to avoid dead
+    modes and unstable selection targets. best_mode is always the single
+    argmin (the mode-classification target)."""
     rv = (agent_mask.unsqueeze(-1) & rel_valid_mask(fut_mask))  # (B,M,T)
     m = rv.unsqueeze(2).unsqueeze(3).float()                    # (B,M,1,1,T)
-    diff = (pred_rel_k - gt_rel.unsqueeze(2)) * m
+    diff = (pred_rel_k - gt_rel.unsqueeze(2)) * m               # (B,M,K,2,T)
     per_mode = (diff * diff).sum(dim=(3, 4))                    # (B,M,K)
     per_mode = per_mode + (~agent_mask).unsqueeze(2).float() * 1e9
     best_mode = per_mode.argmin(dim=2)
 
-    best = pred_rel_k.gather(
-        2, best_mode.unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
-        .expand(-1, -1, 1, 2, gt_rel.shape[-1])).squeeze(2)
-    diff_best = (best - gt_rel) * rv.unsqueeze(2).float()
-    denom = (rv.float().sum() * 2.0).clamp_min(1.0)
-    return (diff_best * diff_best).sum() / denom, best_mode
+    w = max(1, min(int(top_w), pred_rel_k.shape[2]))
+    idx = per_mode.topk(w, dim=2, largest=False).indices        # (B,M,w)
+    diff_sel = diff.gather(
+        2, idx.unsqueeze(-1).unsqueeze(-1)
+        .expand(-1, -1, w, 2, gt_rel.shape[-1]))                # (B,M,w,2,T)
+    denom = (rv.float().sum() * 2.0 * w).clamp_min(1.0)
+    return (diff_sel * diff_sel).sum() / denom, best_mode
 
 
 def abs_from_rel(obs_abs: torch.Tensor, pred_rel: torch.Tensor) -> torch.Tensor:

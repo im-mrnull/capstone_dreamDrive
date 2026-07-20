@@ -85,6 +85,17 @@ def launch_all(smoke: bool) -> None:
                  "--log-tag", f"_idd3d_world_v2_s{seed}",
                  "--save-metrics-json", str(tpp_json)])
 
+        # K-mode with checkpoint selection on val top-1 (deployable) rather than
+        # val oracle. Winner of the EWTA grid (outputs/benchmark_v2/mfp_ewta_grid/):
+        # EWTA annealing lost on both metrics; selection criterion was the fix.
+        mfp_t1_json = OUT / f"mfp_top1sel_seed{seed}.json"
+        if not mfp_t1_json.exists():
+            run([py, "scripts/model4_mfp_train_eval.py",
+                 "--device", "cuda", "--seed", s, "--epochs", gnn_epochs,
+                 "--k", "10", "--select", "top1",
+                 "--save-metrics-json", str(mfp_t1_json),
+                 "--save-ckpt", str(OUT / f"mfp_top1sel_ckpt_seed{seed}.pt")])
+
         tpp_h_json = OUT / f"trajectronpp_hetero_seed{seed}.json"
         if (REPO / TPP_HETERO_DIR / "train.pkl").exists() and not tpp_h_json.exists():
             cmd = [py, "scripts/7_train_eval_trajectronpp.py",
@@ -108,6 +119,8 @@ VARIANTS = [
     ("ST-GAT-inspired (MHA)", "stgat_seed{seed}.json", [], 1, True),
     ("K-mode decoder — oracle best-of-10", "mfp_seed{seed}.json", ["oracle_best_of_k"], 10, False),
     ("K-mode decoder — learned top-1", "mfp_seed{seed}.json", ["top1"], 10, True),
+    ("K-mode decoder (top-1-selected) — oracle best-of-10", "mfp_top1sel_seed{seed}.json", ["oracle_best_of_k"], 10, False),
+    ("K-mode decoder (top-1-selected) — learned top-1", "mfp_top1sel_seed{seed}.json", ["top1"], 10, True),
     ("Trajectron++ — most-likely", "trajectronpp_seed{seed}.json", ["most_likely"], 1, True),
     ("Trajectron++ — oracle best-of-20", "trajectronpp_seed{seed}.json", ["best_of_k"], 20, False),
     ("Trajectron++ hetero (unicycle) — most-likely", "trajectronpp_hetero_seed{seed}.json", ["most_likely"], 1, True),

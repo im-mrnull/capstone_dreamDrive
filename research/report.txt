@@ -905,6 +905,8 @@ MLP | 3.97 +/- 0.01 | 8.66 +/- 0.05 | 2.31 +/- 0.01 | 1 | yes
 ST-GAT-inspired (MHA) | 3.41 +/- 0.07 | 7.35 +/- 0.16 | 2.38 +/- 0.03 | 1 | yes
 K-mode decoder (Oracle best-of-10) | 1.88 +/- 0.05 | 3.18 +/- 0.11 | 1.32 +/- 0.03 | 10 | no (oracle upper bound)
 K-mode decoder (Learned top-1) | 4.31 +/- 0.05 | 9.48 +/- 0.24 | 3.38 +/- 0.36 | 10 | yes
+K-mode decoder, top-1-selected checkpoint (Oracle best-of-10) | 2.01 +/- 0.07 | 3.56 +/- 0.19 | 1.69 +/- 0.09 | 10 | no (oracle upper bound)
+K-mode decoder, top-1-selected checkpoint (Learned top-1) | 4.15 +/- 0.10 | 9.21 +/- 0.26 | 2.61 +/- 0.13 | 10 | yes
 Trajectron++ (most-likely) | 2.58 +/- 0.04 | 5.58 +/- 0.07 | 2.14 +/- 0.07 | 1 | yes
 Trajectron++ (Oracle best-of-20) | 1.37 +/- 0.01 | 2.39 +/- 0.02 | 1.09 +/- 0.02 | 20 | no (oracle upper bound)
 Trajectron++ hetero/unicycle (most-likely) | 2.84 +/- 0.09 | 6.45 +/- 0.27 | 2.21 +/- 0.08 | 1 | yes
@@ -946,7 +948,26 @@ vs 1.37 +/- 0.01; validation oracle slightly better, 1.00 vs 1.09). The
 interpretation is that the unicycle model integrates heading-estimate noise
 into its deterministic rollout - sampling absorbs this, most-likely decoding
 cannot - so dynamics-aware modeling requires true yaw from the raw dataset
-or a perception front-end before it can pay off on this data.
+or a perception front-end before it can pay off on this data; (6) the
+K-mode decoder's mode-selection weakness was partly a checkpoint-selection
+artifact rather than a purely architectural one: the original pipeline chose
+its saved checkpoint by validation oracle ADE and then reported that same
+checkpoint's top-1 output, but the epoch that maximizes coverage is not the
+epoch that maximizes classifier accuracy. Selecting the checkpoint by
+validation top-1 ADE instead (same architecture and loss) improves
+deployable test ADE from 4.31 +/- 0.05 to 4.15 +/- 0.10 and sharply
+stabilizes it across seeds (validation ADE standard deviation 0.36 to 0.09),
+at the honest cost of weaker oracle coverage (test 1.88 to 2.01, validation
+1.32 to 1.69) - a real trade-off, not a free improvement. A follow-up
+validation-only grid (seed 0, 150 epochs) tested whether Evolving
+Winner-Takes-All (EWTA) regression - annealing the gradient from all K modes
+down to a single winner over training, with hard or soft mode-classification
+targets - could improve on this further; it did not (validation top-1 ADE
+2.46 for plain winner-takes-all with top-1 selection versus 2.60 and 2.76 for
+the two EWTA variants), so no EWTA variant was carried to the final 3-seed
+run. Even with the selection-criterion fix, the K-mode decoder's deployable
+output remains well behind the ST-GAT-inspired model (3.41); mode selection
+is improved but not solved.
 
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent
@@ -1162,9 +1183,12 @@ The specific roadmap for the next project phase includes:
 per-split evaluation protocol defined in Section 7.3 on the world-frame data,
 producing artifact-backed measurements of prediction degradation on
 collision-proximate scenes (replacing the retracted placeholder figures).
-2. Improve Deployable Mode Selection: Rework the learned top-1 mode-scoring
-head, which currently underperforms in the world frame; evaluate calibration
-of mode probabilities alongside ADE/FDE.
+2. Improve Deployable Mode Selection: partly addressed in Benchmark v2
+(Section 7.2.1, observation 6) - selecting the checkpoint by validation
+top-1 rather than oracle ADE stabilized the deployable output, and an EWTA
+grid was tried without benefit. The remaining gap to the single-mode models
+suggests the mode-scoring head itself, not just its training target, needs
+rework; evaluate calibration of mode probabilities alongside ADE/FDE.
 3. Extend Hyperparameter Optimization: Conduct systematic hyperparameter
 search for Trajectron++ (learning rate, latent variable size, prediction horizon)
 on the world-frame data to improve its baseline performance. (A first val-only

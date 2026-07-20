@@ -1009,6 +1009,43 @@ single-output selection - it is closeable only by carrying multiple modes
 forward into the planner, which is the case for multi-future prediction in
 chaotic traffic.
 
+7.2.3 Calibrated Uncertainty via Split-Conformal Prediction
+A point prediction without a calibrated uncertainty band is of limited use to
+a safety-aware planner. We add a post-hoc split-conformal wrapper over the
+deployable predictors (artifact outputs/benchmark_v2/conformal_metrics.json):
+using the per-timestep position error as the nonconformity score, the wrapper
+produces a per-step radius that contains the true future position with a
+distribution-free probability of at least 1 - alpha (alpha = 0.1, a 90 percent
+target). The frozen splits from Section 7.2.1 make this statistically clean,
+and the predictors are reproduced in numpy from committed artifacts so the
+analysis runs on CPU in seconds. Three results follow.
+First, the implementation is sound when calibration matches deployment:
+split-conformal calibrated and evaluated within the test set (a seeded 50/50
+agent fold) achieves 89.0 percent coverage for constant velocity and 89.8
+percent for the MLP, both at the 90 percent target. Second, and more
+importantly, naive conformal fails under the validation-to-test distribution
+shift documented in Section 7.2.1: radii calibrated on the validation split
+and deployed on the harder test split cover only 73.8 percent (constant
+velocity) and 74.1 percent (MLP) of true positions - sixteen points below
+nominal. The same shift that motivated the frozen test set breaks conformal's
+exchangeability assumption, so a deployed system must calibrate on data drawn
+like its deployment distribution rather than on an easier split; this is a
+concrete, safety-relevant consequence of the distribution shift rather than an
+abstract one. Third, a single global radius is unfair across agent classes -
+it under-covers fast classes (car 78 percent) and over-covers slow ones
+(pedestrian 96 percent), which is simultaneously a safety failure on the
+former and an efficiency failure on the latter. Class-conditional radii, one
+per IDD-3D class with a per-timestep fallback to the marginal radius where a
+class has too few calibration samples, pull each class toward nominal: the car
+band widens (16 to 27 m, raising coverage to 91 percent) while the pedestrian
+band is halved (11.7 to 5.6 m, lowering coverage to 89 percent). This
+class-conditioning is motivated directly by the sixteen-fold per-class error
+disparity of Section 7.2.1 and is, for dense heterogeneous traffic, the
+novel element of this analysis. The absolute band widths are large because
+they wrap weak six-second predictors; they reflect the base model's accuracy,
+and the contribution here is the relative calibration and per-class fairness,
+which transfer to any stronger predictor the same wrapper is applied to.
+
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent
 increase in ADE and a 131 percent increase in FDE on collision-intensive scenes

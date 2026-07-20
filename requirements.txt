@@ -3,3 +3,4 @@
 numpy>=1.26
 pandas>=2.0
 pytest>=8.0
+matplotlib>=3.8   # scripts/plot_gap_decomposition.py (figures regenerable from artifacts)

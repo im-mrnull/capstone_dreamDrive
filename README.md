@@ -155,8 +155,20 @@ ADE disparity (worst/best class, n ≥ 50): **16.05×**
    plain WTA won outright (val top-1 ADE 2.46 vs 2.60 hard-EWTA vs 2.76 soft-EWTA), so no
    EWTA variant was carried to the final 3-seed run. Even after both fixes, the K-mode
    decoder's top-1 remains well behind ST-GAT (3.41) — mode selection is improved, not solved.
-   Grid + per-seed artifacts:
+   **A content-aware scorer also did not help (third negative result), and the reason is
+   the interesting part.** We rebuilt the mode-scoring head to rank each mode from its
+   *decoded trajectory* (endpoint, waypoints, path length, heading) rather than from context
+   only — a unit test confirms it genuinely reads the trajectory (perturbing one mode's path
+   moves only that mode's logit). On the val gate it was a wash (val top-1 ADE 2.51 vs the
+   2.46 context-only baseline, within seed noise), so it was not promoted to a 3-seed run.
+   The mechanism explains why: this decoder is *deterministic*, so each mode's trajectory is
+   a fixed function of the per-mode context state the scorer already used — the trajectory
+   features are redundant, not new information. The classifier was never information-starved;
+   the bottleneck is the winner-takes-all *assignment target* itself. That points the next
+   attack at the objective/structure (jointly-trained mixture density, or anchor/goal modes),
+   not the scorer's input. Grid + per-seed artifacts:
    [`outputs/benchmark_v2/mfp_ewta_grid/`](outputs/benchmark_v2/mfp_ewta_grid/),
+   [`outputs/benchmark_v2/mfp_content_grid/`](outputs/benchmark_v2/mfp_content_grid/),
    `mfp_top1sel_seed*.json`.
 7. **Unicycle dynamics with approximate heading do not pay off (honest negative result).**
    Modeling wheeled classes as VEHICLE nodes with Unicycle dynamics (nuScenes-style; heading

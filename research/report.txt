@@ -965,7 +965,20 @@ down to a single winner over training, with hard or soft mode-classification
 targets - could improve on this further; it did not (validation top-1 ADE
 2.46 for plain winner-takes-all with top-1 selection versus 2.60 and 2.76 for
 the two EWTA variants), so no EWTA variant was carried to the final 3-seed
-run. Even with the selection-criterion fix, the K-mode decoder's deployable
+run. A third attempt made the mode-scoring head content-aware - ranking each
+mode from its decoded trajectory (endpoint, waypoints, path length, heading)
+rather than from context alone, verified by a unit test showing that
+perturbing one mode's trajectory moves only that mode's score. It did not
+help on the validation gate (validation top-1 ADE 2.51 versus the 2.46
+context-only baseline, within seed noise) and was not promoted to a 3-seed
+run. The mechanism is instructive: because this decoder is deterministic,
+each mode's trajectory is a fixed function of the per-mode context state the
+scorer already consumed, so the trajectory features carry no information the
+classifier lacked - the head was never information-starved, and the
+bottleneck is the winner-takes-all assignment target itself. This localizes
+the next attack to the objective or mode structure (a jointly-trained mixture
+density, or fixed anchor / goal-conditioned modes) rather than the scorer's
+input. Even with the selection-criterion fix, the K-mode decoder's deployable
 output remains well behind the ST-GAT-inspired model (3.41); mode selection
 is improved but not solved.
 
@@ -1184,11 +1197,17 @@ per-split evaluation protocol defined in Section 7.3 on the world-frame data,
 producing artifact-backed measurements of prediction degradation on
 collision-proximate scenes (replacing the retracted placeholder figures).
 2. Improve Deployable Mode Selection: partly addressed in Benchmark v2
-(Section 7.2.1, observation 6) - selecting the checkpoint by validation
-top-1 rather than oracle ADE stabilized the deployable output, and an EWTA
-grid was tried without benefit. The remaining gap to the single-mode models
-suggests the mode-scoring head itself, not just its training target, needs
-rework; evaluate calibration of mode probabilities alongside ADE/FDE.
+(Section 7.2.1, observation 6). Selecting the checkpoint by validation top-1
+rather than oracle ADE stabilized the deployable output; an EWTA grid and a
+content-aware scorer were both tried without benefit. The content-scorer null
+result showed the head is not information-starved (a deterministic decoder
+makes the trajectory redundant with the context the scorer already sees), so
+the remaining gap points to the winner-takes-all objective and the anonymous
+mode structure, not the scorer's input. The indicated next steps are a
+jointly-trained Gaussian-mixture likelihood (as in Trajectron++, whose
+most-likely output is far stronger) and fixed anchor / goal-conditioned
+modes (as in TNT/MTR); evaluate calibration of mode probabilities alongside
+ADE/FDE.
 3. Extend Hyperparameter Optimization: Conduct systematic hyperparameter
 search for Trajectron++ (learning rate, latent variable size, prediction horizon)
 on the world-frame data to improve its baseline performance. (A first val-only

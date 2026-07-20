@@ -101,11 +101,13 @@ class MFPModel(nn.Module):
         gat_layers: int = 2,
         dropout: float = 0.1,
         mode_emb_dim: int | None = None,
+        content_scorer: bool = False,
     ) -> None:
         super().__init__()
         self.obs_len = int(obs_len)
         self.pred_len = int(pred_len)
         self.k = int(k)
+        self.content_scorer = bool(content_scorer)
 
         self.emb = nn.Linear(2, emb_dim)
         self.encoder = nn.LSTM(input_size=emb_dim, hidden_size=hidden_dim,
@@ -130,12 +132,43 @@ class MFPModel(nn.Module):
         self.out = nn.Linear(hidden_dim, 2)
         self.init_h = nn.Linear(hidden_dim, self.k * hidden_dim)
         self.init_c = nn.Linear(hidden_dim, self.k * hidden_dim)
+
+        # Mode-scoring head. The default (context-only) scores each mode from its
+        # per-mode initial state h0 -- BEFORE the trajectory exists, so it chooses
+        # blind. The content-aware variant scores from concat(h0, traj_enc(feats))
+        # where feats summarize the mode's DECODED trajectory (endpoint, waypoints,
+        # path length, heading), letting the scorer judge what it is picking.
+        self.traj_feat_dim = 3 * 2 + 2 + 3  # 3 waypoints + endpoint + 3 scalars
+        traj_emb_dim = hidden_dim // 2
+        self.traj_enc = nn.Sequential(
+            nn.Linear(self.traj_feat_dim, traj_emb_dim),
+            nn.ReLU(inplace=True),
+            nn.Linear(traj_emb_dim, traj_emb_dim),
+        )
+        score_in = hidden_dim + (traj_emb_dim if self.content_scorer else 0)
         self.mode_score = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim),
+            nn.Linear(score_in, hidden_dim),
             nn.ReLU(inplace=True),
             nn.Linear(hidden_dim, 1),
         )
         self.drop = nn.Dropout(dropout)
+
+    def _traj_features(self, pred_rel_k: torch.Tensor) -> torch.Tensor:
+        """Per-mode content features from decoded displacements. (B,M,K,F).
+
+        Detached from the generator: the scorer reads the trajectory but its
+        gradient must not reshape the modes (those are trained by variety loss)."""
+        rel = pred_rel_k.detach()                          # (B,M,K,2,T)
+        pos = torch.cumsum(rel, dim=-1)                    # absolute-from-start
+        T = pos.shape[-1]
+        wp = [pos[..., max(0, T // 4 - 1)], pos[..., max(0, T // 2 - 1)],
+              pos[..., max(0, (3 * T) // 4 - 1)]]          # 3 x (B,M,K,2)
+        endpoint = pos[..., -1]                            # (B,M,K,2)
+        path_len = rel.norm(dim=3).sum(dim=-1, keepdim=True)          # (B,M,K,1)
+        straight = endpoint.norm(dim=-1, keepdim=True)               # (B,M,K,1)
+        last_step = rel[..., -1]
+        heading = torch.atan2(last_step[..., 1], last_step[..., 0]).unsqueeze(-1)
+        return torch.cat(wp + [endpoint, path_len, straight, heading], dim=-1)
 
     def forward(self, obs_rel: torch.Tensor, agent_mask: torch.Tensor
                 ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -158,7 +191,6 @@ class MFPModel(nn.Module):
 
         h0 = self.init_h(h_ctx).view(B, M, self.k, -1)
         c0 = self.init_c(h_ctx).view(B, M, self.k, -1)
-        mode_logits = self.mode_score(h0).squeeze(-1)  # (B, M, K)
 
         h = h0.reshape(B * M * self.k, -1)
         c = c0.reshape(B * M * self.k, -1)
@@ -177,6 +209,15 @@ class MFPModel(nn.Module):
             prev_rel = step
 
         pred_rel_k = torch.stack(preds, dim=-1)  # (B, M, K, 2, T)
+
+        # Score modes AFTER decoding. Content-aware: from each mode's own
+        # trajectory; default: context-only (h0), i.e. blind to the rollout.
+        if self.content_scorer:
+            feats = self.traj_enc(self._traj_features(pred_rel_k))  # (B,M,K,emb)
+            score_in = torch.cat([h0, feats], dim=-1)
+        else:
+            score_in = h0
+        mode_logits = self.mode_score(score_in).squeeze(-1)  # (B, M, K)
         return pred_rel_k, mode_logits
 
 
@@ -256,6 +297,9 @@ def main() -> int:
     ap.add_argument("--select", choices=["oracle", "top1"], default="oracle",
                     help="val metric for checkpoint selection; top1 selects for "
                          "the deployable output")
+    ap.add_argument("--content-scorer", action="store_true", default=False,
+                    help="score modes from their decoded trajectory (endpoint, "
+                         "waypoints, path length, heading) instead of context only")
 
     ap.add_argument("--device", default="cuda")
     args = ap.parse_args()
@@ -281,7 +325,7 @@ def main() -> int:
         emb_dim=int(args.emb_dim), hidden_dim=int(args.hidden_dim),
         pool=str(args.pool), attn_dim=int(args.attn_dim),
         num_heads=int(args.num_heads), gat_layers=int(args.gat_layers),
-        dropout=float(args.dropout),
+        dropout=float(args.dropout), content_scorer=bool(args.content_scorer),
     ).to(device)
 
     opt = torch.optim.AdamW(model.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))

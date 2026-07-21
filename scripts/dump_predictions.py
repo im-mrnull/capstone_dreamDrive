@@ -24,6 +24,7 @@ import torch
 
 import model3_stgat_train_eval as m3
 import model4_mfp_train_eval as m4
+import model5_transformer_train_eval as m5
 from dd_data import CanonicalSeqDataset, collate_pad, abs_from_rel
 from torch.utils.data import DataLoader
 
@@ -103,6 +104,18 @@ def load_mfp(device: torch.device):
     return predict
 
 
+def load_transformer(device: torch.device):
+    ck = torch.load(OUT / "transformer_ckpt_seed0.pt", map_location=device, weights_only=False)
+    a = ck["args"]
+    model = m5.MapFreeTransformer(
+        obs_len=20, pred_len=60, d_model=a["d_model"], n_heads=a["n_heads"],
+        n_temporal_layers=a["n_temporal_layers"], n_social_layers=a["n_social_layers"],
+        n_decoder_layers=a["n_decoder_layers"], ff_mult=a["ff_mult"],
+        dropout=a["dropout"], heading_k=a["heading_k"]).to(device)
+    model.load_state_dict(ck["model"]); model.eval()
+    return lambda b: abs_from_rel(b.obs_abs, model(b.obs_rel, b.agent_mask))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--device", default="cuda")
@@ -111,6 +124,7 @@ def main() -> int:
 
     dump("ST-GAT-inspired (MHA)", load_stgat(device), device, OUT / "preds_stgat.npz")
     dump("K-mode decoder (top-1-sel)", load_mfp(device), device, OUT / "preds_mfp.npz")
+    dump("map-free transformer", load_transformer(device), device, OUT / "preds_transformer.npz")
     return 0
 
 

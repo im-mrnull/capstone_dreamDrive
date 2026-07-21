@@ -78,6 +78,14 @@ def launch_all(smoke: bool) -> None:
                  "--save-metrics-json", str(mfp_json),
                  "--save-ckpt", str(OUT / f"mfp_ckpt_seed{seed}.pt")])
 
+        # Deterministic map-free Transformer (deployable single-output row).
+        tf_json = OUT / f"transformer_seed{seed}.json"
+        if not tf_json.exists():
+            run([py, "scripts/model5_transformer_train_eval.py",
+                 "--device", "cuda", "--seed", s, "--epochs", gnn_epochs,
+                 "--save-metrics-json", str(tf_json),
+                 "--save-ckpt", str(OUT / f"transformer_ckpt_seed{seed}.pt")])
+
         tpp_json = OUT / f"trajectronpp_seed{seed}.json"
         if not tpp_json.exists():
             run([py, "scripts/7_train_eval_trajectronpp.py",
@@ -117,6 +125,7 @@ VARIANTS = [
     ("CV (vel_k=5)", "cv_velk5.json", [], 1, True),
     ("MLP", "mlp_seed{seed}.json", [], 1, True),
     ("ST-GAT-inspired (MHA)", "stgat_seed{seed}.json", [], 1, True),
+    ("Map-free transformer", "transformer_seed{seed}.json", [], 1, True),
     ("K-mode decoder — oracle best-of-10", "mfp_seed{seed}.json", ["oracle_best_of_k"], 10, False),
     ("K-mode decoder — learned top-1", "mfp_seed{seed}.json", ["top1"], 10, True),
     ("K-mode decoder (top-1-selected) — oracle best-of-10", "mfp_top1sel_seed{seed}.json", ["oracle_best_of_k"], 10, False),

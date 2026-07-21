@@ -184,11 +184,26 @@ from prediction dumps ([`scripts/dump_predictions.py`](scripts/dump_predictions.
    11.7→5.6 m). This class-conditioning is motivated directly by the 16× per-class error
    disparity and is, for chaotic mixed traffic, the genuinely novel piece.
 
+Findings 2–3 as pictures — the accuracy→uncertainty link across the five deployable models:
+
+![Uncertainty efficiency: lower ADE buys a tighter conformal band at fixed 90% coverage](outputs/benchmark_v2/uncertainty_efficiency.png)
+
+At a fixed 90% coverage target the band radius *is* uncertainty efficiency, and it tracks
+accuracy almost linearly (r = 0.94): Trajectron++ certifies each position to ±10.0 m where CV
+needs ±15.9 m for the same guarantee.
+
+![Robustness gap: coverage lost under the val→test shift, smallest for the strongest model](outputs/benchmark_v2/robustness_gap.png)
+
+The shift-induced coverage loss (regime B − regime A) shrinks from 15+ points for the weak
+predictors to just 5.2 for Trajectron++ — a stronger forecaster is not only tighter but more
+robust to the calibration→deployment shift.
+
 ![Per-class conformal coverage: marginal vs class-conditional](outputs/benchmark_v2/conformal_coverage.png)
 
-*(Regenerate: `python scripts/conformal_wrapper.py && python scripts/plot_conformal_coverage.py`.
-Bands are wide because they wrap weak 6 s predictors — the absolute width reflects the base
-model's accuracy; the finding is about relative calibration and fairness.)*
+*(Regenerate: `python scripts/conformal_wrapper.py && python scripts/plot_conformal_coverage.py &&
+python scripts/plot_uncertainty_efficiency.py`. Bands are wide because they wrap weak 6 s
+predictors — the absolute width reflects the base model's accuracy; the finding is about relative
+calibration and fairness.)*
 
 ### Honest takeaways (Benchmark v2)
 

@@ -107,7 +107,12 @@ def plot_model(name: str, block: dict, target: float, out_png: Path) -> bool:
 def main() -> int:
     m = json.loads(METRICS.read_text(encoding="utf-8"))
     target = m["target_coverage"]
+    # CV is served by the stable conformal_coverage.png below (the README's
+    # primary figure), so skip its redundant per-model file; every other model
+    # gets one conformal_coverage_<slug>.png.
     for name, r in m["models"].items():
+        if name == "CV (vel_k=5)":
+            continue
         plot_model(name, r["regime_B_test_fold"], target,
                    OUT_DIR / f"conformal_coverage_{_slug(name)}.png")
     # keep a stable primary filename for the README (CV baseline).

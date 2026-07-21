@@ -198,12 +198,24 @@ The shift-induced coverage loss (regime B − regime A) shrinks from 15+ points 
 predictors to just 5.2 for Trajectron++ — a stronger forecaster is not only tighter but more
 robust to the calibration→deployment shift.
 
-![Per-class conformal coverage: marginal vs class-conditional](outputs/benchmark_v2/conformal_coverage.png)
-
 *(Regenerate: `python scripts/conformal_wrapper.py && python scripts/plot_conformal_coverage.py &&
 python scripts/plot_uncertainty_efficiency.py`. Bands are wide because they wrap weak 6 s
 predictors — the absolute width reflects the base model's accuracy; the finding is about relative
 calibration and fairness.)*
+
+**Robustness to the coverage target (α).** Everything above is the α = 0.1 (90%) operating point —
+a conventional reporting default and a tunable knob (`--alpha`), *not* a safety-derived spec. Re-running
+the whole evaluation at **80% / 90% / 95%** (α = 0.2 / 0.1 / 0.05;
+[`scripts/conformal_alpha_sensitivity.py`](scripts/conformal_alpha_sensitivity.py) →
+[`conformal_sensitivity.json`](outputs/benchmark_v2/conformal_sensitivity.json)) shows the findings are
+not artifacts of the 90% choice:
+
+![Conformal findings are robust to the coverage target α](outputs/benchmark_v2/conformal_alpha_sensitivity.png)
+
+At every target, regime B (calibration matches deployment) hits it — validity holds; regime A (val→test
+shift) under-covers; and the two strong models (Trajectron++, ST-GAT) stay clearly closer to the target
+than the weak three. The choice of α moves the absolute coverage and band width, not the qualitative
+story. *(Regenerate: `python scripts/conformal_alpha_sensitivity.py`.)*
 
 ### Honest takeaways (Benchmark v2)
 

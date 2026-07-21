@@ -1058,6 +1058,18 @@ novel element of this analysis. The absolute band widths are large because
 they wrap weak six-second predictors; they reflect the base model's accuracy,
 and the contribution here is the relative calibration and per-class fairness,
 which transfer to any stronger predictor the same wrapper is applied to.
+Finally, the 90 percent target (alpha = 0.1) used throughout is the conventional
+reporting default and a tunable parameter of the wrapper, not a safety-derived
+requirement, so we checked that the results do not depend on it. Re-running the
+full evaluation at the 80, 90, and 95 percent targets (alpha = 0.2, 0.1, 0.05;
+scripts/conformal_alpha_sensitivity.py, artifact
+outputs/benchmark_v2/conformal_sensitivity.json) reproduces every qualitative
+finding at each target: within-test split-conformal attains the target (validity
+holds), the validation-to-test shift under-covers, and the two strongest models
+(Trajectron++ and the ST-GAT-inspired model) stay markedly closer to the target
+than the three weaker predictors. The choice of target moves the absolute
+coverage and band width but not the conclusions; the 90 percent operating point
+is representative rather than special.
 
 7.3 Collision-Scenario Evaluation: Retraction and Planned Protocol
 A previous version of this section reported that Trajectron++ suffers a 66 percent

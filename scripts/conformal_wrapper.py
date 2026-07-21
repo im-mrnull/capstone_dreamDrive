@@ -169,6 +169,50 @@ def evaluate_split(cal_scores, cal_valid, cal_classes,
     }
 
 
+def run_one(s, v, types, is_val, is_test, alpha, min_cal, rng) -> dict:
+    """Both regimes for one model's per-(agent,step) scores + masks at one alpha.
+    Regime A calibrates on val and evaluates on test (exposes the shift); regime B
+    is an exchangeable seeded 50/50 test fold (valid)."""
+    test_i = np.where(is_test)[0]
+    perm = rng.permutation(len(test_i)); half = len(test_i) // 2
+    fc, fe = test_i[perm[:half]], test_i[perm[half:]]
+    A = evaluate_split(s[is_val], v[is_val], types[is_val],
+                       s[is_test], v[is_test], types[is_test], alpha, min_cal)
+    B = evaluate_split(s[fc], v[fc], types[fc], s[fe], v[fe], types[fe], alpha, min_cal)
+    return {"regime_A_val_to_test": A, "regime_B_test_fold": B}
+
+
+def assemble_model_scores(windows_path, splits_file, preds_dir) -> dict:
+    """Per-model (scores, valid, agent_type, is_val, is_test), independent of alpha.
+
+    CV and MLP are reproduced in numpy from the committed agent windows; the neural
+    models are read from the preds_*.npz dumps in preds_dir (dump_predictions.py /
+    7_..._--dump-preds). The nonconformity scores do not depend on alpha, so a caller
+    can re-evaluate coverage at any number of targets without recomputing them."""
+    d = np.load(windows_path, allow_pickle=True)
+    obs = d["obs"].astype(np.float32); fut = d["fut"].astype(np.float32)
+    fut_mask = d["fut_mask"].astype(bool)
+    scene_id = d["scene_id"].astype(object); agent_type = d["agent_type"].astype(object)
+    split_of = np.array([load_splits(splits_file).get(str(s), "?") for s in scene_id])
+    is_val, is_test = split_of == "val", split_of == "test"
+    weights = {k: np.load(MLP_WEIGHTS)[k] for k in np.load(MLP_WEIGHTS).files}
+
+    out = {}
+    # CV and MLP: reproduced in numpy from committed artifacts (agent windows).
+    for name, predict in (("CV (vel_k=5)", lambda o: cv_predict(o, 5)),
+                          ("MLP", lambda o: mlp_predict(o, weights))):
+        s, v = scores_and_valid(predict(obs), fut, fut_mask)
+        out[name] = (s, v, agent_type, is_val, is_test)
+    # Neural models: consume dumped prediction NPZs if present.
+    for npz in sorted(Path(preds_dir).glob("preds_*.npz")):
+        p = np.load(npz, allow_pickle=True)
+        sp = p["split"].astype(object)
+        s, v = scores_and_valid(p["pred"], p["gt"], p["fut_mask"])
+        out[str(p["model"])] = (s, v, p["agent_type"].astype(object),
+                                sp == "val", sp == "test")
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Split-conformal wrapper (benchmark v2)")
     ap.add_argument("--windows", default=str(WINDOWS))
@@ -181,45 +225,13 @@ def main() -> int:
                     default="outputs/benchmark_v2/conformal_metrics.json")
     args = ap.parse_args()
 
-    d = np.load(args.windows, allow_pickle=True)
-    obs = d["obs"].astype(np.float32); fut = d["fut"].astype(np.float32)
-    fut_mask = d["fut_mask"].astype(bool)
-    scene_id = d["scene_id"].astype(object); agent_type = d["agent_type"].astype(object)
-    split_of = np.array([load_splits(args.splits_file).get(str(s), "?") for s in scene_id])
-    is_val, is_test = split_of == "val", split_of == "test"
-
-    weights = {k: np.load(MLP_WEIGHTS)[k] for k in np.load(MLP_WEIGHTS).files}
-
-    def run_one(s, v, types, tval, ttest, rng) -> dict:
-        """Both regimes for one model's per-(agent,step) scores + masks."""
-        test_i = np.where(ttest)[0]
-        perm = rng.permutation(len(test_i)); half = len(test_i) // 2
-        fc, fe = test_i[perm[:half]], test_i[perm[half:]]
-        A = evaluate_split(s[tval], v[tval], types[tval],
-                           s[ttest], v[ttest], types[ttest], args.alpha, args.min_cal)
-        B = evaluate_split(s[fc], v[fc], types[fc], s[fe], v[fe], types[fe],
-                           args.alpha, args.min_cal)
-        return {"regime_A_val_to_test": A, "regime_B_test_fold": B}
-
-    results = {}
-
-    # CV and MLP: reproduced in numpy from committed artifacts (agent windows).
-    for name, predict in (("CV (vel_k=5)", lambda o: cv_predict(o, 5)),
-                          ("MLP", lambda o: mlp_predict(o, weights))):
-        s, v = scores_and_valid(predict(obs), fut, fut_mask)
-        results[name] = run_one(s, v, agent_type, is_val, is_test,
-                                np.random.default_rng(int(args.fold_seed)))
-
-    # Neural models: consume dumped prediction NPZs if present
-    # (scripts/dump_predictions.py, scripts/7_..._--dump-preds).
-    for npz in sorted(Path(args.save_metrics_json).parent.glob("preds_*.npz")):
-        d = np.load(npz, allow_pickle=True)
-        name = str(d["model"])
-        s, v = scores_and_valid(d["pred"], d["gt"], d["fut_mask"])
-        types = d["agent_type"].astype(object)
-        sp = d["split"].astype(object)
-        results[name] = run_one(s, v, types, sp == "val", sp == "test",
-                                np.random.default_rng(int(args.fold_seed)))
+    data = assemble_model_scores(args.windows, args.splits_file,
+                                 Path(args.save_metrics_json).parent)
+    results = {
+        name: run_one(s, v, types, is_val, is_test, args.alpha, args.min_cal,
+                      np.random.default_rng(int(args.fold_seed)))
+        for name, (s, v, types, is_val, is_test) in data.items()
+    }
 
     for name, r in results.items():
         cA = r["regime_A_val_to_test"]["marginal"]["coverage"]

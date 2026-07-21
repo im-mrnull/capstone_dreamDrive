@@ -31,6 +31,27 @@ def test_split_conformal_achieves_nominal_coverage():
     assert out["marginal"]["coverage"] == pytest.approx(0.9, abs=0.02)
 
 
+def test_findings_robust_across_alpha():
+    """Nominal coverage + wider-band-for-tighter-target hold at several targets,
+    not just alpha=0.1 -- the reported findings aren't artifacts of the 90% choice."""
+    rng = np.random.default_rng(3)
+    n, T = 8000, 5
+    scores = np.abs(rng.normal(size=(n, T))) * (1 + np.arange(T))
+    valid = np.ones((n, T), dtype=bool)
+    classes = np.array(["A"] * n, dtype=object)
+    half = n // 2
+    prev = None
+    for alpha in (0.2, 0.1, 0.05):                # 80% -> 90% -> 95% target
+        out = cw.evaluate_split(scores[:half], valid[:half], classes[:half],
+                                scores[half:], valid[half:], classes[half:],
+                                alpha=alpha, min_cal=30)
+        assert out["marginal"]["coverage"] == pytest.approx(1 - alpha, abs=0.02)
+        radii = np.array(out["marginal_radius_by_step"])
+        if prev is not None:
+            assert np.all(radii >= prev - 1e-9)  # tighter target -> wider band
+        prev = radii
+
+
 def test_class_conditional_balances_heterogeneous_classes():
     """One global radius under-covers the wide class and over-covers the tight
     one; per-class radii pull both back toward nominal."""

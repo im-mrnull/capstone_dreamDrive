@@ -223,6 +223,17 @@ val→test, *deployed*):
 | K-mode | 80.0% | 62.0% | 90.9% | 75.7% | 95.4% | 85.9% |
 | CV | 77.3% | 64.1% | 89.0% | 73.8% | 95.2% | 82.7% |
 
+Mean conformal band radius (regime B, the valid band) at each target — the band widens as the target
+tightens, and the efficiency ordering (tighter = better forecaster) holds at every α:
+
+| Model | 80% | 90% | 95% |
+| --- | --- | --- | --- |
+| Trajectron++ | 5.5 m | 10.0 m | 15.3 m |
+| ST-GAT | 6.2 m | 10.8 m | 17.8 m |
+| MLP | 7.5 m | 13.8 m | 19.4 m |
+| K-mode | 7.9 m | 13.8 m | 20.0 m |
+| CV | 9.2 m | 15.9 m | 23.3 m |
+
 Source: [`outputs/benchmark_v2/conformal_sensitivity.json`](outputs/benchmark_v2/conformal_sensitivity.json).
 At every target, regime B (calibration matches deployment) hits it — validity holds; regime A (val→test
 shift) under-covers; and the two strong models (Trajectron++, ST-GAT) stay clearly closer to the target

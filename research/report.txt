@@ -1016,22 +1016,35 @@ deployable predictors (artifact outputs/benchmark_v2/conformal_metrics.json):
 using the per-timestep position error as the nonconformity score, the wrapper
 produces a per-step radius that contains the true future position with a
 distribution-free probability of at least 1 - alpha (alpha = 0.1, a 90 percent
-target). The frozen splits from Section 7.2.1 make this statistically clean,
-and the predictors are reproduced in numpy from committed artifacts so the
-analysis runs on CPU in seconds. Three results follow.
+target). The frozen splits from Section 7.2.1 make this statistically clean.
+Constant velocity and the MLP are reproduced in numpy from committed
+artifacts, while the three neural predictors (the K-mode top-1 head, the
+ST-GAT-inspired model, and Trajectron++ most-likely) are fed from prediction
+dumps written by scripts/dump_predictions.py and script 7 with --dump-preds,
+so the whole analysis runs on CPU in seconds. The wrapper covers all five
+deployable predictors, and four results follow.
 First, the implementation is sound when calibration matches deployment:
 split-conformal calibrated and evaluated within the test set (a seeded 50/50
-agent fold) achieves 89.0 percent coverage for constant velocity and 89.8
-percent for the MLP, both at the 90 percent target. Second, and more
-importantly, naive conformal fails under the validation-to-test distribution
-shift documented in Section 7.2.1: radii calibrated on the validation split
-and deployed on the harder test split cover only 73.8 percent (constant
-velocity) and 74.1 percent (MLP) of true positions - sixteen points below
-nominal. The same shift that motivated the frozen test set breaks conformal's
-exchangeability assumption, so a deployed system must calibrate on data drawn
-like its deployment distribution rather than on an easier split; this is a
-concrete, safety-relevant consequence of the distribution shift rather than an
-abstract one. Third, a single global radius is unfair across agent classes -
+agent fold) hits the 90 percent target for every model, from 89.0 percent for
+constant velocity to 90.9 percent for the K-mode head (89.8 percent MLP, 90.2
+percent ST-GAT, 89.9 percent Trajectron++). Second, and more importantly,
+naive conformal fails under the validation-to-test distribution shift
+documented in Section 7.2.1: radii calibrated on the validation split and
+deployed on the harder test split under-cover for all five predictors, by as
+much as sixteen points. The same shift that motivated the frozen test set
+breaks conformal's exchangeability assumption, so a deployed system must
+calibrate on data drawn like its deployment distribution rather than on an
+easier split; this is a concrete, safety-relevant consequence of the
+distribution shift rather than an abstract one. Third, the severity of that
+failure scales inversely with the accuracy of the base predictor: the
+validation-to-test coverage rises monotonically from 73.8 percent (constant
+velocity) through 74.1 percent (MLP), 75.7 percent (K-mode), and 79.3 percent
+(ST-GAT) to 84.8 percent (Trajectron++), and the mean band tightens in step
+from 15.9 to 10.0 m. A more accurate predictor has a smaller validation-to-test
+error gap, so the exchangeability violation and the under-coverage it produces
+are milder - Trajectron++ loses only five points where constant velocity loses
+fifteen - so a better forecaster also buys more robust calibrated uncertainty.
+Fourth, a single global radius is unfair across agent classes -
 it under-covers fast classes (car 78 percent) and over-covers slow ones
 (pedestrian 96 percent), which is simultaneously a safety failure on the
 former and an efficiency failure on the latter. Class-conditional radii, one

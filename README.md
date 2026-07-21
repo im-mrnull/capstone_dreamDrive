@@ -149,17 +149,35 @@ Source artifact: [`outputs/benchmark_v2/summary.json`](outputs/benchmark_v2/summ
 A post-hoc wrapper ([`scripts/conformal_wrapper.py`](scripts/conformal_wrapper.py)) turns each
 deployable point predictor into a per-timestep uncertainty band with a distribution-free
 coverage guarantee. Nonconformity is the per-step position error; the frozen splits make the
-calibration statistically clean. Three findings (α = 0.1, 90% target; artifact
+calibration statistically clean. The wrapper covers **all five deployable predictors** — CV and
+MLP reproduced in numpy, the neural three (K-mode top-1, ST-GAT, Trajectron++ most-likely) fed
+from prediction dumps ([`scripts/dump_predictions.py`](scripts/dump_predictions.py) and script 7
+`--dump-preds`). Four findings (α = 0.1, 90% target; artifact
 [`outputs/benchmark_v2/conformal_metrics.json`](outputs/benchmark_v2/conformal_metrics.json)):
 
+| Predictor | Regime B — test-fold | Regime A — val→test | band radius |
+|---|---|---|---|
+| CV (vel_k=5) | 89.0% | 73.8% | 15.9 m |
+| MLP | 89.8% | 74.1% | 13.8 m |
+| K-mode (top-1) | 90.9% | 75.7% | 13.8 m |
+| ST-GAT (MHA) | 90.2% | 79.3% | 10.8 m |
+| Trajectron++ (most-likely) | 89.9% | 84.8% | 10.0 m |
+
 1. **The method is sound when calibration matches deployment.** Split-conformal *within* the
-   test set (seeded 50/50 fold) hits the target: CV 89.0%, MLP 89.8% empirical coverage.
+   test set (seeded 50/50 fold) hits the 90% target for **every** model (89.0–90.9%, col 1) —
+   the implementation is correct across all five.
 2. **Naïve conformal fails under the val→test shift (honest, important).** Calibrated on val
-   and deployed on the harder test split, coverage collapses to **73.8% (CV) / 74.1% (MLP)** —
-   16 points below nominal. The same distribution shift the frozen test set exposed
-   (test is 1.2–1.8× harder than val) breaks conformal's exchangeability assumption. A
-   deployed system must calibrate on data drawn like deployment, not on an easier split.
-3. **One global radius is per-class unfair; class-conditional radii fix it.** A single radius
+   and deployed on the harder test split, coverage collapses for all five (col 2). The same
+   distribution shift the frozen test set exposed (test is 1.2–1.8× harder than val) breaks
+   conformal's exchangeability assumption. A deployed system must calibrate on data drawn like
+   deployment, not on an easier split.
+3. **Stronger predictors survive the shift better.** Regime-A coverage rises monotonically with
+   base-model accuracy — CV 73.8% → MLP 74.1% → K-mode 75.7% → ST-GAT 79.3% → Trajectron++
+   84.8% — and the band tightens in step (15.9→10.0 m). A more accurate predictor has a smaller
+   val→test error gap, so the exchangeability violation bites less: Trajectron++ loses only 5
+   points where CV loses 15. Calibrated uncertainty is one more thing a better forecaster buys.
+4. **One global radius is per-class unfair; class-conditional radii fix it** (shown for CV; one
+   figure per model in `outputs/benchmark_v2/conformal_coverage_*.png`). A single radius
    under-covers fast classes (Car 78%) and over-covers slow ones (Pedestrian 96%) — a safety
    *and* efficiency failure. Per-IDD-3D-class radii pull each class toward nominal: Car
    78→91% (band widened 16→27 m, as it should be), Pedestrian 96→89% (band **halved**,

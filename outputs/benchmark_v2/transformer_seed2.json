@@ -1,0 +1,281 @@
+{
+  "model": "MapFreeTransformer_v2",
+  "data": "outputs/canonical_world_obs20_pred60.npz",
+  "splits_file": "splits/scene_splits.json",
+  "obs_len": 20,
+  "pred_len": 60,
+  "seed": 2,
+  "best_epoch": 13,
+  "val": {
+    "ade": 2.435790777206421,
+    "fde": 5.546024322509766,
+    "n_agents": 993,
+    "per_class": {
+      "classes": {
+        "Bicycle": {
+          "n": 7,
+          "ade": 0.38642486929893494,
+          "fde": 0.7625128626823425,
+          "mean_gt_path_m": 3.295048952102661,
+          "ade_per_path": 0.11727439612150192
+        },
+        "BicycleGroup": {
+          "n": 7,
+          "ade": 0.6383804082870483,
+          "fde": 0.9557521939277649,
+          "mean_gt_path_m": 3.6430461406707764,
+          "ade_per_path": 0.17523258924484253
+        },
+        "Bus": {
+          "n": 11,
+          "ade": 5.310000896453857,
+          "fde": 18.13733673095703,
+          "mean_gt_path_m": 35.708744049072266,
+          "ade_per_path": 0.14870309829711914
+        },
+        "Car": {
+          "n": 218,
+          "ade": 4.477272987365723,
+          "fde": 10.151205062866211,
+          "mean_gt_path_m": 22.237703323364258,
+          "ade_per_path": 0.2013370245695114
+        },
+        "Motorcycle": {
+          "n": 51,
+          "ade": 0.7068532109260559,
+          "fde": 1.0040626525878906,
+          "mean_gt_path_m": 2.052062511444092,
+          "ade_per_path": 0.3444598913192749
+        },
+        "MotorcyleRider": {
+          "n": 66,
+          "ade": 1.6768970489501953,
+          "fde": 3.4397315979003906,
+          "mean_gt_path_m": 13.708970069885254,
+          "ade_per_path": 0.12232115119695663
+        },
+        "Pedestrian": {
+          "n": 226,
+          "ade": 0.8349410891532898,
+          "fde": 1.6851450204849243,
+          "mean_gt_path_m": 4.091959476470947,
+          "ade_per_path": 0.20404432713985443
+        },
+        "PoliceCar": {
+          "n": 7,
+          "ade": 8.704558372497559,
+          "fde": 17.857084274291992,
+          "mean_gt_path_m": 24.243146896362305,
+          "ade_per_path": 0.3590523302555084
+        },
+        "Scooter": {
+          "n": 81,
+          "ade": 0.5980775952339172,
+          "fde": 1.0400545597076416,
+          "mean_gt_path_m": 1.6253398656845093,
+          "ade_per_path": 0.3679707944393158
+        },
+        "ScooterRider": {
+          "n": 141,
+          "ade": 3.5944318771362305,
+          "fde": 8.413304328918457,
+          "mean_gt_path_m": 21.10936164855957,
+          "ade_per_path": 0.1702766716480255
+        },
+        "TourCar": {
+          "n": 108,
+          "ade": 2.5544252395629883,
+          "fde": 6.146915435791016,
+          "mean_gt_path_m": 16.88288116455078,
+          "ade_per_path": 0.15130268037319183
+        },
+        "Truck": {
+          "n": 37,
+          "ade": 3.1214380264282227,
+          "fde": 6.953726291656494,
+          "mean_gt_path_m": 10.717110633850098,
+          "ade_per_path": 0.29125741124153137
+        },
+        "Unknown": {
+          "n": 26,
+          "ade": 0.28275182843208313,
+          "fde": 0.47448083758354187,
+          "mean_gt_path_m": 0.8905573487281799,
+          "ade_per_path": 0.3174998462200165
+        },
+        "Van": {
+          "n": 7,
+          "ade": 3.8251309394836426,
+          "fde": 13.516830444335938,
+          "mean_gt_path_m": 16.678897857666016,
+          "ade_per_path": 0.22933955490589142
+        }
+      },
+      "min_class_n": 50,
+      "ade_disparity_worst_over_best": 7.486107192520049
+    }
+  },
+  "test": {
+    "ade": 3.5843420028686523,
+    "fde": 7.873433589935303,
+    "n_agents": 2177,
+    "per_class": {
+      "classes": {
+        "Animal": {
+          "n": 12,
+          "ade": 0.5266167521476746,
+          "fde": 0.9393541216850281,
+          "mean_gt_path_m": 1.8936980962753296,
+          "ade_per_path": 0.27808907628059387
+        },
+        "BicycleGroup": {
+          "n": 6,
+          "ade": 0.22339759767055511,
+          "fde": 0.2910197377204895,
+          "mean_gt_path_m": 1.8590620756149292,
+          "ade_per_path": 0.1201668307185173
+        },
+        "BicycleRider": {
+          "n": 5,
+          "ade": 0.9048799276351929,
+          "fde": 1.4676536321640015,
+          "mean_gt_path_m": 5.248300552368164,
+          "ade_per_path": 0.1724138855934143
+        },
+        "Bus": {
+          "n": 12,
+          "ade": 4.038229465484619,
+          "fde": 10.790352821350098,
+          "mean_gt_path_m": 9.603255271911621,
+          "ade_per_path": 0.4205062985420227
+        },
+        "Car": {
+          "n": 336,
+          "ade": 5.341794490814209,
+          "fde": 11.889715194702148,
+          "mean_gt_path_m": 25.117238998413086,
+          "ade_per_path": 0.21267442405223846
+        },
+        "Child": {
+          "n": 5,
+          "ade": 0.13654199242591858,
+          "fde": 0.23259663581848145,
+          "mean_gt_path_m": 0.628398060798645,
+          "ade_per_path": 0.21728582680225372
+        },
+        "Crane": {
+          "n": 8,
+          "ade": 0.7019208073616028,
+          "fde": 0.9077976942062378,
+          "mean_gt_path_m": 2.4782488346099854,
+          "ade_per_path": 0.28323256969451904
+        },
+        "Misc": {
+          "n": 13,
+          "ade": 0.9951877593994141,
+          "fde": 1.3958568572998047,
+          "mean_gt_path_m": 5.094522476196289,
+          "ade_per_path": 0.19534465670585632
+        },
+        "Motorcycle": {
+          "n": 43,
+          "ade": 0.627201497554779,
+          "fde": 1.308341145515442,
+          "mean_gt_path_m": 2.239999294281006,
+          "ade_per_path": 0.2800007462501526
+        },
+        "MotorcyleRider": {
+          "n": 396,
+          "ade": 4.0045342445373535,
+          "fde": 9.074714660644531,
+          "mean_gt_path_m": 25.637027740478516,
+          "ade_per_path": 0.15620118379592896
+        },
+        "Pedestrian": {
+          "n": 372,
+          "ade": 1.0081515312194824,
+          "fde": 2.064779758453369,
+          "mean_gt_path_m": 4.171732425689697,
+          "ade_per_path": 0.24166256189346313
+        },
+        "PoliceCar": {
+          "n": 7,
+          "ade": 5.855754852294922,
+          "fde": 8.796945571899414,
+          "mean_gt_path_m": 12.952471733093262,
+          "ade_per_path": 0.45209553837776184
+        },
+        "Scooter": {
+          "n": 50,
+          "ade": 0.4499647617340088,
+          "fde": 0.9583093523979187,
+          "mean_gt_path_m": 1.6001495122909546,
+          "ade_per_path": 0.28120169043540955
+        },
+        "ScooterRider": {
+          "n": 328,
+          "ade": 5.797656059265137,
+          "fde": 12.845433235168457,
+          "mean_gt_path_m": 28.77558708190918,
+          "ade_per_path": 0.2014782875776291
+        },
+        "TourCar": {
+          "n": 247,
+          "ade": 4.619014739990234,
+          "fde": 9.546692848205566,
+          "mean_gt_path_m": 22.784603118896484,
+          "ade_per_path": 0.20272526144981384
+        },
+        "Truck": {
+          "n": 278,
+          "ade": 2.8765716552734375,
+          "fde": 6.474748611450195,
+          "mean_gt_path_m": 11.764565467834473,
+          "ade_per_path": 0.24451151490211487
+        },
+        "Unknown": {
+          "n": 38,
+          "ade": 0.5992152690887451,
+          "fde": 1.2802238464355469,
+          "mean_gt_path_m": 3.03379225730896,
+          "ade_per_path": 0.197513610124588
+        },
+        "Van": {
+          "n": 21,
+          "ade": 0.5771422982215881,
+          "fde": 1.0336445569992065,
+          "mean_gt_path_m": 4.341926097869873,
+          "ade_per_path": 0.13292311131954193
+        }
+      },
+      "min_class_n": 50,
+      "ade_disparity_worst_over_best": 12.884689096370508
+    }
+  },
+  "hyper": {
+    "seed": 2,
+    "epochs": 300,
+    "batch_size": 64,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "loss": "huber",
+    "patience": 0,
+    "lr_plateau": true,
+    "lr_plateau_factor": 0.5,
+    "lr_plateau_patience": 10,
+    "min_lr": 1e-05,
+    "amp": true,
+    "rot_aug": false,
+    "d_model": 128,
+    "n_heads": 4,
+    "n_temporal_layers": 2,
+    "n_social_layers": 2,
+    "n_decoder_layers": 2,
+    "ff_mult": 4,
+    "dropout": 0.1,
+    "heading_k": 5,
+    "device": "cuda"
+  },
+  "when": "2026-07-21T13:29:05",
+  "note": "Benchmark v2: plain map-free Transformer (deterministic single output), per-agent heading canonicalization, masked per-timestep metrics, FDE at last valid step, model selection on val only."
+}

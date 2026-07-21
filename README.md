@@ -76,6 +76,7 @@ The current headline benchmark. Protocol:
 | CV (vel_k=5) | 1 | yes | 4.36 | 9.78 | 2.43 | 0 |
 | MLP | 1 | yes | 3.97 ± 0.01 | 8.66 ± 0.05 | 2.31 ± 0.01 | 0,1,2 |
 | ST-GAT-inspired (MHA) | 1 | yes | 3.41 ± 0.07 | 7.35 ± 0.16 | 2.38 ± 0.03 | 0,1,2 |
+| Map-free transformer | 1 | yes | 3.57 ± 0.11 | 7.85 ± 0.18 | 2.46 ± 0.02 | 0,1,2 |
 | K-mode decoder — oracle best-of-10 | 10 | no (oracle) | 1.88 ± 0.05 | 3.18 ± 0.11 | 1.32 ± 0.03 | 0,1,2 |
 | K-mode decoder — learned top-1 | 10 | yes | 4.31 ± 0.05 | 9.48 ± 0.24 | 3.38 ± 0.36 | 0,1,2 |
 | K-mode decoder (top-1-selected) — oracle best-of-10 | 10 | no (oracle) | 2.01 ± 0.07 | 3.56 ± 0.19 | 1.69 ± 0.09 | 0,1,2 |

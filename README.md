@@ -212,6 +212,18 @@ not artifacts of the 90% choice:
 
 ![Conformal findings are robust to the coverage target α](outputs/benchmark_v2/conformal_alpha_sensitivity.png)
 
+Empirical coverage at each target (**B** = regime B, seeded test-fold, *valid*; **A** = regime A,
+val→test, *deployed*):
+
+| Model | B @ 80% | A @ 80% | B @ 90% | A @ 90% | B @ 95% | A @ 95% |
+| --- | --- | --- | --- | --- | --- | --- |
+| Trajectron++ | 79.4% | 71.7% | 89.9% | 84.8% | 95.1% | 92.1% |
+| ST-GAT | 78.0% | 66.1% | 90.2% | 79.3% | 96.0% | 88.8% |
+| MLP | 76.8% | 60.1% | 89.8% | 74.1% | 95.4% | 83.9% |
+| K-mode | 80.0% | 62.0% | 90.9% | 75.7% | 95.4% | 85.9% |
+| CV | 77.3% | 64.1% | 89.0% | 73.8% | 95.2% | 82.7% |
+
+Source: [`outputs/benchmark_v2/conformal_sensitivity.json`](outputs/benchmark_v2/conformal_sensitivity.json).
 At every target, regime B (calibration matches deployment) hits it — validity holds; regime A (val→test
 shift) under-covers; and the two strong models (Trajectron++, ST-GAT) stay clearly closer to the target
 than the weak three. The choice of α moves the absolute coverage and band width, not the qualitative

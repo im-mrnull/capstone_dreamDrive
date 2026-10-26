@@ -1,0 +1,255 @@
+<mxfile host="app.diagrams.net" modified="2026-08-31T12:30:00.000Z" agent="DreamDrive" version="24.7.6">
+  <diagram name="DreamDrive Full Architecture" id="dreamdrive-arch">
+    <mxGraphModel dx="2200" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="3300" pageHeight="2400" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- PHASE 1: Raw Data to Clean Trajectories -->
+        <mxCell id="phase1" value="Phase 1: Raw Data → Clean Trajectories" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="700" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="raw" value="IDD-3D Raw Labels&#xa;105 scenes, ego-frame&#xa;Per-frame JSON" style="rounded=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" vertex="1" parent="phase1">
+          <mxGeometry x="20" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="parse" value="Script 1: Parse&#xa;positions&#xa;parsed_positions/*.csv" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="phase1">
+          <mxGeometry x="200" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="ego" value="Script 0: Ego-Motion&#xa;Compensation (KEY)&#xa;RANSAC rigid alignment&#xa;Ped: 5.05 to 0.91 m/s" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="phase1">
+          <mxGeometry x="380" y="40" width="160" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="world" value="World-Frame&#xa;Positions&#xa;parsed_positions_world/*.csv" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="phase1">
+          <mxGeometry x="580" y="50" width="100" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="raw" target="parse" parent="phase1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="parse" target="ego" parent="phase1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="ego" target="world" parent="phase1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- PHASE 2: Dataset Engineering -->
+        <mxCell id="phase2" value="Phase 2: Dataset Engineering" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="960" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="consol" value="Script 2: Consolidate&#xa;Per-scene CSVs to one&#xa;trajectories.csv" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="phase2">
+          <mxGeometry x="20" y="50" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="window" value="Script 3: Windows&#xa;2s obs to 6s pred&#xa;4,820 windows" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="phase2">
+          <mxGeometry x="20" y="130" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ma" value="Script 4: Multi-agent&#xa;export 105 scene NPZs&#xa;(pos, mask, vel, type)" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="phase2">
+          <mxGeometry x="200" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="splits" value="Script 8: Frozen Splits&#xa;md5 hash-based&#xa;73 train / 10 val / 22 test" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="phase2">
+          <mxGeometry x="200" y="130" width="150" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="canonical" value="Canonical Dataset (KEY)&#xa;718 sequences&#xa;10,576 agents&#xa;(vs 58% loss old filter)" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="phase2">
+          <mxGeometry x="400" y="40" width="160" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="fmt_sa" value="Single-Agent&#xa;Windows&#xa;(CV, MLP)" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="phase2">
+          <mxGeometry x="620" y="40" width="100" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="fmt_ma" value="Multi-Agent&#xa;Sequences&#xa;(ST-GAT, K-mode, TF)" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="phase2">
+          <mxGeometry x="740" y="40" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="fmt_tpp" value="Trajectron++&#xa;pkl format&#xa;(train/val/test.pkl)" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="phase2">
+          <mxGeometry x="620" y="110" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="fmt_af" value="AgentFormer&#xa;Direct adapter&#xa;(dd_agentformer.py)" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="phase2">
+          <mxGeometry x="750" y="110" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="consol" target="window" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="consol" target="ma" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="ma" target="splits" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="ma" target="canonical" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="canonical" target="fmt_sa" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="canonical" target="fmt_ma" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="canonical" target="fmt_tpp" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="canonical" target="fmt_af" parent="phase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_p1_p2" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;strokeColor=#6c8ebf;" edge="1" source="world" target="consol" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- PHASE 3: Model Benchmark -->
+        <mxCell id="phase3" value="Phase 3: Model Benchmark (3-seed, frozen test)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="580" width="960" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_simple" value="Simple Baselines" style="text;fontStyle=3;fontSize=11;fillColor=none;align=center;" vertex="1" parent="phase3">
+          <mxGeometry x="20" y="35" width="120" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_cv" value="CV (Constant Velocity)&#xa;No learning&#xa;ADE: 4.36m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="20" y="60" width="120" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_mlp" value="MLP (2-layer NN)&#xa;No interaction&#xa;ADE: 3.97m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="20" y="125" width="120" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_home" value="Homegrown Interaction Models" style="text;fontStyle=3;fontSize=11;fillColor=none;align=center;" vertex="1" parent="phase3">
+          <mxGeometry x="170" y="35" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_stgat" value="ST-GAT-inspired&#xa;LSTM + Attention&#xa;ADE: 3.41m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="170" y="60" width="120" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_kmode" value="K-mode Decoder&#xa;10 parallel futures&#xa;Oracle: 1.88m Top-1: 4.15m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="170" y="125" width="150" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_tf" value="Map-free Transformer&#xa;Attention everywhere&#xa;ADE: 3.57m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="170" y="195" width="140" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_upstream" value="Upstream Published Models" style="text;fontStyle=3;fontSize=11;fillColor=none;align=center;" vertex="1" parent="phase3">
+          <mxGeometry x="400" y="35" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_tpp" value="Trajectron++ (BEST)&#xa;LSTM + GNN + CVAE&#xa;Most-likely: 2.58m&#xa;Oracle: 1.37m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="400" y="60" width="160" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_tpp_h" value="T++ Hetero (Unicycle)&#xa;Negative result&#xa;ADE: 2.84m (worse)" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="400" y="145" width="160" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_af" value="AgentFormer&#xa;Transformer CVAE&#xa;Code done, needs GPU" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="400" y="215" width="140" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="m_led" value="LED (Diffusion)&#xa;Iterative denoising&#xa;Not started" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="560" y="215" width="120" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_abl" value="Ablation Studies (all negative)" style="text;fontStyle=3;fontSize=11;fillColor=none;align=center;" vertex="1" parent="phase3">
+          <mxGeometry x="700" y="35" width="220" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="abl_ewta" value="EWTA Annealing&#xa;Plain WTA won" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="720" y="60" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="abl_content" value="Content-Aware Scorer&#xa;No new information" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="720" y="115" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="abl_uni" value="Unicycle Physics&#xa;Heading noise kills it" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase3">
+          <mxGeometry x="720" y="170" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="eval" value="3-Seed Evaluation&#xa;on Frozen Test Set&#xa;summary.json" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="phase3">
+          <mxGeometry x="600" y="60" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="readme_tbl" value="make_tables.py&#xa;Auto-generated&#xa;README tables" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="phase3">
+          <mxGeometry x="600" y="140" width="100" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_tpp_eval" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="m_tpp" target="eval" parent="phase3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_eval_tbl" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="eval" target="readme_tbl" parent="phase3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- PHASE 4: Analysis and Uncertainty -->
+        <mxCell id="phase4" value="Phase 4: Analysis and Uncertainty" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="960" width="960" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="fairness" value="Per-Class Fairness&#xa;Audit&#xa;16x ADE disparity&#xa;(Car 4.08 vs Animal 0.25)" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase4">
+          <mxGeometry x="20" y="50" width="160" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="gap" value="Oracle vs Deployable&#xa;Gap Decomposition&#xa;Calibration: 0.47m&#xa;Coverage: 1.21m" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase4">
+          <mxGeometry x="200" y="50" width="160" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="conformal" value="Conformal Prediction (KEY)&#xa;6 models x 2 regimes&#xa;Marginal + Class-Conditional&#xa;4 findings documented" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=10;" vertex="1" parent="phase4">
+          <mxGeometry x="400" y="40" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="alpha" value="Alpha Sensitivity&#xa;80% / 90% / 95%&#xa;Rankings preserved at&#xa;every target" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase4">
+          <mxGeometry x="620" y="50" width="150" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="neg_res" value="3 Negative Results&#xa;EWTA / Content / Unicycle&#xa;All documented" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase4">
+          <mxGeometry x="800" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="conf_detail" value="Findings: (1) Method valid 89-91% (2) Breaks under val-test shift (3) Better models degrade less r=0.93 (4) Class-conditional radii fix fairness" style="text;fontSize=9;fillColor=none;align=left;whiteSpace=wrap;" vertex="1" parent="phase4">
+          <mxGeometry x="20" y="140" width="700" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- PHASE 5: Integrity and CI -->
+        <mxCell id="phase5" value="Phase 5: Integrity and CI" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1200" width="700" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="ci_prov" value="make_tables.py --check&#xa;README matches JSON" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase5">
+          <mxGeometry x="20" y="45" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ci_ban" value="test_provenance.py&#xa;Banned fabricated claims" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase5">
+          <mxGeometry x="180" y="45" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ci_gh" value="GitHub Actions CI&#xa;pytest + provenance&#xa;on every push" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase5">
+          <mxGeometry x="340" y="45" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ci_safe" value="Structurally impossible&#xa;to ship fabricated numbers" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=10;" vertex="1" parent="phase5">
+          <mxGeometry x="510" y="45" width="170" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- PHASE 6: Future Work -->
+        <mxCell id="phase6" value="Phase 6: Future Work (Not Started)" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1370" width="960" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="fw_chaos" value="Chaos Gap&#xa;Western to Indian&#xa;transfer measurement&#xa;UniTraj + zero-shot eval" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=10;" vertex="1" parent="phase6">
+          <mxGeometry x="20" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="fw_carla" value="CARLA Simulation&#xa;Replay IDD-3D trajectories&#xa;as scripted actors" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase6">
+          <mxGeometry x="180" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="fw_planner" value="Frenet/MPC Planner&#xa;Cost = Progress +&#xa;Comfort + Collision Risk" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase6">
+          <mxGeometry x="340" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="fw_conf_plan" value="Conformal to&#xa;Planner Constraints&#xa;Safety bubbles as&#xa;no-go zones" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase6">
+          <mxGeometry x="500" y="50" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="fw_rss" value="RSS Violations&#xa;Collision rates,&#xa;near-miss, TTC/PET" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase6">
+          <mxGeometry x="660" y="50" width="130" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="fw_bench" value="Named Benchmark&#xa;+ Leaderboard&#xa;(Patent Pending)" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="phase6">
+          <mxGeometry x="810" y="50" width="130" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_fw1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="fw_carla" target="fw_planner" parent="phase6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_fw2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="fw_planner" target="fw_conf_plan" parent="phase6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_fw3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="fw_conf_plan" target="fw_rss" parent="phase6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- CROSS-PHASE EDGES -->
+        <mxCell id="e_p3_p4" value="" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;strokeColor=#6c8ebf;" edge="1" source="eval" target="fairness" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- LEGEND -->
+        <mxCell id="legend" value="Legend" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="1200" width="220" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg1" value="Done" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="35" width="90" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2" value="Needs GPU" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="110" y="35" width="100" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg3" value="Not Started" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="70" width="100" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg4" value="Key Finding" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="120" y="70" width="90" height="25" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

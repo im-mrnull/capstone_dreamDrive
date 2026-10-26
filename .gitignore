@@ -24,3 +24,6 @@ __pycache__/
 # OS noise
 Thumbs.db
 .DS_Store
+
+# Obsidian per-user UI state (the vault notes in docs/ are tracked)
+docs/.obsidian/workspace.json

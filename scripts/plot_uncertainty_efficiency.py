@@ -1,4 +1,4 @@
-"""Plot the accuracy->uncertainty link across the five deployable predictors.
+"""Plot the accuracy->uncertainty link across the six deployable predictors.
 
 Two figures, both regenerable from committed artifacts (like the tables):
 
@@ -48,6 +48,7 @@ MODELS = [
     ("CV (vel_k=5)", ["CV"], "CV"),
     ("MLP", ["MLP"], "MLP"),
     ("K-mode decoder (top-1-sel)", ["K-mode", "top-1-selected"], "K-mode"),
+    ("map-free transformer", ["Map-free"], "Map-free"),
     ("ST-GAT-inspired (MHA)", ["ST-GAT"], "ST-GAT"),
     ("Trajectron++ (most-likely)", ["Trajectron++", "most-likely"], "Trajectron++"),
 ]
@@ -109,9 +110,11 @@ def plot_efficiency(rows, target, out_png: Path) -> None:
         ax.plot(rw["ade"], rw["radius"], "o", ms=11, mfc=BLUE, mec="white",
                 mew=2, zorder=5)
 
-    # direct labels (hand-placed to dodge the MLP/K-mode near-overlap at ~13.8 m).
+    # direct labels (hand-placed to dodge the MLP/K-mode near-overlap at ~13.8 m
+    # and the ST-GAT/Map-free proximity at ~3.4-3.6 m ADE).
     off = {"Trajectron++": (0, 13, "center", "bottom"),
-           "ST-GAT": (12, 0, "left", "center"),
+           "ST-GAT": (11, -3, "left", "center"),
+           "Map-free": (0, 12, "center", "bottom"),
            "MLP": (-11, -9, "right", "center"),
            "K-mode": (12, 6, "left", "center"),
            "CV": (0, 13, "center", "bottom")}

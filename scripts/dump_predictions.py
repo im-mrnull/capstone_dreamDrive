@@ -116,15 +116,27 @@ def load_transformer(device: torch.device):
     return lambda b: abs_from_rel(b.obs_abs, model(b.obs_rel, b.agent_mask))
 
 
+# key -> (display name, checkpoint loader, output filename). The display name is
+# what conformal_wrapper.py keys each model by (via the NPZ `model` field).
+REGISTRY = {
+    "stgat": ("ST-GAT-inspired (MHA)", load_stgat, "preds_stgat.npz"),
+    "mfp": ("K-mode decoder (top-1-sel)", load_mfp, "preds_mfp.npz"),
+    "transformer": ("map-free transformer", load_transformer, "preds_transformer.npz"),
+}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--models", nargs="+", choices=sorted(REGISTRY), default=sorted(REGISTRY),
+                    help="which model dumps to (re)generate; default all. Use a subset to "
+                         "add one model without overwriting the committed dumps of others.")
     args = ap.parse_args()
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
 
-    dump("ST-GAT-inspired (MHA)", load_stgat(device), device, OUT / "preds_stgat.npz")
-    dump("K-mode decoder (top-1-sel)", load_mfp(device), device, OUT / "preds_mfp.npz")
-    dump("map-free transformer", load_transformer(device), device, OUT / "preds_transformer.npz")
+    for key in args.models:
+        name, loader, fname = REGISTRY[key]
+        dump(name, loader(device), device, OUT / fname)
     return 0
 
 

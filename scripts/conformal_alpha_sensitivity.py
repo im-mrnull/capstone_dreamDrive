@@ -39,9 +39,12 @@ REPO = Path(__file__).resolve().parent.parent
 OUT_DIR = REPO / "outputs" / "benchmark_v2"
 
 # Validated light-surface palette (dataviz skill; CVD-checked), matching the other
-# benchmark figures. The five models take the first five categorical slots (fixed
-# order; validate_palette.js: all checks pass on surface #fcfcfb). Hue carries
-# identity per model; the plot's vertical position carries the ordering.
+# benchmark figures. The six models take the first six categorical slots (fixed
+# reference order — the map-free transformer is appended as slot 6 green, kept last
+# so the color sequence stays the validated reference *prefix*: validate_palette.js
+# passes on #fcfcfb, worst adjacent CVD ΔE 9.1; the ADE-position ordering fails
+# green↔orange, so entity-color is decoupled from the reading order here). Hue
+# carries identity per model; the plot's vertical position carries the ordering.
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
 INK2 = "#52514e"
@@ -57,6 +60,7 @@ MODELS = [
     ("MLP", "MLP", "#1baf7a"),
     ("K-mode decoder (top-1-sel)", "K-mode", "#eda100"),
     ("CV (vel_k=5)", "CV", "#e87ba4"),
+    ("map-free transformer", "Map-free", "#008300"),
 ]
 
 
@@ -102,7 +106,7 @@ def plot(payload: dict, out_png: Path) -> None:
             ax.plot(targets, cov, "-o", color=col, ms=7, lw=2, mec="white",
                     mew=1.4, zorder=4, label=disp)
         if regime == "regime_B_test_fold":
-            ax.annotate("all five models track the\ntarget (lines overlap)",
+            ax.annotate("all six models track the\ntarget (lines overlap)",
                         xy=(0.97, 0.06), xycoords="axes fraction", fontsize=9,
                         color=INK2, va="bottom", ha="right", linespacing=1.25)
 
@@ -126,11 +130,11 @@ def plot(payload: dict, out_png: Path) -> None:
 
     axes[0].set_ylabel("empirical coverage", fontsize=10.5, color=INK2)
     handles, labels = axes[1].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=5, frameon=False,
+    fig.legend(handles, labels, loc="upper center", ncol=6, frameon=False,
                fontsize=9.5, bbox_to_anchor=(0.5, 0.965), handletextpad=0.4,
                columnspacing=1.6)
     fig.suptitle("The conformal findings are robust to the coverage target α  ·  "
-                 "IDD-3D, five deployable models, targets 80/90/95%",
+                 "IDD-3D, six deployable models, targets 80/90/95%",
                  fontsize=12, color=INK, fontweight="bold", x=0.008, ha="left", y=1.03)
 
     fig.tight_layout(rect=(0, 0, 1, 0.90))

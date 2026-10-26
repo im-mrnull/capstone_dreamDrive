@@ -141,8 +141,34 @@
           15.322763798636965
         ]
       }
+    },
+    "map-free transformer": {
+      "regime_A_val_to_test": {
+        "coverage": [
+          0.6588463726532934,
+          0.807563877414727,
+          0.8879022483860595
+        ],
+        "mean_radius_m": [
+          4.025458583702026,
+          6.890840443699786,
+          9.881422469511055
+        ]
+      },
+      "regime_B_test_fold": {
+        "coverage": [
+          0.7560041768186565,
+          0.9026403460792601,
+          0.95132017303963
+        ],
+        "mean_radius_m": [
+          6.0145925044780775,
+          11.701171146728809,
+          16.420218222669767
+        ]
+      }
     }
   },
-  "when": "2026-07-21T06:47:00",
+  "when": "2026-07-21T22:35:31",
   "note": "Marginal split-conformal coverage + mean radius per model at each target. Regime A (val->test) exposes the distribution shift; regime B (seeded test fold) is exchangeable and valid. Scores are alpha-free and reused across targets. Headline conformal_metrics.json (alpha=0.1) is unchanged."
 }

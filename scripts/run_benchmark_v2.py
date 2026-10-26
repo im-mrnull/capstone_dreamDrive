@@ -46,6 +46,7 @@ def launch_all(smoke: bool) -> None:
     mlp_epochs = "20" if smoke else "300"
     gnn_epochs = "20" if smoke else "300"
     tpp_epochs = "2" if smoke else "100"
+    af_epochs = "2" if smoke else "100"
 
     # CV: deterministic, single run.
     cv_json = OUT / "cv_velk5.json"
@@ -93,6 +94,15 @@ def launch_all(smoke: bool) -> None:
                  "--log-tag", f"_idd3d_world_v2_s{seed}",
                  "--save-metrics-json", str(tpp_json)])
 
+        # Upstream AgentFormer (base CVAE, map-free). Runs only if the repo is
+        # cloned + patched (scripts/patch_agentformer.py); needs easydict, glob2.
+        af_json = OUT / f"agentformer_seed{seed}.json"
+        if (REPO / "third_party" / "agentformer" / "model" / "agentformer.py").exists() and not af_json.exists():
+            run([py, "scripts/model6_agentformer_train_eval.py",
+                 "--device", "cuda", "--seed", s, "--epochs", af_epochs,
+                 "--save-metrics-json", str(af_json),
+                 "--save-ckpt", str(OUT / f"agentformer_ckpt_seed{seed}.pt")])
+
         # K-mode with checkpoint selection on val top-1 (deployable) rather than
         # val oracle. Winner of the EWTA grid (outputs/benchmark_v2/mfp_ewta_grid/):
         # EWTA annealing lost on both metrics; selection criterion was the fix.
@@ -134,6 +144,8 @@ VARIANTS = [
     ("Trajectron++ — oracle best-of-20", "trajectronpp_seed{seed}.json", ["best_of_k"], 20, False),
     ("Trajectron++ hetero (unicycle) — most-likely", "trajectronpp_hetero_seed{seed}.json", ["most_likely"], 1, True),
     ("Trajectron++ hetero (unicycle) — oracle best-of-20", "trajectronpp_hetero_seed{seed}.json", ["best_of_k"], 20, False),
+    ("AgentFormer (upstream, map-free) — most-likely", "agentformer_seed{seed}.json", ["most_likely"], 1, True),
+    ("AgentFormer (upstream, map-free) — oracle best-of-20", "agentformer_seed{seed}.json", ["best_of_k"], 20, False),
 ]
 
 

@@ -62,7 +62,7 @@ The current headline benchmark. Protocol:
 - **Data:** [`outputs/canonical_world_obs20_pred60.npz`](outputs/canonical_world_obs20_pred60_stats.json)
   — world-frame, 718 sequences, **10,576 agents** (the legacy all-80-frames survivor filter
   discarded 58% of predictable agents; agents now need only a full 2 s observation + ≥1 future
-  step, with per-timestep `fut_mask`). All five models evaluate on this same population.
+  step, with per-timestep `fut_mask`). Every model evaluates on this same population.
 - **Split:** frozen [`splits/scene_splits.json`](splits/scene_splits.json) (73/10/22 scenes,
   hash-based, committed). Model selection uses val only; **test numbers are final**.
 - **Seeds:** {0,1,2} affect model init/shuffling only, never the split. Cells are mean ± std.
@@ -150,10 +150,10 @@ Source artifact: [`outputs/benchmark_v2/summary.json`](outputs/benchmark_v2/summ
 A post-hoc wrapper ([`scripts/conformal_wrapper.py`](scripts/conformal_wrapper.py)) turns each
 deployable point predictor into a per-timestep uncertainty band with a distribution-free
 coverage guarantee. Nonconformity is the per-step position error; the frozen splits make the
-calibration statistically clean. The wrapper covers **all five deployable predictors** — CV and
-MLP reproduced in numpy, the neural three (K-mode top-1, ST-GAT, Trajectron++ most-likely) fed
-from prediction dumps ([`scripts/dump_predictions.py`](scripts/dump_predictions.py) and script 7
-`--dump-preds`). Four findings (α = 0.1, 90% target; artifact
+calibration statistically clean. The wrapper covers **all six deployable predictors** — CV and
+MLP reproduced in numpy, the neural four (K-mode top-1, ST-GAT, map-free transformer, Trajectron++
+most-likely) fed from prediction dumps ([`scripts/dump_predictions.py`](scripts/dump_predictions.py)
+and script 7 `--dump-preds`). Four findings (α = 0.1, 90% target; artifact
 [`outputs/benchmark_v2/conformal_metrics.json`](outputs/benchmark_v2/conformal_metrics.json)):
 
 | Predictor | Regime B — test-fold | Regime A — val→test | band radius |
@@ -162,21 +162,27 @@ from prediction dumps ([`scripts/dump_predictions.py`](scripts/dump_predictions.
 | MLP | 89.8% | 74.1% | 13.8 m |
 | K-mode (top-1) | 90.9% | 75.7% | 13.8 m |
 | ST-GAT (MHA) | 90.2% | 79.3% | 10.8 m |
+| Map-free transformer | 90.3% | 80.8% | 11.7 m |
 | Trajectron++ (most-likely) | 89.9% | 84.8% | 10.0 m |
 
 1. **The method is sound when calibration matches deployment.** Split-conformal *within* the
    test set (seeded 50/50 fold) hits the 90% target for **every** model (89.0–90.9%, col 1) —
-   the implementation is correct across all five.
+   the implementation is correct across all six.
 2. **Naïve conformal fails under the val→test shift (honest, important).** Calibrated on val
-   and deployed on the harder test split, coverage collapses for all five (col 2). The same
+   and deployed on the harder test split, coverage collapses for all six (col 2). The same
    distribution shift the frozen test set exposed (test is 1.2–1.8× harder than val) breaks
    conformal's exchangeability assumption. A deployed system must calibrate on data drawn like
    deployment, not on an easier split.
-3. **Stronger predictors survive the shift better.** Regime-A coverage rises monotonically with
+3. **Stronger predictors survive the shift better.** Regime-A coverage broadly rises with
    base-model accuracy — CV 73.8% → MLP 74.1% → K-mode 75.7% → ST-GAT 79.3% → Trajectron++
    84.8% — and the band tightens in step (15.9→10.0 m). A more accurate predictor has a smaller
-   val→test error gap, so the exchangeability violation bites less: Trajectron++ loses only 5
-   points where CV loses 15. Calibrated uncertainty is one more thing a better forecaster buys.
+   val→test error gap, so the exchangeability violation bites less: Trajectron++ loses only 5.2
+   coverage points to the shift where CV loses 15.2. The map-free transformer is an honest partial
+   exception — at 80.8% regime-A coverage it is *more* shift-robust than its accuracy rank
+   predicts, edging out ST-GAT (79.3%) despite a worse test ADE (3.57 vs 3.41) — but its band
+   radius (11.7 m) still lands exactly where accuracy says, between ST-GAT (10.8) and MLP (13.8),
+   so the accuracy→efficiency link is undisturbed. Calibrated uncertainty is one more thing a
+   better forecaster buys.
 4. **One global radius is per-class unfair; class-conditional radii fix it** (shown for CV; one
    figure per model in `outputs/benchmark_v2/conformal_coverage_*.png`). A single radius
    under-covers fast classes (Car 78%) and over-covers slow ones (Pedestrian 96%) — a safety
@@ -185,12 +191,12 @@ from prediction dumps ([`scripts/dump_predictions.py`](scripts/dump_predictions.
    11.7→5.6 m). This class-conditioning is motivated directly by the 16× per-class error
    disparity and is, for chaotic mixed traffic, the genuinely novel piece.
 
-Findings 2–3 as pictures — the accuracy→uncertainty link across the five deployable models:
+Findings 2–3 as pictures — the accuracy→uncertainty link across the six deployable models:
 
 ![Uncertainty efficiency: lower ADE buys a tighter conformal band at fixed 90% coverage](outputs/benchmark_v2/uncertainty_efficiency.png)
 
 At a fixed 90% coverage target the band radius *is* uncertainty efficiency, and it tracks
-accuracy almost linearly (r = 0.94): Trajectron++ certifies each position to ±10.0 m where CV
+accuracy almost linearly (r = 0.93): Trajectron++ certifies each position to ±10.0 m where CV
 needs ±15.9 m for the same guarantee.
 
 ![Robustness gap: coverage lost under the val→test shift, smallest for the strongest model](outputs/benchmark_v2/robustness_gap.png)
@@ -220,6 +226,7 @@ val→test, *deployed*):
 | --- | --- | --- | --- | --- | --- | --- |
 | Trajectron++ | 79.4% | 71.7% | 89.9% | 84.8% | 95.1% | 92.1% |
 | ST-GAT | 78.0% | 66.1% | 90.2% | 79.3% | 96.0% | 88.8% |
+| Map-free tf | 75.6% | 65.9% | 90.3% | 80.8% | 95.1% | 88.8% |
 | MLP | 76.8% | 60.1% | 89.8% | 74.1% | 95.4% | 83.9% |
 | K-mode | 80.0% | 62.0% | 90.9% | 75.7% | 95.4% | 85.9% |
 | CV | 77.3% | 64.1% | 89.0% | 73.8% | 95.2% | 82.7% |
@@ -231,15 +238,16 @@ tightens, and the efficiency ordering (tighter = better forecaster) holds at eve
 | --- | --- | --- | --- |
 | Trajectron++ | 5.5 m | 10.0 m | 15.3 m |
 | ST-GAT | 6.2 m | 10.8 m | 17.8 m |
+| Map-free tf | 6.0 m | 11.7 m | 16.4 m |
 | MLP | 7.5 m | 13.8 m | 19.4 m |
 | K-mode | 7.9 m | 13.8 m | 20.0 m |
 | CV | 9.2 m | 15.9 m | 23.3 m |
 
 Source: [`outputs/benchmark_v2/conformal_sensitivity.json`](outputs/benchmark_v2/conformal_sensitivity.json).
 At every target, regime B (calibration matches deployment) hits it — validity holds; regime A (val→test
-shift) under-covers; and the two strong models (Trajectron++, ST-GAT) stay clearly closer to the target
-than the weak three. The choice of α moves the absolute coverage and band width, not the qualitative
-story. *(Regenerate: `python scripts/conformal_alpha_sensitivity.py`.)*
+shift) under-covers; and the three stronger models (Trajectron++, map-free transformer, ST-GAT) stay
+clearly closer to the target than the weaker three (K-mode, MLP, CV). The choice of α moves the absolute
+coverage and band width, not the qualitative story. *(Regenerate: `python scripts/conformal_alpha_sensitivity.py`.)*
 
 ### Honest takeaways (Benchmark v2)
 
@@ -409,6 +417,29 @@ best-of-20 and the deployable most-likely output). All agents are exported as po
 `PEDESTRIAN` nodes; class-conditioned dynamics is future work. `dt=0.1` is the default —
 the historical `dt=0.4` bug cannot recur through this path.
 
+### AgentFormer (upstream, map-free base CVAE)
+
+```bash
+git clone --depth 1 https://github.com/Khrylx/AgentFormer.git third_party/agentformer
+python scripts/patch_agentformer.py           # Py3.12/NumPy2/Torch2 compatibility (idempotent)
+pip install easydict glob2
+python scripts/model6_agentformer_train_eval.py --epochs 100 --seed 0 \
+  --save-metrics-json outputs/benchmark_v2/agentformer_seed0.json \
+  --save-ckpt outputs/benchmark_v2/agentformer_ckpt_seed0.pt
+# plumbing check only (CPU, tiny model, smallest scenes, ~7 s):
+python scripts/model6_agentformer_train_eval.py --smoke --device cpu \
+  --save-metrics-json /tmp/af_smoke.json --save-ckpt /tmp/af_smoke.pt
+```
+
+The driver runs the upstream AgentFormer **base CVAE** in a map-free configuration
+(`input_type=['scene_norm','vel']`, `use_map=False`, no heading; standard-normal prior),
+fed canonical sequences directly by [`scripts/dd_agentformer.py`](scripts/dd_agentformer.py) so
+the eval population matches the shared contract. It writes the multimodal JSON schema
+(deployable `most_likely` = z=0 rollout, oracle `best_of_k` = min over K=20 prior samples). The
+benchmark-v2 table row appears once the 3-seed artifacts exist;
+[`scripts/run_benchmark_v2.py`](scripts/run_benchmark_v2.py) launches it automatically when the
+repo is present. The DLow diversity head is out of scope for this configuration.
+
 ## Testing & CI
 
 ```bash
@@ -429,8 +460,19 @@ runs all of it on every push and pull request.
   published ST-GAT (Huang et al., 2019).
 - *K-mode variety decoder* (formerly "MFP") — best-of-K variety loss + learned mode-scoring
   head. **Not** Multiple Futures Prediction (Tang & Salakhutdinov, NeurIPS 2019).
+- *Map-free transformer* — a plain Transformer (per-agent temporal encoder + agent
+  self-attention + query decoder) on agent-relative displacements. **Not** a QCNet/map-based
+  model: IDD-3D is lane-free, so there is no map branch and no map-anchored frame.
 - *Trajectron++* — the actual upstream implementation (Salzmann et al., 2021), patched for
   modern Python/PyTorch by [`scripts/patch_trajectronpp.py`](scripts/patch_trajectronpp.py).
+- *AgentFormer* — the actual upstream implementation (Yuan et al., ICCV 2021), patched for
+  modern Python/PyTorch by [`scripts/patch_agentformer.py`](scripts/patch_agentformer.py) and
+  run as the **base CVAE in a map-free configuration** (no map/lane channel, no heading input;
+  standard-normal prior, so most-likely = the z=0 rollout). It is driven through its model
+  interface on the shared canonical population by
+  [`scripts/dd_agentformer.py`](scripts/dd_agentformer.py) — **not** its own frame-sliding data
+  loader — so it is scored on exactly the same agents as every other model. The DLow diversity
+  head is out of scope for this configuration.
 
 ## Known limitations / next steps
 

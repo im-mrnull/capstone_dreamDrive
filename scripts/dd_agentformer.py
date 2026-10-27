@@ -117,13 +117,51 @@ def _fill_copyforward(fut: np.ndarray, fm: np.ndarray, last_obs: np.ndarray) -> 
     return out
 
 
+def keyframe_indices(obs_len: int, pred_len: int, stride: int):
+    """Frame indices AgentFormer sees when run at 10/stride Hz.
+
+    Observed keyframes always end at the last observed frame (the prediction
+    anchor); future keyframes are t+stride, t+2*stride, ..., t+pred_len. stride=1
+    is the full 10 Hz sequence. stride=5 is AgentFormer's native 2 Hz regime
+    (nuScenes: 12 future frames for 6 s): 4 observed + 12 future keyframes instead
+    of 20 + 60, which cuts the agent x time token count 5x. That matters because
+    AgentFormer attends over all agent-time tokens and re-decodes autoregressively:
+    at 10 Hz a 61-agent IDD-3D scene needs ~35 GB for one training step."""
+    if pred_len % stride:
+        raise ValueError(f"pred_len={pred_len} must be a multiple of stride={stride}")
+    obs_idx = np.arange(obs_len - 1, -1, -stride)[::-1]
+    fut_idx = np.arange(stride - 1, pred_len, stride)
+    return obs_idx, fut_idx
+
+
+def upsample_keyframes(kf: torch.Tensor, anchor: torch.Tensor, stride: int) -> torch.Tensor:
+    """Linearly interpolate keyframe predictions back to every frame.
+
+    kf (..., Tk, 2) are positions at steps stride, 2*stride, ..., Tk*stride;
+    anchor (..., 2) is the last observed position (step 0). Returns (..., Tk*stride, 2)
+    with output index s-1 holding step s, so keyframe positions are reproduced
+    exactly and the 10 Hz metric code scores the same frames as every other model."""
+    if stride == 1:
+        return kf
+    anchor = anchor.expand(*kf.shape[:-2], 2)
+    full = torch.cat([anchor.unsqueeze(-2), kf], dim=-2)                       # (...,Tk+1,2)
+    w = torch.arange(1, stride + 1, device=kf.device, dtype=kf.dtype) / stride  # (stride,)
+    a, b = full[..., :-1, None, :], full[..., 1:, None, :]                     # (...,Tk,1,2)
+    seg = a + (b - a) * w[:, None]                                             # (...,Tk,stride,2)
+    return seg.reshape(*kf.shape[:-2], kf.shape[-2] * stride, 2)
+
+
 def seq_to_af_data(obs_abs: np.ndarray, pred_abs: np.ndarray, fut_mask: np.ndarray,
-                   traj_scale: float) -> dict:
+                   traj_scale: float, stride: int = 1) -> dict:
     """One canonical sequence -> an AgentFormer `data` dict.
 
     obs_abs (M,2,obs_len), pred_abs (M,2,pred_len) are world-frame meters;
     fut_mask (M,pred_len) is the per-timestep validity mask. Positions are scaled
-    into world/traj_scale units (AgentFormer's internal convention)."""
+    into world/traj_scale units (AgentFormer's internal convention). stride > 1
+    keeps only the keyframes of keyframe_indices (training targets and mask too)."""
+    obs_idx, fut_idx = keyframe_indices(obs_abs.shape[-1], pred_abs.shape[-1], stride)
+    obs_abs, pred_abs = obs_abs[..., obs_idx], pred_abs[..., fut_idx]
+    fut_mask = fut_mask[:, fut_idx]
     obs = np.transpose(obs_abs, (0, 2, 1)).astype(np.float32) / traj_scale   # (M,obs,2)
     fut = np.transpose(pred_abs, (0, 2, 1)).astype(np.float32) / traj_scale  # (M,pred,2)
     fm = fut_mask.astype(bool)
@@ -141,11 +179,13 @@ def seq_to_af_data(obs_abs: np.ndarray, pred_abs: np.ndarray, fut_mask: np.ndarr
 
 
 @torch.no_grad()
-def predict_seq(model, data: dict, nz: int, sample_k: int, traj_scale: float):
+def predict_seq(model, data: dict, nz: int, sample_k: int, traj_scale: float,
+                stride: int = 1):
     """Run one scene through AgentFormer and return predictions in METERS:
       most_likely (M, T, 2)  — deployable z=0 rollout;
       samples     (M, K, T, 2) — K prior draws (oracle best-of-K).
-    Shares the encoded context between the two decodes."""
+    Shares the encoded context between the two decodes. With stride > 1 the
+    keyframe outputs are upsampled to every frame (upsample_keyframes)."""
     device = model.device
     model.set_data(data)
     model.context_encoder(model.data)  # populate context_enc + agent_context once
@@ -157,4 +197,8 @@ def predict_seq(model, data: dict, nz: int, sample_k: int, traj_scale: float):
 
     samp, _ = model.inference(mode="infer", sample_num=sample_k)      # reuses context_enc
     samp = samp * traj_scale                                          # (M,K,T,2)
+    if stride > 1:
+        last = torch.stack([p[-1] for p in data["pre_motion_3D"]]).to(ml) * traj_scale  # (M,2)
+        ml = upsample_keyframes(ml, last, stride)
+        samp = upsample_keyframes(samp, last[:, None, :], stride)
     return ml, samp

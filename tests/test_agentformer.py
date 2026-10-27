@@ -107,6 +107,63 @@ def test_masked_future_steps_copy_forward():
     assert np.allclose(fut[30:], fut[29])
 
 
+@needs_af
+def test_keyframes_native_2hz():
+    obs_idx, fut_idx = dda.keyframe_indices(OBS, PRED, 5)
+    assert obs_idx.tolist() == [4, 9, 14, 19]      # ends at the prediction anchor
+    assert fut_idx.tolist() == list(range(4, 60, 5))  # t+0.5 s ... t+6.0 s, 12 frames
+    o1, f1 = dda.keyframe_indices(OBS, PRED, 1)
+    assert o1.tolist() == list(range(OBS)) and f1.tolist() == list(range(PRED))
+    with pytest.raises(ValueError):
+        dda.keyframe_indices(OBS, PRED, 7)
+
+
+@needs_af
+def test_seq_to_af_data_with_stride_keeps_keyframes():
+    obs, pred, fm = _synth_scene(M=2)
+    fm[1, 12:] = False
+    data = dda.seq_to_af_data(obs, pred, fm, traj_scale=1.0, stride=5)
+    assert tuple(data["pre_motion_3D"][0].shape) == (4, 2)
+    assert tuple(data["fut_motion_3D"][0].shape) == (12, 2)
+    assert np.allclose(data["pre_motion_3D"][0].numpy()[-1], obs[0, :, -1])
+    assert np.allclose(data["fut_motion_3D"][0].numpy()[0], pred[0, :, 4])
+    # agent 1 is valid only through frame 11 -> keyframes 4 and 9 valid, rest masked
+    assert data["fut_motion_mask"][1].numpy().tolist() == [1, 1] + [0] * 10
+
+
+@needs_af
+def test_upsample_keyframes_is_exact_linear_interpolation():
+    import torch
+    anchor = torch.tensor([[0.0, 0.0], [10.0, 5.0]])               # (M=2, 2)
+    steps = torch.arange(5, 61, 5, dtype=torch.float32)             # keyframe times
+    kf = torch.stack([torch.stack([steps, 2 * steps], -1),          # straight lines
+                      torch.stack([10 + steps, 5 - steps], -1)])    # (2, 12, 2)
+    up = dda.upsample_keyframes(kf, anchor, 5)
+    assert tuple(up.shape) == (2, 60, 2)
+    t = torch.arange(1, 61, dtype=torch.float32)
+    assert torch.allclose(up[0], torch.stack([t, 2 * t], -1))       # exact on a line
+    assert torch.allclose(up[1], torch.stack([10 + t, 5 - t], -1))
+    assert torch.allclose(up[:, 4::5], kf)                           # keyframes reproduced
+    # sample axis broadcasts against a per-agent anchor
+    up_k = dda.upsample_keyframes(kf[:, None].expand(2, 3, 12, 2), anchor[:, None, :], 5)
+    assert tuple(up_k.shape) == (2, 3, 60, 2) and torch.allclose(up_k[:, 1], up)
+
+
+@needs_af
+def test_predict_seq_with_stride_returns_full_rate():
+    import torch
+    torch.manual_seed(0)
+    cfg = dda.build_map_free_cfg(4, 12, nz=8, sample_k=2, tf_model_dim=32, tf_ff_dim=64,
+                                 tf_nhead=4, nlayer=1, out_mlp_dim=None, rand_rot_scene=False)
+    model = model_dict["agentformer"](cfg)
+    model.set_device(torch.device("cpu")); model.eval()
+    obs, pred, fm = _synth_scene(M=3)
+    data = dda.seq_to_af_data(obs, pred, fm, cfg.traj_scale, stride=5)
+    ml, samp = dda.predict_seq(model, data, nz=cfg.nz, sample_k=4,
+                               traj_scale=cfg.traj_scale, stride=5)
+    assert tuple(ml.shape) == (3, PRED, 2) and tuple(samp.shape) == (3, 4, PRED, 2)
+
+
 # --------------------------------------------------------------------------
 # forward / inference
 # --------------------------------------------------------------------------

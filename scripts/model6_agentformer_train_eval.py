@@ -38,6 +38,7 @@ from dd_data import (
 from dd_agentformer import (
     add_af_to_path,
     build_map_free_cfg,
+    keyframe_indices,
     predict_seq,
     seq_to_af_data,
 )
@@ -91,9 +92,9 @@ def evaluate(model, ds, cfg, eval_k: int, device, indices=None) -> dict:
     idx_list = range(len(ds)) if indices is None else indices
     for i in idx_list:
         obs, pred, _, _, fm, at = ds[int(i)]
-        data = seq_to_af_data(obs, pred, fm, cfg.traj_scale)
+        data = seq_to_af_data(obs, pred, fm, cfg.traj_scale, stride=cfg.get("stride", 1))
         ml, samp = predict_seq(model, data, nz=cfg.nz, sample_k=eval_k,
-                               traj_scale=cfg.traj_scale)
+                               traj_scale=cfg.traj_scale, stride=cfg.get("stride", 1))
         gt, am, fmt, at2 = _seq_batch1(obs, pred, fm, at)
         gt, am, fmt = gt.to(device), am.to(device), fmt.to(device)
 
@@ -112,23 +113,25 @@ def dump_most_likely(model, splits, cfg, device, out_path: str) -> None:
     """Flat per-agent val+test most-likely predictions for the conformal wrapper
     (one row per real agent): pred/gt (N,60,2), fut_mask (N,60), agent_type, split."""
     model.eval()
-    P, G, M, C, S = [], [], [], [], []
+    P, G, M, C, S, Z = [], [], [], [], [], []
     for split, ds in splits.items():
         for i in range(len(ds)):
             obs, pred, _, _, fm, at = ds[i]
-            data = seq_to_af_data(obs, pred, fm, cfg.traj_scale)
+            data = seq_to_af_data(obs, pred, fm, cfg.traj_scale, stride=cfg.get("stride", 1))
             ml, _ = predict_seq(model, data, nz=cfg.nz, sample_k=1,
-                                traj_scale=cfg.traj_scale)
+                                traj_scale=cfg.traj_scale, stride=cfg.get("stride", 1))
             ml = ml.cpu().numpy()                                        # (M,T,2)
             gt = np.transpose(pred, (0, 2, 1))                           # (M,T,2)
+            scene = str(ds.scene_id[int(ds.seq_indices[i])])
             for a in range(obs.shape[0]):
                 P.append(ml[a]); G.append(gt[a]); M.append(fm[a].astype(bool))
-                C.append(str(at[a])); S.append(split)
+                C.append(str(at[a])); S.append(split); Z.append(scene)
     np.savez_compressed(
         out_path,
         pred=np.asarray(P, dtype=np.float32), gt=np.asarray(G, dtype=np.float32),
         fut_mask=np.asarray(M, dtype=bool), agent_type=np.asarray(C, dtype=object),
-        split=np.asarray(S, dtype=object), model="AgentFormer (most-likely)")
+        split=np.asarray(S, dtype=object), scene_id=np.asarray(Z, dtype=object),
+        model="AgentFormer (most-likely)")
     print(f"saved most-likely predictions: {out_path}")
 
 
@@ -165,6 +168,11 @@ def main() -> int:
     ap.add_argument("--no-out-mlp", action="store_true", help="disable decoder/encoder out MLP")
     ap.add_argument("--traj-scale", type=float, default=10.0)
     ap.add_argument("--no-rot-aug", dest="rot_aug", action="store_false", default=True)
+    ap.add_argument("--stride", type=int, default=5,
+                    help="run AgentFormer on every stride-th frame (5 -> its native 2 Hz: "
+                         "4 obs + 12 future keyframes), predictions linearly upsampled "
+                         "to 10 Hz for scoring; 1 = full 10 Hz (memory-infeasible for "
+                         "the largest IDD-3D scenes on a 24 GB GPU)")
 
     ap.add_argument("--smoke", action="store_true",
                     help="tiny model + few seqs/epochs: plumbing check only")
@@ -192,12 +200,14 @@ def main() -> int:
     set_seed(args.seed)
 
     obs_len, pred_len = 20, 60
+    obs_idx, fut_idx = keyframe_indices(obs_len, pred_len, args.stride)
     cfg = build_map_free_cfg(
-        obs_len, pred_len, nz=args.nz, sample_k=args.sample_loss_k,
+        len(obs_idx), len(fut_idx), nz=args.nz, sample_k=args.sample_loss_k,
         tf_model_dim=args.tf_model_dim, tf_ff_dim=args.tf_ff_dim,
         tf_nhead=args.tf_nhead, tf_dropout=args.tf_dropout, nlayer=args.nlayer,
         out_mlp_dim=None if args.no_out_mlp else (512, 256),
         rand_rot_scene=bool(args.rot_aug), traj_scale=args.traj_scale)
+    cfg.stride = int(args.stride)
 
     def make_ds(split):
         return CanonicalSeqDataset(args.data, split, args.splits_file,
@@ -224,7 +234,7 @@ def main() -> int:
         losses = []
         for idx in order:
             obs, pred, _, _, fm, at = train_ds[int(idx)]
-            data = seq_to_af_data(obs, pred, fm, cfg.traj_scale)
+            data = seq_to_af_data(obs, pred, fm, cfg.traj_scale, stride=cfg.get("stride", 1))
             model.set_data(data)
             model()
             loss, _, _ = model.compute_loss()
@@ -237,6 +247,10 @@ def main() -> int:
         sched.step()
 
         val = evaluate(model, val_ds, cfg, args.eval_k, device, indices=val_indices)
+        if device.type == "cuda":
+            # Hand the K-sample eval's cached blocks back to the device: on a shared
+            # GPU a process pinned near the limit stalls in allocator retries.
+            torch.cuda.empty_cache()
         val_ml_ade = val["most_likely"]["ade"]
         improved = val_ml_ade < best_val_ade - 1e-6
         if improved:
@@ -269,6 +283,10 @@ def main() -> int:
                 "most_likely = z=0 deployable rollout; best_of_k = oracle min over "
                 f"K={args.eval_k} prior samples. Masked per-timestep metrics, FDE "
                 "at last valid step, model selection on val most-likely ADE. "
+                + (f"Run at stride {args.stride} (10/{args.stride} Hz keyframes, AgentFormer's "
+                   "native rate); predictions linearly upsampled to 10 Hz, so it is scored "
+                   "on the same agents and frames as every other model. "
+                   if args.stride > 1 else "")
                 + ("SMOKE run (tiny model, seq-limited) — plumbing only, not a benchmark number."
                    if args.smoke else ""),
     }

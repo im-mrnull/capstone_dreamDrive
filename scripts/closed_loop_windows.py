@@ -88,15 +88,17 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--split", default="test")
     ap.add_argument("--splits-file", default=str(REPO / "splits" / "scene_splits.json"))
+    ap.add_argument("--out", default=None, help="output NPZ (default outputs/closed_loop/dense_windows_<split>.npz)")
     args = ap.parse_args()
     data = build(args.split, args.splits_file)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUT_DIR / f"dense_windows_{args.split}.npz"
+    out = Path(args.out) if args.out else OUT_DIR / f"dense_windows_{args.split}.npz"
+    out.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(out, **data)
     stats = {"split": args.split, "sequences": int(len(data["t0"])), "agents": int(len(data["agent_id"])),
              "plan_times": [PLAN_TIMES.start, PLAN_TIMES.stop - 1, PLAN_TIMES.step],
              "agents_without_future": int((~data["fut_mask"].any(axis=1)).sum())}
-    (OUT_DIR / f"dense_windows_{args.split}_stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
+    out.with_name(out.stem + "_stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
     print(stats, "->", out)
     return 0
 

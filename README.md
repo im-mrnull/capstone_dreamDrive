@@ -510,6 +510,37 @@ single "separated" results are hypotheses, not findings.
   predictors do help in closed loop, but it needs confirmation on data this analysis has not
   seen.
 
+### Closed-loop test v2: cross-validated, with a fixed instrument and planner (pre-registered)
+
+The first closed-loop test exposed three problems:
+- a ~6% false-collision floor in the measurement;
+- 90% bands that paralysed the planner;
+- too few test scenes to separate the predictors.
+
+The second test addresses all three. The full protocol is in
+[`docs/wiki/closed-loop-cv.md`](docs/wiki/closed-loop-cv.md), committed before any fold model
+drove a primary scene.
+
+- **Measurement.** Three fixes, each calibrated on the recorded human driver alone:
+  - Ego-pose glitches from the motion reconstruction are excluded.
+  - The ego is oriented by its logged yaw.
+  - Collisions are tested with exact rectangles and a footprint measured from the data.
+
+  The human replay's false at-fault rate falls to 0% (test), 0% (val) and 1.1% (former train
+  scenes).
+- **Planner.** A 30-configuration grid on the 32 already-seen scenes chose a 1 s hard safety
+  horizon, a soft penalty beyond it, and **no conformal band**. Every band setting scored lower
+  there (0.813 with the full band against 0.894 without). Harsh braking dropped from about 45%
+  of episodes to about 9%.
+- **More scenes.** 5-fold scene cross-validation retrains CV, MLP, ST-GAT, the transformer and
+  LED, so each of the 105 scenes is driven by models that never saw it. The **primary** analysis
+  uses the 73 scenes that were never evaluated before. Hypotheses (Holm-corrected):
+  - learned models beat CV on score (H1) and on at-fault collisions (H1b);
+  - every predictor beats ignoring agents (H2);
+  - the band hurts (H3).
+
+*Result: pending.*
+
 ### Honest takeaways (Benchmark v2)
 
 1. **Two models share the top: the ST-GAT-inspired model and the map-free transformer.**

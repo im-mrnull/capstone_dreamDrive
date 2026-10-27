@@ -30,9 +30,12 @@ from conformal_wrapper import cv_predict
 from dd_data import CanonicalSeqDataset, collate_pad
 from safety_scorecard import OUT as BENCH, REPO, _load_script, mlp_world
 
+# run configuration (overridable from the command line; see main)
 DENSE = REPO / "outputs" / "closed_loop" / "dense_windows_test.npz"
 PRED_DIR = REPO / "outputs" / "closed_loop" / "preds"
 SPLITS = str(REPO / "splits" / "scene_splits.json")
+SPLIT = "test"
+CKPT_DIR = BENCH
 K_SET = 10
 MODELS = ("cv", "mlp", "stgat", "transformer", "mfp", "led", "agentformer", "trajectronpp")
 
@@ -53,11 +56,11 @@ def save(key: str, seed: int, pred, samples, meta) -> None:
     np.savez_compressed(out, pred=np.asarray(pred, dtype=np.float32), **extra,
                         scene_id=meta["scene_id"], t0=meta["t0"], agent_id=meta["agent_id"])
     print(f"seed {seed} {key}: {len(pred)} rows" + ("" if samples is None else f", samples {np.shape(samples)[1]}")
-          + f" -> {out.relative_to(REPO)}", flush=True)
+          + f" -> {out}", flush=True)
 
 
 def dataset():
-    return CanonicalSeqDataset(str(DENSE), "test", SPLITS, rot_aug=False, seed=0)
+    return CanonicalSeqDataset(str(DENSE), SPLIT, SPLITS, rot_aug=False, seed=0)
 
 
 def run_seq_models(keys, seed, device, meta):
@@ -65,7 +68,7 @@ def run_seq_models(keys, seed, device, meta):
     loaders = {"stgat": dp.load_stgat, "transformer": dp.load_transformer, "mfp": dp.load_mfp}
     loader = DataLoader(dataset(), batch_size=64, shuffle=False, num_workers=0, collate_fn=collate_pad)
     for key in keys:
-        fn = loaders[key](device, seed)
+        fn = loaders[key](device, seed, CKPT_DIR)
         pred = dp.flatten(loader, fn, device, "test")[0]
         samples = dp.flatten_samples(loader, fn.samples_fn, device) if hasattr(fn, "samples_fn") else None
         save(key, seed, pred, samples, meta)
@@ -73,7 +76,7 @@ def run_seq_models(keys, seed, device, meta):
 
 def run_led(seed, device, meta):
     from dd_led import Diffusion, build_batch, build_models, predict_batch
-    ck = torch.load(BENCH / f"led_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+    ck = torch.load(CKPT_DIR / f"led_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
     a = ck["args"]
     core, init = build_models(20, 60, a["k"])
     core.load_state_dict(ck["core"]); init.load_state_dict(ck["init"])
@@ -93,7 +96,7 @@ def run_led(seed, device, meta):
 def run_agentformer(seed, device, meta):
     lat = _load_script("safety_latency.py")
     from dd_agentformer import seq_to_af_data, predict_seq
-    ck = torch.load(BENCH / f"agentformer_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+    ck = torch.load(CKPT_DIR / f"agentformer_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
     model, cfg = lat.build_agentformer(ck, device)
     torch.manual_seed(seed)
     ds, P, S = dataset(), [], []
@@ -120,7 +123,7 @@ def run_trajectronpp(seed, device_str, meta):
     reg.load_models(exp7.latest_checkpoint_iter(model_dir))
     stg = Trajectron(reg, hyper, None, device_str)
     torch.manual_seed(seed); np.random.seed(seed)
-    with open(ev.TPP_DATA / "test.pkl", "rb") as f:
+    with open(ev.TPP_DATA / f"{SPLIT}.pkl", "rb") as f:
         env = dill.load(f, encoding="latin1")
     stg.set_environment(env)
     stg.set_annealing_params()
@@ -152,10 +155,18 @@ def run_trajectronpp(seed, device_str, meta):
 
 
 def main() -> int:
+    global DENSE, PRED_DIR, SPLITS, SPLIT, CKPT_DIR
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", choices=MODELS, default=[m for m in MODELS if m != "trajectronpp"])
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
+    ap.add_argument("--dense", default=str(DENSE), help="dense windows NPZ (closed_loop_windows.py)")
+    ap.add_argument("--split", default=SPLIT, help="split of the dense windows' scenes")
+    ap.add_argument("--splits-file", default=SPLITS)
+    ap.add_argument("--ckpt-dir", default=str(BENCH), help="model checkpoints (+ mlp_best_seed<k>.npz)")
+    ap.add_argument("--out-dir", default=str(PRED_DIR))
     args = ap.parse_args()
+    DENSE, PRED_DIR, SPLITS, SPLIT, CKPT_DIR = (Path(args.dense), Path(args.out_dir), args.splits_file,
+                                                args.split, Path(args.ckpt_dir))
     if "trajectronpp" in args.models and len(args.models) > 1:
         raise SystemExit("run trajectronpp on its own (module clash with AgentFormer)")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -164,7 +175,7 @@ def main() -> int:
         if "cv" in args.models:
             save("cv", seed, meta["obs"][:, -1:, :] + cv_predict(meta["obs"], 5), None, meta)
         if "mlp" in args.models:
-            w = np.load(BENCH / f"mlp_best_seed{seed}.npz")
+            w = np.load(CKPT_DIR / f"mlp_best_seed{seed}.npz")
             save("mlp", seed, mlp_world(meta["obs"], {k: w[k] for k in w.files}), None, meta)
         seq = [k for k in ("stgat", "transformer", "mfp") if k in args.models]
         if seq:

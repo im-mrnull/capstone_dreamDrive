@@ -106,8 +106,8 @@ def dump(name: str, predict_fn, device: torch.device, out_path: Path,
     print(f"{name}: {len(P)} agents (val+test) -> {out_path}")
 
 
-def load_stgat(device: torch.device, seed: int = 0):
-    ck = torch.load(OUT / f"stgat_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+def load_stgat(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
+    ck = torch.load(Path(ckpt_dir) / f"stgat_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
     a = ck["args"]
     model = m3.STGATModel(
         obs_len=20, pred_len=60, emb_dim=a["emb_dim"], hidden_dim=a["hidden_dim"],
@@ -117,11 +117,11 @@ def load_stgat(device: torch.device, seed: int = 0):
     return lambda b: abs_from_rel(b.obs_abs, model(b.obs_rel, b.agent_mask, False))
 
 
-def load_mfp(device: torch.device, seed: int = 0):
+def load_mfp(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
     # The top-1-selected checkpoint is the better deployable K-mode (test 4.15).
     # It predates the sprint-3 traj_enc module, so load non-strictly: the content
     # scorer is off, traj_enc is unused, and every real weight matches.
-    ck = torch.load(OUT / f"mfp_top1sel_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+    ck = torch.load(Path(ckpt_dir) / f"mfp_top1sel_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
     a = ck["args"]
     model = m4.MFPModel(
         obs_len=20, pred_len=60, k=a["k"], emb_dim=a["emb_dim"], hidden_dim=a["hidden_dim"],
@@ -143,8 +143,8 @@ def load_mfp(device: torch.device, seed: int = 0):
     return predict
 
 
-def load_transformer(device: torch.device, seed: int = 0):
-    ck = torch.load(OUT / f"transformer_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+def load_transformer(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
+    ck = torch.load(Path(ckpt_dir) / f"transformer_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
     a = ck["args"]
     model = m5.MapFreeTransformer(
         obs_len=20, pred_len=60, d_model=a["d_model"], n_heads=a["n_heads"],
@@ -165,25 +165,30 @@ REGISTRY = {
 
 
 def main() -> int:
+    global DATA, SPLITS
     ap = argparse.ArgumentParser()
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--models", nargs="+", choices=sorted(REGISTRY), default=sorted(REGISTRY),
                     help="which model dumps to (re)generate; default all. Use a subset to "
                          "add one model without overwriting the committed dumps of others.")
     ap.add_argument("--seed", type=int, default=0, help="which seed's checkpoint to dump")
+    ap.add_argument("--ckpt-dir", default=str(OUT), help="where the *_ckpt_seed<k>.pt files are")
+    ap.add_argument("--data", default=str(DATA))
+    ap.add_argument("--splits-file", default=SPLITS)
     ap.add_argument("--save-samples", action="store_true",
                     help="also store every mode of multi-output models (K-mode) as samples")
     ap.add_argument("--out-dir", default=str(OUT),
                     help="output directory; keep non-seed-0 dumps out of outputs/benchmark_v2 "
                          "itself, whose preds_*.npz are the conformal inputs")
     args = ap.parse_args()
+    DATA, SPLITS = Path(args.data), args.splits_file
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
 
     for key in args.models:
         name, loader, fname = REGISTRY[key]
-        dump(name, loader(device, args.seed), device, out_dir / fname, args.save_samples)
+        dump(name, loader(device, args.seed, args.ckpt_dir), device, out_dir / fname, args.save_samples)
     return 0
 
 

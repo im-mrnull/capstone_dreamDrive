@@ -111,6 +111,8 @@ def load_population(splits_file) -> dict:
                 continue
             t0 = int(c["t0"][q])
             e = ego_xy[sid][t0 + OBS_LEN:t0 + OBS_LEN + PRED_LEN]
+            if len(e) < PRED_LEN:   # scene ends inside the horizon: agents are masked there too
+                e = np.vstack([e, np.repeat(e[-1:], PRED_LEN - len(e), 0)])
             assert e.shape == (PRED_LEN, 2) and np.isfinite(e).all(), (sid, t0)
             for i in range(a, b):
                 rows.append(i); split.append(want); ego_fut.append(e)

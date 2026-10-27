@@ -46,6 +46,8 @@ SCENES = REPO / "outputs" / "multiagent_world_v1" / "scenes"
 EGO_CSV = REPO / "outputs" / "ego_trajectories.csv"
 CL_DIR = REPO / "outputs" / "closed_loop"
 PRED_DIR = CL_DIR / "preds"
+CV_DIR = REPO / "outputs" / "cv_folds"            # fold models + their canonical dumps
+CV_PRED_DIR = CL_DIR / "cv"                       # fold predictions on dense windows
 OUT_JSON = REPO / "outputs" / "benchmark_v2" / "closed_loop.json"
 LATENCY = REPO / "outputs" / "benchmark_v2" / "safety_latency.json"
 RULE_DOC = "docs/wiki/closed-loop-test.md"
@@ -68,12 +70,17 @@ HARSH_DECEL = -4.0
 NEAR_MISS_M = 0.5
 AT_FAULT_MIN_SPEED = 0.5
 AT_FAULT_REAR_M = -1.0              # near-miss clearance counts agents from 1 m behind the sensor
-EGO_CENTRE = 0.5                    # ego centre ahead of the sensor (m)
+EGO_CENTRE = 0.3                    # ego centre ahead of the sensor (m), ground-truth footprint
 FRONT_M = 1.0                       # "in front": agent centre >= 1 m ahead of the ego centre
 SWERVE_MS = 0.1                     # ego lateral speed toward the agent that counts as swerving
 CUT_IN_MS = 2.0                     # agent lateral speed toward the ego that makes it a cut-in
 SCORE_W = (5.0, 2.0, 2.0)
 SEEDS = (0, 1, 2)
+GLITCH_M = 1.0                      # ego pose > 1 m off its 9-frame median path = pose glitch
+COLLISION_TOL = 0.25                # m of footprint overlap tolerated before a contact counts
+# Planner band handling (v1 defaults: band is a hard constraint over the whole horizon,
+# least-penetration fallback). Overridden per run via run_package's cfg.
+PLAN_CFG = {"hard_s": 3.0, "soft_w": 0.0, "fallback": "least_penetration"}
 
 # Nominal footprints (IDD-3D box sizes are not in this repo): circle centres along
 # the heading and a common radius.
@@ -92,6 +99,21 @@ FOOTPRINTS = {
     "Bus": ((-3.0, -1.0, 1.0, 3.0), 1.25),                                  # 8.5 m x 2.5 m
 }
 OTHER = ((0.0,), 0.5)
+# Ground-truth collision geometry (instrument v2): oriented rectangles (length, width),
+# same nominal sizes the circles approximate. The planner keeps the circles.
+# Ego: the region no annotated agent edge enters around the sensor in (almost) all frames,
+# slow ones included (p0.5: 2.0 m ahead, 1.4 m behind, ~1 m to each side) -> 3.4 x 1.7 m
+# centred 0.3 m ahead. The planner plans with the larger circle footprint (EGO).
+EGO_RECT = (3.4, 1.7)
+RECTS = {
+    **{c: (0.6, 0.6) for c in ("Pedestrian", "Child")},
+    **{c: (1.9, 0.7) for c in ("MotorcyleRider", "ScooterRider", "BicycleRider",
+                               "Motorcycle", "Scooter", "Bicycle", "BicycleGroup")},
+    **{c: (4.3, 1.7) for c in ("Car", "TourCar", "Van", "PoliceCar")},
+    **{c: (6.8, 2.4) for c in ("Truck", "Crane")},
+    "Bus": (8.5, 2.5),
+}
+OTHER_RECT = (1.0, 1.0)
 VRU = {"Pedestrian", "Child", "MotorcyleRider", "ScooterRider", "BicycleRider", "BicycleGroup"}
 
 # package -> (kind, prediction file key, scorecard source for its val-calibrated band)
@@ -139,6 +161,46 @@ def smooth(x: np.ndarray, w: int = 9) -> np.ndarray:
     return np.stack([np.convolve(pad[:, j], k, mode="valid") for j in range(x.shape[1])], 1)
 
 
+def medfilt(x: np.ndarray, w: int = 9) -> np.ndarray:
+    pad = np.pad(x, ((w // 2, w // 2), (0, 0)), mode="edge")
+    return np.stack([np.median(np.lib.stride_tricks.sliding_window_view(pad[:, j], w), axis=1)
+                     for j in range(x.shape[1])], 1)
+
+
+def rect(centre, heading, size) -> np.ndarray:
+    """(4,2) corners of an oriented rectangle (length along heading, width across)."""
+    L, W = size
+    u = np.asarray(heading, float)
+    n = np.array([-u[1], u[0]])
+    return centre + np.array([L / 2 * u + W / 2 * n, L / 2 * u - W / 2 * n,
+                              -L / 2 * u - W / 2 * n, -L / 2 * u + W / 2 * n])
+
+
+def rect_gap(A: np.ndarray, B: np.ndarray) -> float:
+    """Signed gap between two convex quads: Euclidean distance when apart, minus the
+    smallest separating-axis overlap when they intersect."""
+    overlaps = []
+    for Q in (A, B):
+        for i in range(2):
+            e = Q[(i + 1) % 4] - Q[i]
+            ax = np.array([-e[1], e[0]]) / max(np.linalg.norm(e), 1e-12)
+            pa, pb = A @ ax, B @ ax
+            overlaps.append(min(pa.max(), pb.max()) - max(pa.min(), pb.min()))
+    if min(overlaps) > 0:
+        return -float(min(overlaps))
+
+    def pt_seg(P, Q):   # min distance from points P (n,2) to the 4 edges of Q
+        a, b = Q, np.roll(Q, -1, axis=0)
+        ab = b - a
+        t = np.clip(np.einsum("pkj,kj->pk", P[:, None] - a[None], ab) / np.einsum("kj,kj->k", ab, ab), 0, 1)
+        return np.linalg.norm(P[:, None] - (a[None] + t[..., None] * ab[None]), axis=-1).min()
+    return float(min(pt_seg(A, B), pt_seg(B, A)))
+
+
+def rect_size(cls) -> tuple:
+    return RECTS.get(str(cls), OTHER_RECT)
+
+
 class Route:
     """Arc-length parametrised polyline (0.25 m grid) with tangents and normals."""
 
@@ -152,11 +214,20 @@ class Route:
         tan /= np.maximum(np.linalg.norm(tan, axis=1, keepdims=True), 1e-9)
         self.tan = tan
         self.nrm = np.stack([-tan[:, 1], tan[:, 0]], 1)
+        self.head = tan                     # footprint orientation; replaced by set_heading
+
+    def set_heading(self, s_h: np.ndarray, head: np.ndarray) -> None:
+        """Orient the ego along the human's logged heading at each arc length (the pose yaw):
+        robust where the path tangent is noise (crawling in jams). Beyond the human's
+        path the last heading holds."""
+        idx = np.clip(np.searchsorted(s_h, self.s_grid, side="right") - 1, 0, len(s_h) - 1)
+        h = head[idx]
+        self.head = h / np.maximum(np.linalg.norm(h, axis=1, keepdims=True), 1e-9)
 
     def pose(self, s: np.ndarray, d: np.ndarray):
         """World position and heading unit vector for arc length s and lateral offset d."""
         i = np.clip(np.rint(np.asarray(s) / 0.25).astype(int), 0, len(self.s_grid) - 1)
-        return self.xy[i] + np.asarray(d)[..., None] * self.nrm[i], self.tan[i]
+        return self.xy[i] + np.asarray(d)[..., None] * self.nrm[i], self.head[i]
 
     def project(self, p: np.ndarray) -> float:
         return float(self.s_grid[np.argmin(np.linalg.norm(self.xy - p, axis=1))])
@@ -167,7 +238,9 @@ def load_scene(sid: str) -> dict:
     e, yaw_off = ego_table()
     g = e[e.scene_id == sid].set_index("f").loc[[int(f) for f in d["frame_id"]]]
     raw = g[["ego_x", "ego_y"]].to_numpy(float)
-    P = smooth(raw)
+    med = medfilt(raw)                          # robust to single-frame pose glitches
+    glitch = np.linalg.norm(raw - med, axis=1) > GLITCH_M
+    P = smooth(med)
     step = np.linalg.norm(np.diff(P, axis=0), axis=1)
     if step.sum() < 2.0:                       # the driver never moves: heading from yaw
         h = g.ego_yaw.to_numpy()[0] + yaw_off
@@ -182,12 +255,17 @@ def load_scene(sid: str) -> dict:
         pts = np.vstack([pts, pts[-1] + ROUTE_EXT * u])
         s_h = np.concatenate([[0.0], np.cumsum(step)])
     route = Route(pts)
+    yaw_head = np.stack([np.cos(g.ego_yaw.to_numpy() + yaw_off), np.sin(g.ego_yaw.to_numpy() + yaw_off)], 1)
+    route.set_heading(s_h, yaw_head)
     v_h = np.clip(np.gradient(s_h) / DT, 0.0, V_MAX)
     v_h = smooth(v_h[:, None])[:, 0]
     pos, mask = d["pos"].astype(np.float64), d["mask"].astype(bool)
     cls = np.asarray(d["agent_type"], dtype=str)
     return {"sid": sid, "pos": pos, "mask": mask, "cls": cls, "agent_id": d["agent_id"].astype(int),
-            "ego_raw": raw,
+            "ego_raw": raw, "glitch": glitch,
+            # the sensor's own orientation (pose yaw + the measured axis offset): the frame the
+            # annotations were made in, so the human replay keeps their exact geometry
+            "ego_head_raw": yaw_head,
             "heading": agent_headings(pos, mask, route), "route": route, "s_h": s_h, "v_h": v_h,
             "T": pos.shape[0]}
 
@@ -228,19 +306,31 @@ def circles(centre, heading, fp):
 class Predictor:
     """Per-agent predicted positions + band radii for one package (or reference)."""
 
-    def __init__(self, name: str, seed: int, split: str):
+    def __init__(self, name: str, seed: int, fold: int | None = None):
+        """fold=None: the frozen-split models; fold=k: the cross-validation models of
+        fold k, with bands calibrated on that fold's val scenes."""
         self.name, self.seed = name, seed
         self.kind = "ref" if name in REFERENCES else PACKAGES[name][0]
-        self.cv_band = band_table("single", "cv", 0)
+        self.cv_band = band_table("single", "cv", 0) if fold is None else fold_band_table("cv", fold, seed)
         if self.kind == "ref":
             self.rows, self.band = {}, None
             return
         kind, key, source = PACKAGES[name]
-        z = np.load(PRED_DIR / f"seed{seed}" / f"{key}.npz", allow_pickle=True)
-        self.p = z["samples"].astype(np.float64) if kind == "set" else z["pred"].astype(np.float64)[:, None]
-        self.rows = {(str(s), int(t0) + 19, int(a)): i
-                     for i, (s, t0, a) in enumerate(zip(z["scene_id"], z["t0"], z["agent_id"]))}
-        self.band = band_table(kind, source, seed)
+        # frozen-split models: test-scene predictions plus, when present, val-scene ones
+        # (planner development); fold models: that fold's test scenes
+        pdirs = [PRED_DIR, CL_DIR / "preds_val"] if fold is None else [CV_PRED_DIR / f"fold{fold}" / "preds"]
+        P, self.rows = [], {}
+        for pdir in pdirs:
+            f = pdir / f"seed{seed}" / f"{key}.npz"
+            if not f.exists():
+                continue
+            z = np.load(f, allow_pickle=True)
+            off = sum(len(x) for x in P)
+            P.append(z["samples"].astype(np.float64) if kind == "set" else z["pred"].astype(np.float64)[:, None])
+            self.rows.update({(str(s), int(t0) + 19, int(a)): off + i
+                              for i, (s, t0, a) in enumerate(zip(z["scene_id"], z["t0"], z["agent_id"]))})
+        self.p = np.concatenate(P)
+        self.band = band_table(kind, source, seed) if fold is None else fold_band_table(key, fold, seed)
 
     def at(self, sc: dict, t: int, lam: float = 1.0):
         """Agents present at frame t: list of (agent index, samples (K,60,2), band (60,))."""
@@ -287,6 +377,28 @@ def band_table(kind: str, source: str, seed: int):
     return marginal, radii_per_class(s, pop["fm"][val], pop["cls"][val], sc.ALPHA, marginal, sc.MIN_CAL)
 
 
+@lru_cache(maxsize=None)
+def fold_band_table(key: str, fold: int, seed: int = 0):
+    """Per-step radii calibrated on fold `fold`'s val scenes (canonical windows)."""
+    import safety_scorecard as sc
+    from conformal_wrapper import cv_predict
+    pop = sc.load_population(REPO / "splits" / "cv_folds" / f"fold{fold}.json")
+    val = pop["split"] == "val"
+    if key == "cv":
+        pred = pop["obs"][:, -1:, :] + cv_predict(pop["obs"], 5)
+    elif key == "mlp":
+        w = np.load(CV_DIR / f"fold{fold}" / f"mlp_best_seed{seed}.npz")
+        pred = sc.mlp_world(pop["obs"], {k: w[k] for k in w.files})
+    else:
+        d = np.load(CV_DIR / f"fold{fold}" / "dumps" / f"preds_{key}.npz", allow_pickle=True)
+        assert np.array_equal(d["split"].astype(str), pop["split"]), f"fold {fold} {key}: row order"
+        assert np.array_equal(d["fut_mask"].astype(bool), pop["fm"]), f"fold {fold} {key}: fut_mask"
+        pred = d["pred"].astype(np.float64)
+    s = np.linalg.norm(pred[val] - pop["gt"][val], axis=-1)
+    marginal = radii_per_timestep(s, pop["fm"][val], sc.ALPHA)
+    return marginal, radii_per_class(s, pop["fm"][val], pop["cls"][val], sc.ALPHA, marginal, sc.MIN_CAL)
+
+
 @lru_cache(maxsize=1)
 def val_population():
     import safety_scorecard as sc
@@ -328,7 +440,9 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
         E.append(circles(xy, tan, EGO))                                  # (15, 3, 2)
         v_end.append(v[-1])
     E = np.stack(E)                                                      # (C, steps, 3, 2)
-    worst = np.zeros(len(cands))
+    hard = PLAN_OFFSETS * DT <= PLAN_CFG["hard_s"] + 1e-9                # steps under the hard constraint
+    worst = np.zeros(len(cands))                                         # hard-step penetration
+    soft = np.zeros(len(cands))                                          # later-step penetration
     ego_c = E.mean(axis=2)                                               # centres (C, steps, 2)
     for a_idx, samples, band in preds:
         fp = footprint(sc["cls"][a_idx])
@@ -350,16 +464,18 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
         A = circles(np.where(ok[..., None], P, 1e9), hd, fp)             # (K, steps, m, 2)
         dist = np.linalg.norm(E[:, None, :, :, None] - A[None, :, :, None, :, :], axis=-1)  # (C,K,steps,3,m)
         need = EGO[1] + fp[1] + band[idx] + SAFETY_BUFFER                # (steps,)
-        pen = (need[None, None, :, None, None] - dist) / need[None, None, :, None, None]
-        worst = np.maximum(worst, pen.max(axis=(1, 2, 3, 4)))
+        pen = ((need[None, None, :, None, None] - dist) / need[None, None, :, None, None]).max(axis=(1, 3, 4))
+        worst = np.maximum(worst, pen[:, hard].max(axis=1))             # pen: (C, steps)
+        if (~hard).any():
+            soft = np.maximum(soft, np.clip(pen[:, ~hard], 0, None).max(axis=1))
     feasible = worst <= 0.0
     cost = np.array([((ve - v_ref) / 2.0) ** 2 + 0.05 * a * a + 0.3 * dt * dt + 0.5 * abs(dt - d0)
-                     for (a, dt), ve in zip(cands, v_end)])
+                     for (a, dt), ve in zip(cands, v_end)]) + PLAN_CFG["soft_w"] * soft
     if feasible.any():
-        k = int(np.argmin(np.where(feasible, cost, np.inf)))
-    else:
-        k = int(np.lexsort((cost, worst))[0])                            # least penetration
-    return cands[k]
+        return cands[int(np.argmin(np.where(feasible, cost, np.inf)))]
+    if PLAN_CFG["fallback"] == "brake":                                  # emergency stop, no swerve
+        return ACCELS[0], min(LAT_TARGETS, key=lambda x: abs(x - d0))
+    return cands[int(np.lexsort((cost, worst))[0])]                      # least penetration
 
 
 def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
@@ -384,21 +500,22 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
         # ground truth at frame f+1
         g = f + 1
         xy, tan = route.pose(np.array(s), np.array(d))
-        if human:      # the raw logged position keeps the annotations' exact geometry
-            xy = sc["ego_raw"][g]
+        if human:      # the raw logged pose keeps the annotations' exact geometry
+            xy, tan = sc["ego_raw"][g], sc["ego_head_raw"][g]
         sc["route_tan_now"] = tan
-        ego = circles(xy, tan, EGO)
+        ego = rect(xy + EGO_CENTRE * tan, tan, EGO_RECT)
         nrm = np.array([-tan[1], tan[0]])
         ddot = (d - d_prev) / DT
         for a in np.where(sc["mask"][g])[0]:
-            fp = footprint(sc["cls"][a])
-            ac = circles(sc["pos"][g, a], sc["heading"][g, a], fp)
-            gap = (np.linalg.norm(ego[:, None] - ac[None], axis=-1) - EGO[1] - fp[1]).min()
+            size = rect_size(sc["cls"][a])
             rel = sc["pos"][g, a] - xy
+            if rel @ rel > 400.0:                                       # > 20 m away: no contact
+                continue
+            gap = rect_gap(ego, rect(sc["pos"][g, a], sc["heading"][g, a], size))
             lon, lat = float(rel @ tan), float(rel @ nrm)
             if lon >= AT_FAULT_REAR_M:
                 min_clear = min(min_clear, gap)
-            if gap < 0.0 and v >= AT_FAULT_MIN_SPEED and a not in hits and at_fault(sc, g, a, lon, lat, ddot, fp):
+            if gap < -COLLISION_TOL and v >= AT_FAULT_MIN_SPEED and a not in hits and at_fault(sc, g, a, lon, lat, ddot, size):
                 hits.add(a); hit = True
                 hit_vru |= sc["cls"][a] in VRU
     t_end = t_start + EP_LEN
@@ -414,11 +531,12 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
             "min_clearance_m": float(min_clear) if np.isfinite(min_clear) else None}
 
 
-def at_fault(sc, g, a, lon, lat, ddot, fp) -> bool:
+def at_fault(sc, g, a, lon, lat, ddot, size) -> bool:
     """The moving ego caused the contact: the agent is in front of it, or the ego was
     swerving toward it; an agent cutting in sideways faster than CUT_IN_MS is not
     the ego's fault (non-reactive replay, nuPlan-style)."""
-    in_front = (lon - EGO_CENTRE) >= FRONT_M and abs(lat) <= EGO[1] + fp[1] + 0.5 * EGO[1]
+    half_w = 0.5 * EGO_RECT[1]
+    in_front = (lon - EGO_CENTRE) >= FRONT_M and abs(lat) <= half_w + 0.5 * size[1] + 0.5 * half_w
     swerving = ddot * np.sign(lat) > SWERVE_MS and (lon - EGO_CENTRE) >= -1.0
     if not (in_front or swerving):
         return False
@@ -430,18 +548,31 @@ def at_fault(sc, g, a, lon, lat, ddot, fp) -> bool:
     return True
 
 
+def episode_ok(sc, t0) -> bool:
+    """The episode fits in the scene and its ego poses are free of glitches
+    (data-quality rule, the same for every package)."""
+    return t0 + EP_LEN <= sc["T"] - 1 and not sc["glitch"][t0:t0 + EP_LEN + 1].any()
+
+
 def run_package(args) -> tuple:
-    name, seed, split, scene_ids, lam = args
-    pred = Predictor(name, seed, split)
-    eps = []
+    """args = (package, seed, scene ids, band scale, planner cfg, {scene: fold} or None)."""
+    name, seed, scene_ids, lam, cfg, folds = args
+    PLAN_CFG.update(cfg)
+    predictors, eps, excluded = {}, [], 0
     for sid in scene_ids:
+        fold = None if folds is None else folds[sid]
+        if fold not in predictors:
+            predictors[fold] = Predictor(name, seed, fold)
         sc = load_scene(sid)
-        for persona, vmin in PERSONAS.items():
-            for t0 in EP_STARTS:
-                r = run_episode(sc, t0, vmin, pred, lam)
-                r["persona"] = persona
+        for t0 in EP_STARTS:
+            if not episode_ok(sc, t0):
+                excluded += len(PERSONAS)
+                continue
+            for persona, vmin in PERSONAS.items():
+                r = run_episode(sc, t0, vmin, predictors[fold], lam)
+                r["persona"], r["fold"] = persona, fold
                 eps.append(r)
-    return name, seed, lam, eps
+    return name, seed, lam, eps, excluded
 
 
 # --------------------------------------------------------------------------
@@ -522,12 +653,13 @@ def main() -> int:
     mapping = load_splits(REPO / "splits" / "scene_splits.json")
     scene_ids = sorted(p.stem for p in SCENES.glob("*.npz") if mapping.get(p.stem) == args.split)
     names = list(REFERENCES) if args.references_only else (args.packages or list(PACKAGES)) + list(REFERENCES)
-    tasks = [(n, s, args.split, scene_ids, 1.0) for n in names for s in ((0,) if n in REFERENCES else SEEDS)]
+    cfg = dict(PLAN_CFG)
+    tasks = [(n, s, scene_ids, 1.0, cfg, None) for n in names for s in ((0,) if n in REFERENCES else SEEDS)]
     if not args.references_only and args.packages is None:      # reported sensitivity: no band
-        tasks += [(n, s, args.split, scene_ids, 0.0) for n in PACKAGES for s in SEEDS]
+        tasks += [(n, s, scene_ids, 0.0, cfg, None) for n in PACKAGES for s in SEEDS]
     results = {}
     with ProcessPoolExecutor(max_workers=args.workers) as ex:
-        for name, seed, lam, eps in ex.map(run_package, tasks):
+        for name, seed, lam, eps, _ in ex.map(run_package, tasks):
             results.setdefault((name, lam), {})[seed] = eps
             s = summarise(eps)
             print(f"{name:32s} seed {seed} band x{lam:.0f}: score {s['score']:.3f}  at-fault "

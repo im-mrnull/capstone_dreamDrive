@@ -18,6 +18,10 @@ outputs/benchmark_v2/preds_*.npz
 outputs/benchmark_v2/seed_dumps/
 # Closed-loop dense windows + predictions (regenerable; closed_loop.json is the artifact)
 outputs/closed_loop/
+# Cross-validation fold models: checkpoints, weights and dumps (the *_seed0.json metrics are tracked)
+outputs/cv_folds/**/*.pt
+outputs/cv_folds/**/*.npz
+outputs/cv_folds/*/dumps/
 
 # Python
 __pycache__/

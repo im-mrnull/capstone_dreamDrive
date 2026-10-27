@@ -26,8 +26,12 @@ Final run 2026-10-27, all models on the same 2,177 canonical test windows.
    Transformer vs LED is **separated** (Δ −0.31, CI [−0.66, −0.08]). LED ≈ AgentFormer ≈
    Trajectron++ ≈ MLP ≈ K-mode ≈ CV are adjacent ties. ST-GAT is separated from every model
    except the transformer.
-3. **Caveat:** one dump per model (seed 0) — the transformer's best seed (3.43 vs 3.71 / 3.58).
-   A seed-pooled bootstrap needs the seed-1/2 dumps.
+3. **Seed-pooled (3-seed means; scenes + seeds resampled), 2026-10-27:** the seed-0
+   "transformer > LED separated" does **not** hold — it used the transformer's best seed.
+   ST-GAT vs transformer −0.17 [−0.48, 0.13]; ST-GAT vs LED −0.34 [−0.76, 0.01];
+   transformer vs LED −0.17 [−0.55, 0.11]. None separated at 95%, but both top models beat
+   LED in 9/9 seed pairings. Paper claim: "consistently lower ADE", not "significantly better".
+   Seed dumps: `outputs/benchmark_v2/seed_dumps/` (gitignored).
 4. **Class disparity** (n ≥ 50 classes): ST-GAT 12.5×, CI 6.7–24.0× (worst Car, best Scooter).
 5. *Withdrawn:* "Trajectron++ > ST-GAT separated" — Trajectron++'s dump was on its easier
    dense population; see [[benchmark-v2]].

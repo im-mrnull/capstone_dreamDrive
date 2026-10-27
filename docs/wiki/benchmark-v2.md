@@ -36,14 +36,19 @@
 
 ## Key Takeaways
 
-1. **Top tier = ST-GAT ≈ map-free transformer** — paired scene bootstrap cannot separate them
-   (Δ −0.10 m, CI [−0.36, 0.13]); both beat LED / AgentFormer / Trajectron++ on every seed.
+1. **Top tier = ST-GAT ≈ map-free transformer** — seed-pooled bootstrap cannot separate them
+   (Δ −0.17 m, CI [−0.48, 0.13]); both beat LED / AgentFormer / Trajectron++ on every seed,
+   but vs LED the margin is not significant at 95% (transformer −0.17 [−0.55, 0.11]).
    See [[bootstrap-ci]].
-2. **Val and test disagree** — LED is best on val (every seed) but third-tier on test.
-3. **Interaction modeling works on full population** — ST-GAT beats CV/MLP (was reversed in v1)
-4. **Mode selection is the bottleneck** — every multimodal model loses 1.5–2.4 m going from
+2. **Fairness audit (2026-10-27):** same 2,177 windows for every model and seed, same 2 s
+   input, no future leakage, no train/test leakage, checkpoints chosen on val. Only
+   asymmetry: Trajectron++ trains on denser upstream sampling and sees extra neighbours —
+   in its favour.
+3. **Val and test disagree** — LED is best on val (every seed) but third-tier on test.
+4. **Interaction modeling works on full population** — ST-GAT beats CV/MLP (was reversed in v1)
+5. **Mode selection is the bottleneck** — every multimodal model loses 1.5–2.4 m going from
    oracle to its single deployable output
-5. **Test set is genuinely harder** — 1.3–1.9× val ADE for every model
+6. **Test set is genuinely harder** — 1.3–1.9× val ADE for every model
 
 ## Correction (2026-10-27)
 

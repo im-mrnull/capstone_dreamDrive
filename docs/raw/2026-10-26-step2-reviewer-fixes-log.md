@@ -101,3 +101,20 @@ Claude session, continuing [[2026-10-26-claude-project-review]].
 
 ## Move to Wiki?
 - [x] bootstrap-ci, datasheet, conformal-prediction notes updated.
+
+## 2026-10-27 (afternoon) — final fairness audit + seed-pooled significance
+- **Fairness audit (all models, all seeds):** 92 JSON checks = canonical 993/2,177; all dumps
+  row-identical to canonical GT/masks; CV/MLP windows = rigid copies of canonical rows (new
+  test); T++ history bit-identical to canonical obs (max diff 0.0 m), T++ split files respect
+  the frozen split; no model reads the future at prediction time (code-checked: ST-GAT
+  teacher_forcing=False; AgentFormer `infer` never calls the posterior; LED predict uses past
+  only; T++ incl_robot_node=False, no map). Checkpoints chosen on val for every model.
+- Only asymmetry: T++ trains on its upstream dense node-timesteps (~147k overlapping
+  instances vs 7,406 canonical train windows) and sees ~6 extra neighbours per test window.
+  Favours T++ → our lead over it is conservative. Disclosed in README limitations.
+- **Seed-pooled bootstrap** (seed-1/2 dumps via dump_predictions --seed and LED --eval-only,
+  each verified = its JSON): transformer vs LED −0.17 [−0.55, 0.11], ST-GAT vs LED −0.34
+  [−0.76, 0.01], ST-GAT vs transformer −0.17 [−0.48, 0.13] → none separated at 95%. Top
+  models beat LED in 9/9 seed pairings. The seed-0 "transformer > LED separated" overstated it.
+- History cleanup before push: review PDF + chaos-gap / rss-violations notes removed from the
+  unpushed vault commit (kept locally, gitignored); index titles neutralised.

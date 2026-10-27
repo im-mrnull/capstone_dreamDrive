@@ -554,9 +554,28 @@ def episode_ok(sc, t0) -> bool:
     return t0 + EP_LEN <= sc["T"] - 1 and not sc["glitch"][t0:t0 + EP_LEN + 1].any()
 
 
+NOMINAL_RECTS = dict(RECTS)
+PRIMARY_INSTRUMENT = {"collision_tol": COLLISION_TOL, "ego_rect": EGO_RECT, "ego_centre": EGO_CENTRE,
+                      "glitch_m": GLITCH_M, "agent_scale": 1.0}
+
+
+def set_instrument(inst: dict) -> None:
+    """Override ground-truth instrument settings in this process (sensitivity analysis):
+    collision_tol, ego_rect, ego_centre, glitch_m, agent_scale (x nominal agent sizes)."""
+    global COLLISION_TOL, EGO_RECT, EGO_CENTRE, GLITCH_M, RECTS, OTHER_RECT
+    v = {**PRIMARY_INSTRUMENT, **inst}          # always relative to the primary instrument
+    COLLISION_TOL, EGO_RECT, EGO_CENTRE, GLITCH_M = v["collision_tol"], tuple(v["ego_rect"]), v["ego_centre"], v["glitch_m"]
+    k = v["agent_scale"]
+    RECTS = {c: (L * k, W * k) for c, (L, W) in NOMINAL_RECTS.items()}
+    OTHER_RECT = (1.0 * k, 1.0 * k)
+
+
 def run_package(args) -> tuple:
-    """args = (package, seed, scene ids, band scale, planner cfg, {scene: fold} or None)."""
+    """args = (package, seed, scene ids, band scale, planner cfg, {scene: fold} or None);
+    cfg may carry an "instrument" dict of ground-truth overrides (sensitivity analysis)."""
     name, seed, scene_ids, lam, cfg, folds = args
+    cfg = dict(cfg)
+    set_instrument(cfg.pop("instrument", {}))   # pool workers are reused: reset every task
     PLAN_CFG.update(cfg)
     predictors, eps, excluded = {}, [], 0
     for sid in scene_ids:

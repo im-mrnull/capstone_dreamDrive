@@ -81,6 +81,24 @@ across all 16):
 - **H3:** for each package, the chosen band setting (×0) scores higher than the full 90% band
   (×1), with the same planner.
 
+## 5. Amendment (2026-10-27, before any primary result): instrument sensitivity
+
+Every instrument setting above was calibrated on the human replay. To show the conclusions
+don't hinge on those exact values, the same pre-registered analysis (primary set, same
+hypotheses, same decision rule) is re-run with one setting varied at a time
+(`python scripts/closed_loop_cv.py sensitivity` → `closed_loop_cv_sensitivity.json`):
+
+| Setting | Variants (primary in bold) |
+|---|---|
+| Collision tolerance | 0, **0.25**, 0.5 m |
+| Ego footprint | **3.4 × 1.7 m, centred +0.3 m (measured)**; 4.5 × 1.7 m, centred +0.5 m (nominal car) |
+| Pose-glitch threshold | 0.5, **1.0**, 2.0 m |
+| Agent footprint sizes | −20%, **nominal**, +20% |
+
+The headline stays the primary analysis. For each hypothesis the report states in how many of
+the 7 variants it remains supported. A hypothesis is called **robust** only if it is supported
+in the primary analysis and in every variant.
+
 **Caveats:**
 - the agents don't react;
 - footprints are nominal;

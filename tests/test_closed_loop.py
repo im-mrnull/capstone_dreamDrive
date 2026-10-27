@@ -115,3 +115,10 @@ def test_holm_correction():
     assert adj["a"] == pytest.approx(0.03)          # 3 x 0.01
     assert adj["c"] == pytest.approx(0.06)          # 2 x 0.03
     assert adj["b"] == pytest.approx(0.06)          # max(1 x 0.04, previous 0.06): monotone
+
+
+def test_instrument_overrides_reset_to_primary():
+    cl.set_instrument({"agent_scale": 1.2, "collision_tol": 0.5})
+    assert cl.COLLISION_TOL == 0.5 and cl.RECTS["Car"][0] == pytest.approx(4.3 * 1.2)
+    cl.set_instrument({})
+    assert cl.COLLISION_TOL == cl.PRIMARY_INSTRUMENT["collision_tol"] and cl.RECTS["Car"] == (4.3, 1.7)

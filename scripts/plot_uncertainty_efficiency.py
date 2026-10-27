@@ -6,13 +6,14 @@ Two figures, both regenerable from committed artifacts (like the tables):
       band radius at the 90% coverage target (y). At a fixed coverage target the
       radius is pure uncertainty efficiency, and the expected trend holds: a
       lower-ADE model buys a tighter band.
-  robustness_gap.png          -- coverage lost per model when calibration stops
-      matching deployment (regime B minus regime A). Weaker predictors lose far
-      more, so the robustness gap shrinks as the base forecaster improves.
+  robustness_gap.png          -- coverage lost per model when calibrating on val
+      and deploying on test (regime-B scene-fold mean minus regime A), next to the
+      drop that scene sampling alone produces at its 5th percentile. With 22 test
+      scenes the val->test drop sits inside that no-shift spread for every model.
 
 ADE comes from outputs/benchmark_v2/summary.json (deployable test_ade_mean);
 radius + both-regime coverage come from outputs/benchmark_v2/conformal_metrics.json
-(regime B test-fold marginal and regime A val->test marginal).
+(regime B = mean over random test-scene folds; regime A = val->test marginal).
 
 Usage:
     python scripts/plot_uncertainty_efficiency.py
@@ -50,9 +51,11 @@ MODELS = [
     ("K-mode decoder (top-1-sel)", ["K-mode", "top-1-selected"], "K-mode"),
     ("map-free transformer", ["Map-free"], "Map-free"),
     ("ST-GAT-inspired (MHA)", ["ST-GAT"], "ST-GAT"),
-    ("Trajectron++ (most-likely)", ["Trajectron++", "most-likely"], "Trajectron++"),
+    ("Trajectron++ (most-likely, canonical windows)", ["Trajectron++", "most-likely"], "Trajectron++"),
+    ("AgentFormer (most-likely)", ["AgentFormer"], "AgentFormer"),
+    ("LED (most-likely)", ["LED"], "LED"),
 ]
-_BLOCKED = ("hetero", "oracle")
+_BLOCKED = ("hetero", "oracle", "dense")
 
 
 def _find_ade(summ_models: list, needles: list) -> float:
@@ -70,13 +73,18 @@ def load_rows():
     target = conf["target_coverage"]
     rows = []
     for ckey, needles, disp in MODELS:
-        b = conf["models"][ckey]["regime_B_test_fold"]["marginal"]
+        if ckey not in conf["models"]:
+            continue
+        folds = conf["models"][ckey]["regime_B_scene_folds"]
+        b = folds["per_step_marginal"]
         a = conf["models"][ckey]["regime_A_val_to_test"]["marginal"]
         rows.append({
             "name": disp,
             "ade": _find_ade(summ, needles),
-            "radius": float(b["mean_radius_m"]),
-            "gap": 100.0 * (float(b["coverage"]) - float(a["coverage"])),
+            "radius": float(b["mean_radius_m"]["mean"]),
+            "gap": 100.0 * (float(b["coverage"]["mean"]) - float(a["coverage"])),
+            "noise_gap": 100.0 * (float(b["coverage"]["mean"]) - float(b["coverage"]["p05"])),
+            "rank": float(folds["regime_A_coverage_rank_in_folds"]),
         })
     return rows, target
 
@@ -103,23 +111,25 @@ def plot_efficiency(rows, target, out_png: Path) -> None:
     r = sxy / (sxx * syy) ** 0.5
 
     fig, ax = _fig()
-    x0, x1 = 2.3, 4.6
+    x0, x1 = min(xs) - 0.3, max(xs) + 0.3
     ax.plot([x0, x1], [slope * x0 + intercept, slope * x1 + intercept],
             color=MUTED, lw=1.4, ls=(0, (5, 3)), zorder=2)
     for rw in rows:
         ax.plot(rw["ade"], rw["radius"], "o", ms=11, mfc=BLUE, mec="white",
                 mew=2, zorder=5)
 
-    # direct labels (hand-placed to dodge the MLP/K-mode near-overlap at ~13.8 m
-    # and the ST-GAT/Map-free proximity at ~3.4-3.6 m ADE).
+    # direct labels (hand-placed: LED and AgentFormer share ADE ~3.75 so they go
+    # on opposite sides; Trajectron++/MLP/K-mode crowd ~13.5 m).
     off = {"Trajectron++": (0, 13, "center", "bottom"),
            "ST-GAT": (11, -3, "left", "center"),
            "Map-free": (0, 12, "center", "bottom"),
-           "MLP": (-11, -9, "right", "center"),
+           "LED": (-12, 0, "right", "center"),
+           "AgentFormer": (12, -2, "left", "center"),
+           "MLP": (12, -4, "left", "center"),
            "K-mode": (12, 6, "left", "center"),
            "CV": (0, 13, "center", "bottom")}
     for rw in rows:
-        dx, dy, ha, va = off[rw["name"]]
+        dx, dy, ha, va = off.get(rw["name"], (0, 13, "center", "bottom"))
         ax.annotate(f"{rw['name']}\n{rw['radius']:.1f} m",
                     xy=(rw["ade"], rw["radius"]), xytext=(dx, dy),
                     textcoords="offset points", fontsize=9, color=INK, ha=ha,
@@ -130,7 +140,7 @@ def plot_efficiency(rows, target, out_png: Path) -> None:
                 va="bottom", fontstyle="italic")
 
     ax.set_xlim(x0, x1)
-    ax.set_ylim(9.2, 16.9)
+    ax.set_ylim(min(ys) - 0.8, max(ys) + 0.9)
     ax.set_xlabel("deployable test ADE (m)  —  lower is a better forecaster",
                   fontsize=10.5, color=INK2)
     ax.set_ylabel(f"conformal band radius (m) at the {target:.0%} target",
@@ -143,12 +153,14 @@ def plot_efficiency(rows, target, out_png: Path) -> None:
     for side in ("left", "bottom"):
         ax.spines[side].set_color(GRID)
 
-    ax.set_title("Uncertainty efficiency: a more accurate model needs a smaller "
-                 "band for the same coverage", fontsize=11.5, color=INK,
-                 fontweight="bold", pad=16, loc="left")
-    ax.annotate("IDD-3D test split · split-conformal band radius at the 90% target "
-                "(regime B, valid) vs deployable test ADE · one point per model",
-                xy=(0, 1.02), xycoords="axes fraction", fontsize=9, color=MUTED, ha="left")
+    # title + subtitle kept within the axes width: anything wider makes
+    # tight_layout squeeze the plot into the left half of the canvas.
+    ax.set_title("A more accurate model needs a smaller band for the same coverage",
+                 fontsize=11.5, color=INK, fontweight="bold", pad=34, loc="left")
+    ax.annotate(f"IDD-3D test split · split-conformal band radius at the {target:.0%} target\n"
+                "(regime B, mean over scene folds) vs deployable test ADE · one point per model",
+                xy=(0, 1.02), xycoords="axes fraction", fontsize=9, color=MUTED, ha="left",
+                va="bottom", linespacing=1.3)
 
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -161,18 +173,21 @@ def plot_robustness(rows, out_png: Path) -> None:
     order = sorted(rows, key=lambda rw: rw["ade"])   # best forecaster first
     y = list(range(len(order)))[::-1]                # -> best at the top
 
-    fig, ax = _fig(8.2, 5.2)
+    fig, ax = _fig(9.0, 5.2)
     ax.barh(y, [rw["gap"] for rw in order], height=0.62, color=BLUE, zorder=3)
+    # the tick is explained in the subtitle (a legend box here collides with the last row)
+    ax.plot([rw["noise_gap"] for rw in order], y, "|", color=INK, ms=22, mew=2.2, zorder=4)
     for yi, rw in zip(y, order):
-        ax.text(rw["gap"] + 0.3, yi, f"{rw['gap']:.1f} pts", va="center",
-                ha="left", fontsize=9.5, color=INK, fontweight="bold")
+        x = max(rw["gap"], rw["noise_gap"])
+        ax.text(x + 0.4, yi, f"{rw['gap']:.1f} pts  ·  {rw['rank']:.0%} of splits lower",
+                va="center", ha="left", fontsize=9, color=INK)
 
     ax.set_yticks(y)
     ax.set_yticklabels([f"{rw['name']}   ·   ADE {rw['ade']:.2f}" for rw in order],
                        fontsize=9.5, color=INK)
-    ax.set_xlim(0, max(rw["gap"] for rw in order) * 1.18)
-    ax.set_xlabel("coverage lost under the val→test shift  (percentage points, "
-                  "regime B − regime A)", fontsize=10.5, color=INK2)
+    ax.set_xlim(0, max(max(rw["gap"], rw["noise_gap"]) for rw in order) * 1.65)
+    ax.set_xlabel("coverage drop, calibrate on val → deploy on test  (percentage points, "
+                  "regime B mean − regime A)", fontsize=10.5, color=INK2)
     ax.tick_params(axis="both", length=0, labelcolor=INK2)
     ax.xaxis.grid(True, color=GRID, lw=0.8)
     ax.set_axisbelow(True)
@@ -180,13 +195,12 @@ def plot_robustness(rows, out_png: Path) -> None:
         ax.spines[side].set_visible(False)
     ax.spines["bottom"].set_color(GRID)
 
-    ax.set_title("Robustness gap: weaker predictors lose far more coverage under "
-                 "the val→test shift", fontsize=11.5, color=INK, fontweight="bold",
-                 pad=16, loc="left")
-    ax.annotate("IDD-3D · drop from regime B (calibration matches deployment, ≈90%) "
-                "to regime A (calibrate on val, deploy on harder test) · shorter is "
-                "more robust", xy=(0, 1.02), xycoords="axes fraction", fontsize=9,
-                color=MUTED, ha="left")
+    ax.set_title("The val→test coverage drop is within scene-sampling variability",
+                 fontsize=11.5, color=INK, fontweight="bold", pad=34, loc="left")
+    ax.annotate("IDD-3D · bar = regime-B scene-fold mean − regime A\n"
+                "tick = drop that random scene splits alone reach 5% of the time "
+                "(no shift)", xy=(0, 1.02), xycoords="axes fraction", fontsize=9,
+                color=MUTED, ha="left", va="bottom", linespacing=1.3)
 
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)

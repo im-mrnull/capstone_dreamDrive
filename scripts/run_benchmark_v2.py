@@ -93,15 +93,30 @@ def launch_all(smoke: bool) -> None:
                  "--seed", s, "--epochs", tpp_epochs,
                  "--log-tag", f"_idd3d_world_v2_s{seed}",
                  "--save-metrics-json", str(tpp_json)])
+        # Re-score on the canonical windows (the population every other model uses).
+        if tpp_json.exists() and not (OUT / f"trajectronpp_canonical_seed{seed}.json").exists():
+            run([py, "scripts/eval_trajectronpp_canonical.py", "--seeds", s])
 
         # Upstream AgentFormer (base CVAE, map-free). Runs only if the repo is
         # cloned + patched (scripts/patch_agentformer.py); needs easydict, glob2.
         af_json = OUT / f"agentformer_seed{seed}.json"
+        # Seed 0 also dumps its most-likely predictions for the conformal wrapper.
+        dump = ["--save-pred-npz", str(OUT / "preds_agentformer.npz")] if seed == 0 else []
         if (REPO / "third_party" / "agentformer" / "model" / "agentformer.py").exists() and not af_json.exists():
             run([py, "scripts/model6_agentformer_train_eval.py",
-                 "--device", "cuda", "--seed", s, "--epochs", af_epochs,
+                 "--device", "cuda", "--seed", s, "--epochs", af_epochs, "--stride", "5",
                  "--save-metrics-json", str(af_json),
-                 "--save-ckpt", str(OUT / f"agentformer_ckpt_seed{seed}.pt")])
+                 "--save-ckpt", str(OUT / f"agentformer_ckpt_seed{seed}.pt")] + dump)
+
+        # Upstream LED (leapfrog diffusion): needs only the cloned repo (no patches).
+        led_json = OUT / f"led_seed{seed}.json"
+        dump = ["--save-pred-npz", str(OUT / "preds_led.npz")] if seed == 0 else []
+        if (REPO / "third_party" / "led" / "models" / "model_diffusion.py").exists() and not led_json.exists():
+            run([py, "scripts/model7_led_train_eval.py",
+                 "--device", "cuda", "--seed", s,
+                 "--core-epochs", af_epochs, "--init-epochs", af_epochs,
+                 "--save-metrics-json", str(led_json),
+                 "--save-ckpt", str(OUT / f"led_ckpt_seed{seed}.pt")] + dump)
 
         # K-mode with checkpoint selection on val top-1 (deployable) rather than
         # val oracle. Winner of the EWTA grid (outputs/benchmark_v2/mfp_ewta_grid/):
@@ -124,6 +139,8 @@ def launch_all(smoke: bool) -> None:
             if TPP_HETERO_AUGMENT:
                 cmd.append("--augment")
             run(cmd)
+        if tpp_h_json.exists() and not (OUT / f"trajectronpp_hetero_canonical_seed{seed}.json").exists():
+            run([py, "scripts/eval_trajectronpp_canonical.py", "--hetero", "--seeds", s])
 
 
 # --------------------------------------------------------------------------
@@ -140,13 +157,20 @@ VARIANTS = [
     ("K-mode decoder — learned top-1", "mfp_seed{seed}.json", ["top1"], 10, True),
     ("K-mode decoder (top-1-selected) — oracle best-of-10", "mfp_top1sel_seed{seed}.json", ["oracle_best_of_k"], 10, False),
     ("K-mode decoder (top-1-selected) — learned top-1", "mfp_top1sel_seed{seed}.json", ["top1"], 10, True),
-    ("Trajectron++ — most-likely", "trajectronpp_seed{seed}.json", ["most_likely"], 1, True),
-    ("Trajectron++ — oracle best-of-20", "trajectronpp_seed{seed}.json", ["best_of_k"], 20, False),
-    ("Trajectron++ hetero (unicycle) — most-likely", "trajectronpp_hetero_seed{seed}.json", ["most_likely"], 1, True),
-    ("Trajectron++ hetero (unicycle) — oracle best-of-20", "trajectronpp_hetero_seed{seed}.json", ["best_of_k"], 20, False),
-    ("AgentFormer (upstream, map-free) — most-likely", "agentformer_seed{seed}.json", ["most_likely"], 1, True),
-    ("AgentFormer (upstream, map-free) — oracle best-of-20", "agentformer_seed{seed}.json", ["best_of_k"], 20, False),
+    ("Trajectron++ — most-likely", "trajectronpp_canonical_seed{seed}.json", ["most_likely"], 1, True),
+    ("Trajectron++ — oracle best-of-20", "trajectronpp_canonical_seed{seed}.json", ["best_of_k"], 20, False),
+    ("Trajectron++ hetero (unicycle) — most-likely", "trajectronpp_hetero_canonical_seed{seed}.json", ["most_likely"], 1, True),
+    ("Trajectron++ hetero (unicycle) — oracle best-of-20", "trajectronpp_hetero_canonical_seed{seed}.json", ["best_of_k"], 20, False),
+    ("AgentFormer (upstream, map-free, 2 Hz) — most-likely", "agentformer_seed{seed}.json", ["most_likely"], 1, True),
+    ("AgentFormer (upstream, map-free, 2 Hz) — oracle best-of-20", "agentformer_seed{seed}.json", ["best_of_k"], 20, False),
+    ("LED (leapfrog diffusion) — mean-denoised", "led_seed{seed}.json", ["most_likely"], 1, True),
+    ("LED (leapfrog diffusion) — oracle best-of-20", "led_seed{seed}.json", ["best_of_k"], 20, False),
+    # Trajectron++'s own protocol (script 7): every valid node-timestep, 46% of them
+    # with < 2 s of future. Kept for reference only, never ranked against the rows above.
+    ("Trajectron++ — most-likely [dense node-timesteps]", "trajectronpp_seed{seed}.json", ["most_likely"], 1, True),
+    ("Trajectron++ — oracle best-of-20 [dense node-timesteps]", "trajectronpp_seed{seed}.json", ["best_of_k"], 20, False),
 ]
+DENSE_PROTOCOL = {label for label, *_ in VARIANTS if "[dense node-timesteps]" in label}
 
 
 def _dig(d: dict, keys: list[str]) -> dict:
@@ -178,12 +202,13 @@ def aggregate() -> dict:
                 seeds_present.append(0 if seed is None else seed)
             except (KeyError, TypeError) as e:
                 print(f"warning: {f.name} missing fields for {label}: {e}")
+        population = "dense node-timesteps" if label in DENSE_PROTOCOL else "canonical windows"
         if not seeds_present:
             models.append({"label": label, "k": k, "deployable": deployable,
-                           "status": "pending"})
+                           "population": population, "status": "pending"})
             continue
         entry = {"label": label, "k": k, "deployable": deployable,
-                 "seeds": seeds_present, "status": "ok"}
+                 "population": population, "seeds": seeds_present, "status": "ok"}
         for split in ("val", "test"):
             for metric in ("ade", "fde"):
                 vals = np.asarray(per_split[split][metric])
@@ -206,13 +231,13 @@ def aggregate() -> dict:
 def _trajectronpp_gap_decomposition() -> dict | None:
     """3-seed test-split decomposition of the T++ oracle-vs-deployable gap.
 
-    Reads the sampling_curve block emitted by scripts/7_train_eval_trajectronpp.py
-    (best-of-{1,2,5,10,20} + mean-sample) and splits the most-likely -> oracle gap
+    Reads the sampling_curve block emitted by scripts/eval_trajectronpp_canonical.py
+    (best-of-{1,2,5,10,20} + mean-sample on the canonical windows) and splits the most-likely -> oracle gap
     into a calibration slice (random draw -> most-likely) and a coverage slice
     (most-likely -> best-of-20). Returns None if the curve is absent."""
     curves, means, mls, oracles, k_list = [], [], [], [], None
     for seed in SEEDS:
-        f = OUT / f"trajectronpp_seed{seed}.json"
+        f = OUT / f"trajectronpp_canonical_seed{seed}.json"
         if not f.exists():
             return None
         t = json.loads(f.read_text(encoding="utf-8")).get("test", {})

@@ -67,8 +67,8 @@ def main() -> int:
 
     # --- direct labels: endpoints (reference readouts) ---
     ax.annotate(f"random single sample\n{rnd:.2f} m",
-                xy=(K[0], ade[0]), xytext=(K[0] * 1.08, ade[0] + 0.02),
-                fontsize=9.5, color=INK, va="center", ha="left", fontweight="bold")
+                xy=(K[0], ade[0]), xytext=(K[0] * 1.08, ade[0] + 0.04),
+                fontsize=9.5, color=INK, va="bottom", ha="left", fontweight="bold")
     ax.annotate(f"oracle best-of-{K[-1]}\n{oracle:.2f} m",
                 xy=(K[-1], ade[-1]), xytext=(K[-1] * 0.93, ade[-1] - 0.13),
                 fontsize=9.5, color=INK, va="top", ha="right", fontweight="bold")
@@ -89,7 +89,7 @@ def main() -> int:
     ax.text(6.3, (ml + rnd) / 2 + 0.03,
             f"calibration = {calib:.2f} m\nrandom → most-likely\n(mode selection is informative)",
             fontsize=9.5, color=INK, ha="center", va="center", linespacing=1.3)
-    ax.text(12.5, 2.12,
+    ax.text(11, (ml + oracle) / 2 + 0.25 * (ml - oracle),
             f"coverage = {cover:.2f} m\nmost-likely → oracle\n(irreducible multimodality)",
             fontsize=9.5, color=INK, ha="center", va="center", linespacing=1.3)
 
@@ -100,7 +100,7 @@ def main() -> int:
     ax.tick_params(axis="both", which="both", length=0, labelcolor=INK2)
     ax.minorticks_off()
     ax.set_xlim(K[0] * 0.92, K[-1] * 1.12)
-    ax.set_ylim(min(oracle - 0.18, 1.1), rnd + 0.30)
+    ax.set_ylim(oracle - 0.5, rnd + 0.40)
     ax.set_xlabel("K  (samples kept — best-of-K)", fontsize=10.5, color=INK2)
     ax.set_ylabel("ADE (m)  —  lower is better", fontsize=10.5, color=INK2)
     ax.yaxis.grid(True, color=GRID, lw=0.8, zorder=0)
@@ -110,11 +110,14 @@ def main() -> int:
     for side in ("left", "bottom"):
         ax.spines[side].set_color(GRID)
 
-    ax.set_title("Trajectron++ on IDD-3D: where the 1.21 m oracle-vs-deployable gap comes from",
-                 fontsize=12, color=INK, fontweight="bold", pad=26, loc="left")
-    ax.annotate("Test split, 3-seed mean. Best-of-K ADE from 20 CVAE samples (same draws); "
-                "the curve still falls at K=20 — genuine multimodality, not sampling noise.",
-                xy=(0, 1.02), xycoords="axes fraction", fontsize=9, color=MUTED, ha="left")
+    # title + subtitle kept within the axes width (wider text squeezes the plot).
+    ax.set_title(f"Trajectron++: where the {cover:.2f} m oracle-vs-deployable gap comes from",
+                 fontsize=12, color=INK, fontweight="bold", pad=36, loc="left")
+    ax.annotate("IDD-3D test split, canonical windows, 3-seed mean. Best-of-K ADE from 20 CVAE\n"
+                f"samples (same draws); the curve still falls at K={K[-1]} — genuine "
+                "multimodality, not sampling noise.",
+                xy=(0, 1.02), xycoords="axes fraction", fontsize=9, color=MUTED, ha="left",
+                va="bottom", linespacing=1.3)
 
     fig.tight_layout()
     OUT_PNG.parent.mkdir(parents=True, exist_ok=True)

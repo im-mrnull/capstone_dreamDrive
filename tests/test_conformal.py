@@ -87,3 +87,49 @@ def test_small_class_falls_back_to_marginal():
     pc = cw.radii_per_class(scores, valid, classes, 0.1, marg, min_cal=30)
     assert np.allclose(pc["rare"], marg)      # rare class uses the marginal radius
     assert not np.allclose(pc["big"], marg)   # big class gets its own
+
+
+def test_scene_fold_never_splits_a_scene():
+    """Regime B splits test SCENES: no scene contributes rows to both halves."""
+    rng = np.random.default_rng(0)
+    scenes = np.repeat(np.array([f"s{i}" for i in range(22)], dtype=object), 30)
+    is_test = np.ones(scenes.shape[0], dtype=bool)
+    is_test[:60] = False                                   # two non-test scenes ignored
+    cal, ev = cw.scene_fold(is_test, scenes, rng)
+    assert not set(scenes[cal]) & set(scenes[ev])
+    assert set(scenes[cal]) | set(scenes[ev]) == set(scenes[is_test])
+    assert abs(len(set(scenes[cal])) - len(set(scenes[ev]))) <= 1
+
+
+def test_trajectory_coverage_counts_whole_futures():
+    scores = np.array([[0.5, 0.5, 0.5],    # all inside
+                       [0.5, 2.0, 0.5],    # one step outside -> trajectory miss
+                       [0.5, 9.0, 0.5]])   # step 2 outside but masked -> covered
+    valid = np.array([[1, 1, 1], [1, 1, 1], [1, 0, 1]], dtype=bool)
+    classes = np.array(["a", "a", "b"], dtype=object)
+    rep = cw.coverage_report(scores, valid, classes, np.ones((3, 3)))
+    assert rep["trajectory_coverage"] == pytest.approx(2 / 3)
+    assert rep["coverage"] == pytest.approx(7 / 8)
+    assert rep["per_class_trajectory_coverage"] == {"a": 0.5, "b": 1.0}
+
+
+def test_simultaneous_band_guarantees_whole_trajectories():
+    """Exchangeable agents with correlated per-step errors: the per-step band
+    covers each step at ~90% but whole trajectories well below; the simultaneous
+    band brings trajectory coverage back to >= ~90%."""
+    rng = np.random.default_rng(4)
+    n, T, alpha = 12000, 12, 0.1
+    walk = np.cumsum(rng.normal(size=(n, T, 2)), axis=1)          # error grows with t
+    scores = np.linalg.norm(walk, axis=-1)
+    valid = np.ones((n, T), dtype=bool)
+    classes = np.array(["A"] * n, dtype=object)
+    scenes = np.array([f"s{i // 20}" for i in range(n)], dtype=object)   # 600 scenes
+    half = n // 2
+    out = cw.evaluate_split(scores[:half], valid[:half], classes[:half],
+                            scores[half:], valid[half:], classes[half:], alpha, 30,
+                            cal_scenes=scenes[:half], rng=np.random.default_rng(0))
+    assert out["marginal"]["coverage"] == pytest.approx(0.9, abs=0.02)
+    assert out["marginal"]["trajectory_coverage"] < 0.85
+    assert out["simultaneous"]["marginal"]["trajectory_coverage"] == pytest.approx(0.9, abs=0.02)
+    # the guarantee costs width: the simultaneous band is wider than the per-step one
+    assert out["simultaneous"]["marginal"]["mean_radius_m"] > out["marginal"]["mean_radius_m"]

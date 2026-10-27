@@ -91,7 +91,7 @@ def plot_model(name: str, block: dict, target: float, out_png: Path) -> bool:
 
     ax.set_title("Class-conditional conformal fixes the coverage one global radius leaves unfair",
                  fontsize=11.5, color=INK, fontweight="bold", pad=16, loc="left")
-    ax.annotate(f"{name} on IDD-3D · test-fold split-conformal (valid) · {target:.0%} target · "
+    ax.annotate(f"{name} on IDD-3D · one 50/50 test-scene fold · {target:.0%} target · "
                 "per-class radii pull each class toward nominal",
                 xy=(0, 1.02), xycoords="axes fraction", fontsize=9, color=MUTED,
                 ha="left", va="bottom")

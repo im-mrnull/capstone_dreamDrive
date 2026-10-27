@@ -5,6 +5,7 @@ inference on the val and test splits of the canonical dataset, and writes a flat
 conformal-ready NPZ per model:
 
     pred (N,60,2) · gt (N,60,2) · fut_mask (N,60) · agent_type (N,) · split (N,)
+    · scene_id (N,)  (for scene-level conformal folds and bootstrap CIs)
 
 one row per real agent (padding dropped). ST-GAT dumps its single output;
 K-mode dumps its deployable learned top-1. These feed scripts/conformal_wrapper.py
@@ -58,16 +59,30 @@ def flatten(loader: DataLoader, predict_fn, device: torch.device, split: str):
     return P, G, M, C, S
 
 
+def agent_scene_ids(ds: CanonicalSeqDataset) -> list:
+    """Scene id per real agent, in the order an unshuffled loader yields them
+    (sequences in seq_indices order, agents in order within each sequence)."""
+    out = []
+    for k in ds.seq_indices:
+        s, e = ds.seq_start_end[int(k)]
+        out += [str(ds.scene_id[int(k)])] * int(e - s)
+    return out
+
+
 def dump(name: str, predict_fn, device: torch.device, out_path: Path) -> None:
-    P, G, M, C, S = [], [], [], [], []
+    P, G, M, C, S, Z = [], [], [], [], [], []
     for split in ("val", "test"):
-        p, g, m, c, s = flatten(make_loader(split), predict_fn, device, split)
-        P += p; G += g; M += m; C += c; S += s
+        loader = make_loader(split)
+        p, g, m, c, s = flatten(loader, predict_fn, device, split)
+        z = agent_scene_ids(loader.dataset)
+        assert len(z) == len(p), "scene-id order must match the flattened agents"
+        P += p; G += g; M += m; C += c; S += s; Z += z
     np.savez_compressed(
         out_path,
         pred=np.asarray(P, dtype=np.float32), gt=np.asarray(G, dtype=np.float32),
         fut_mask=np.asarray(M, dtype=bool), agent_type=np.asarray(C, dtype=object),
-        split=np.asarray(S, dtype=object), model=name)
+        split=np.asarray(S, dtype=object), scene_id=np.asarray(Z, dtype=object),
+        model=name)
     print(f"{name}: {len(P)} agents (val+test) -> {out_path}")
 
 

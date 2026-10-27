@@ -354,6 +354,28 @@ Source artifact: [`outputs/benchmark_v2/conformal_sensitivity.json`](outputs/ben
 The qualitative picture is the same at every target: regime B lands near the target but slightly
 under it, regime A is lower, and the band widens as the target tightens.
 
+### Which model is safest? (pre-registered safety scorecard)
+
+Mean ADE ranks forecasters, not safety. A planner needs a predictor that foresees the agents that
+actually come close to the ego vehicle, without flagging everyone, and does so for pedestrians
+and two-wheelers too, fast enough for 10 Hz. The rule below was committed **before** any
+scorecard number was computed; full definitions are in
+[`docs/wiki/safety-scorecard.md`](docs/wiki/safety-scorecard.md).
+
+- **Candidates (12, seeds 0–2, canonical windows).** There are 8 single-trajectory predictors and
+  4 multi-future sets (LED, AgentFormer and Trajectron++ with 10 samples each, and the K-mode
+  decoder's 10 modes). Each gets a per-step, per-class 90% conformal band calibrated on val.
+- **Conflict.** An agent's true position comes within 5 m of the ego's actual position (from
+  `outputs/ego_trajectories.csv`) at the same future step.
+- **Primary metric.** The test ROC-AUC for flagging conflict agents, sweeping a scale on the
+  band. It is reported as the 3-seed mean with a seed-pooled scene-bootstrap CI.
+- **Pick.** The highest primary AUC wins. Packages tied with it (paired 95% CI includes 0) are
+  then compared on the same AUC over vulnerable road users (pedestrians, children and
+  two-wheeler riders). Any remaining tie goes to the lowest GPU latency.
+
+*Result: pending.* This is an open-loop proxy. The ego path is what the human driver did, so
+closed-loop collision rates in CARLA remain the stronger test.
+
 ### Honest takeaways (Benchmark v2)
 
 1. **Two models share the top: the ST-GAT-inspired model and the map-free transformer.**

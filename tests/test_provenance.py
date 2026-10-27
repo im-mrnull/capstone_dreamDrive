@@ -24,7 +24,9 @@ def test_readme_tables_match_artifacts():
 
 def test_no_fabricated_numbers_resurface():
     """The retracted placeholder claims must not reappear in tracked docs."""
-    banned = ["66% higher ADE", "131% higher FDE", "66% increase in ADE", "131% increase in FDE"]
+    banned = ["66% higher ADE", "131% higher FDE", "66% increase in ADE", "131% increase in FDE",
+              # withdrawn Oct 2026: Trajectron++ was ranked on its easier dense population
+              "Trajectron++ most-likely is the best deployable model"]
     for doc in ["README.md", "TRAJECTRON_FIX_SUMMARY.md", "research/report.txt", "research/presentation.txt"]:
         p = REPO / doc
         if not p.exists():

@@ -183,7 +183,7 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
         With collect=True also gathers the deployable single trajectory, GT and
         validity mask per node-timestep (for the conformal predictions dump)."""
         ade_s_all, fde_s_all, paths, classes = [], [], [], []
-        dpred, dgt, dmask = [], [], []
+        dpred, dgt, dmask, dscene = [], [], [], []
         for scene in env.scenes:
             timesteps = np.arange(scene.timesteps)
             predictions = stg.predict(
@@ -206,9 +206,11 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
                         dpred.append(arr[0].astype(np.float32))
                         dgt.append(np.where(valid[:, None], fut64, 0.0).astype(np.float32))
                         dmask.append(valid)
+                        dscene.append(str(scene.name))
         base = (ade_s_all, fde_s_all, np.asarray(paths), np.asarray(classes, dtype=object))
         if collect:
-            return base + (np.asarray(dpred), np.asarray(dgt), np.asarray(dmask))
+            return base + (np.asarray(dpred), np.asarray(dgt), np.asarray(dmask),
+                           np.asarray(dscene, dtype=object))
         return base
 
     results: dict = {"checkpoint_iter": it}
@@ -256,7 +258,7 @@ def evaluate(model_dir: Path, device: str, k_best_of: int, split: str,
         if dump_preds:
             results["_pred_dump"] = {
                 "pred": ml_out[4], "gt": ml_out[5], "fut_mask": ml_out[6],
-                "agent_type": types}
+                "agent_type": types, "scene_id": ml_out[7]}
         print(f"{split}/best_of_k: ADE={results['best_of_k']['ade']:.4f} | "
               f"most_likely: ADE={results['most_likely']['ade']:.4f}")
     return results
@@ -323,6 +325,7 @@ def main() -> int:
             agent_type=np.concatenate([vd["agent_type"], td["agent_type"]]).astype(object),
             split=np.asarray(["val"] * len(vd["pred"]) + ["test"] * len(td["pred"]),
                              dtype=object),
+            scene_id=np.concatenate([vd["scene_id"], td["scene_id"]]).astype(object),
             model="Trajectron++ (most-likely)")
         print(f"saved predictions dump -> {args.dump_preds}")
 

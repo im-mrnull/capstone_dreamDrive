@@ -109,25 +109,28 @@ def evaluate(model, ds, cfg, eval_k: int, device, indices=None) -> dict:
 
 
 @torch.no_grad()
-def dump_most_likely(model, splits, cfg, device, out_path: str) -> None:
+def dump_most_likely(model, splits, cfg, device, out_path: str, sample_k: int = 0) -> None:
     """Flat per-agent val+test most-likely predictions for the conformal wrapper
-    (one row per real agent): pred/gt (N,60,2), fut_mask (N,60), agent_type, split."""
+    (one row per real agent): pred/gt (N,60,2), fut_mask (N,60), agent_type, split.
+    sample_k > 0 also stores that many prior samples per agent as samples (N,K,60,2)."""
     model.eval()
-    P, G, M, C, S, Z = [], [], [], [], [], []
+    P, G, M, C, S, Z, K = [], [], [], [], [], [], []
     for split, ds in splits.items():
         for i in range(len(ds)):
             obs, pred, _, _, fm, at = ds[i]
             data = seq_to_af_data(obs, pred, fm, cfg.traj_scale, stride=cfg.get("stride", 1))
-            ml, _ = predict_seq(model, data, nz=cfg.nz, sample_k=1,
-                                traj_scale=cfg.traj_scale, stride=cfg.get("stride", 1))
-            ml = ml.cpu().numpy()                                        # (M,T,2)
+            ml, samp = predict_seq(model, data, nz=cfg.nz, sample_k=max(sample_k, 1),
+                                   traj_scale=cfg.traj_scale, stride=cfg.get("stride", 1))
+            ml, samp = ml.cpu().numpy(), samp.cpu().numpy()              # (M,T,2), (M,K,T,2)
             gt = np.transpose(pred, (0, 2, 1))                           # (M,T,2)
             scene = str(ds.scene_id[int(ds.seq_indices[i])])
             for a in range(obs.shape[0]):
-                P.append(ml[a]); G.append(gt[a]); M.append(fm[a].astype(bool))
+                P.append(ml[a]); G.append(gt[a]); M.append(fm[a].astype(bool)); K.append(samp[a])
                 C.append(str(at[a])); S.append(split); Z.append(scene)
+    extra = {"samples": np.asarray(K, dtype=np.float32)} if sample_k > 0 else {}
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
-        out_path,
+        out_path, **extra,
         pred=np.asarray(P, dtype=np.float32), gt=np.asarray(G, dtype=np.float32),
         fut_mask=np.asarray(M, dtype=bool), agent_type=np.asarray(C, dtype=object),
         split=np.asarray(S, dtype=object), scene_id=np.asarray(Z, dtype=object),
@@ -149,6 +152,11 @@ def main() -> int:
     ap.add_argument("--save-ckpt", default="outputs/benchmark_v2/agentformer_ckpt.pt")
     ap.add_argument("--save-pred-npz", default=None,
                     help="optional: dump val+test most-likely predictions (conformal)")
+    ap.add_argument("--save-samples", action="store_true",
+                    help="with --save-pred-npz: also store --eval-k prior samples (N,K,T,2)")
+    ap.add_argument("--eval-only", action="store_true",
+                    help="skip training: rebuild the model from --save-ckpt (its saved args) "
+                         "and evaluate val + test")
 
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=100)
@@ -180,6 +188,14 @@ def main() -> int:
     ap.add_argument("--eval-seq-limit", type=int, default=None)
     ap.add_argument("--device", default="cuda")
     args = ap.parse_args()
+
+    if args.eval_only:
+        # architecture + data settings must match the trained checkpoint
+        saved = torch.load(args.save_ckpt, map_location="cpu", weights_only=False)["args"]
+        for key in ("nz", "sample_loss_k", "eval_k", "tf_model_dim", "tf_ff_dim", "tf_nhead",
+                    "tf_dropout", "nlayer", "no_out_mlp", "traj_scale", "rot_aug", "stride"):
+            setattr(args, key, saved[key])
+        args.epochs = 0
 
     if args.smoke:
         # tiny model + smallest scenes: AgentFormer's 60-step AR decode is slow on
@@ -264,6 +280,8 @@ def main() -> int:
     # Final: reload best, evaluate val + test in full (population contract holds here).
     ckpt = torch.load(args.save_ckpt, map_location=device, weights_only=False)
     model.load_state_dict(ckpt["model"])
+    if args.eval_only:
+        best_epoch = ckpt["epoch"]
     val_summary = evaluate(model, val_ds, cfg, args.eval_k, device, indices=val_indices)
     test_summary = evaluate(model, test_ds, cfg, args.eval_k, device, indices=test_indices)
 
@@ -276,7 +294,7 @@ def main() -> int:
         "val": val_summary, "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
                   if k not in {"data", "splits_file", "save_metrics_json",
-                               "save_ckpt", "save_pred_npz"}},
+                               "save_ckpt", "save_pred_npz", "save_samples", "eval_only"}},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: upstream AgentFormer base CVAE, map-free "
                 "(scene_norm+vel, no map, no heading), standard-normal prior. "
@@ -301,7 +319,8 @@ def main() -> int:
     print(f"saved metrics: {out}")
 
     if args.save_pred_npz:
-        dump_most_likely(model, {"val": val_ds, "test": test_ds}, cfg, device, args.save_pred_npz)
+        dump_most_likely(model, {"val": val_ds, "test": test_ds}, cfg, device, args.save_pred_npz,
+                         sample_k=args.eval_k if args.save_samples else 0)
     return 0
 
 

@@ -72,16 +72,33 @@ def agent_scene_ids(ds: CanonicalSeqDataset) -> list:
     return out
 
 
-def dump(name: str, predict_fn, device: torch.device, out_path: Path) -> None:
-    P, G, M, C, S, Z = [], [], [], [], [], []
+@torch.no_grad()
+def flatten_samples(loader: DataLoader, samples_fn, device: torch.device) -> list:
+    """Per real agent (same order as flatten): samples (K,T,2) from samples_fn(b) -> (B,M,K,2,T)."""
+    out = []
+    for batch in loader:
+        b = batch.to(device)
+        k = samples_fn(b).permute(0, 1, 2, 4, 3).cpu().numpy()   # (B,M,K,T,2)
+        am = b.agent_mask.cpu().numpy()
+        out += [k[i, j] for i in range(am.shape[0]) for j in range(am.shape[1]) if am[i, j]]
+    return out
+
+
+def dump(name: str, predict_fn, device: torch.device, out_path: Path,
+         save_samples: bool = False) -> None:
+    P, G, M, C, S, Z, K = [], [], [], [], [], [], []
+    samples_fn = getattr(predict_fn, "samples_fn", None) if save_samples else None
     for split in ("val", "test"):
         loader = make_loader(split)
         p, g, m, c, s = flatten(loader, predict_fn, device, split)
         z = agent_scene_ids(loader.dataset)
         assert len(z) == len(p), "scene-id order must match the flattened agents"
         P += p; G += g; M += m; C += c; S += s; Z += z
+        if samples_fn is not None:
+            K += flatten_samples(loader, samples_fn, device)
+    extra = {"samples": np.asarray(K, dtype=np.float32)} if samples_fn is not None else {}
     np.savez_compressed(
-        out_path,
+        out_path, **extra,
         pred=np.asarray(P, dtype=np.float32), gt=np.asarray(G, dtype=np.float32),
         fut_mask=np.asarray(M, dtype=bool), agent_type=np.asarray(C, dtype=object),
         split=np.asarray(S, dtype=object), scene_id=np.asarray(Z, dtype=object),
@@ -119,6 +136,10 @@ def load_mfp(device: torch.device, seed: int = 0):
     def predict(b):
         pred_rel_k, mode_logits = model(b.obs_rel, b.agent_mask)
         return m4.top1_abs(pred_rel_k, mode_logits, b.obs_abs)
+
+    def samples(b):   # all K modes, absolute: (B,M,K,2,T)
+        return m4.abs_from_rel_k(b.obs_abs, model(b.obs_rel, b.agent_mask)[0])
+    predict.samples_fn = samples
     return predict
 
 
@@ -150,6 +171,8 @@ def main() -> int:
                     help="which model dumps to (re)generate; default all. Use a subset to "
                          "add one model without overwriting the committed dumps of others.")
     ap.add_argument("--seed", type=int, default=0, help="which seed's checkpoint to dump")
+    ap.add_argument("--save-samples", action="store_true",
+                    help="also store every mode of multi-output models (K-mode) as samples")
     ap.add_argument("--out-dir", default=str(OUT),
                     help="output directory; keep non-seed-0 dumps out of outputs/benchmark_v2 "
                          "itself, whose preds_*.npz are the conformal inputs")
@@ -160,7 +183,7 @@ def main() -> int:
 
     for key in args.models:
         name, loader, fname = REGISTRY[key]
-        dump(name, loader(device, args.seed), device, out_dir / fname)
+        dump(name, loader(device, args.seed), device, out_dir / fname, args.save_samples)
     return 0
 
 

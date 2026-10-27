@@ -57,11 +57,11 @@ def batches(ds, indices, batch_seqs: int):
 @torch.no_grad()
 def run_split(core, init, diff, ds, args, device, indices=None, collect=False):
     """Most-likely + oracle best-of-K summaries over the given sequences (all by
-    default). collect=True also returns the flat most-likely dump rows."""
+    default). collect=True also returns the flat dump rows (most-likely + the K samples)."""
     core.eval(); init.eval()
     idx = list(range(len(ds))) if indices is None else list(indices)
     ade_ml, fde_ml, ade_k, fde_k, paths, types = [], [], [], [], [], []
-    dump = {"pred": [], "gt": [], "fut_mask": [], "agent_type": [], "scene_id": []}
+    dump = {"pred": [], "samples": [], "gt": [], "fut_mask": [], "agent_type": [], "scene_id": []}
     for items, scenes in batches(ds, idx, args.batch_seqs):
         b = build_batch(items, args.traj_scale, device)
         ml, samp = predict_batch(core, init, diff, b, args.traj_scale, args.n_tau)
@@ -75,6 +75,7 @@ def run_split(core, init, diff, ds, args, device, indices=None, collect=False):
         ade_k.append(ak.min(1)); fde_k.append(fk.min(1))
         if collect:
             dump["pred"].append(ml.astype(np.float32)); dump["gt"].append(gt.astype(np.float32))
+            dump["samples"].append(samp.astype(np.float32))
             dump["fut_mask"].append(fm); dump["agent_type"].append(b["agent_type"])
             dump["scene_id"].append(np.asarray(scenes, dtype=object))
     cat = np.concatenate
@@ -104,6 +105,8 @@ def main() -> int:
     ap.add_argument("--save-ckpt", default="outputs/benchmark_v2/led_ckpt.pt")
     ap.add_argument("--save-pred-npz", default=None,
                     help="optional: dump val+test most-likely predictions (conformal)")
+    ap.add_argument("--save-samples", action="store_true",
+                    help="with --save-pred-npz: also store the K leapfrog samples (N,K,T,2)")
 
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--core-epochs", type=int, default=100)
@@ -232,7 +235,7 @@ def main() -> int:
         "val": val_summary, "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
                   if k not in {"data", "splits_file", "save_metrics_json",
-                               "save_ckpt", "save_pred_npz"}},
+                               "save_ckpt", "save_pred_npz", "save_samples"}},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: LED leapfrog diffusion at 10 Hz. Stage 1 trains the core "
                 "denoiser (DDPM eps loss; upstream ships only an NBA core), stage 2 the "
@@ -255,8 +258,9 @@ def main() -> int:
     if args.save_pred_npz:
         Path(args.save_pred_npz).parent.mkdir(parents=True, exist_ok=True)
         d = {k: np.concatenate([val_dump[k], test_dump[k]]) for k in val_dump}
+        extra = {"samples": d["samples"]} if args.save_samples else {}
         np.savez_compressed(
-            args.save_pred_npz, pred=d["pred"], gt=d["gt"], fut_mask=d["fut_mask"],
+            args.save_pred_npz, **extra, pred=d["pred"], gt=d["gt"], fut_mask=d["fut_mask"],
             agent_type=d["agent_type"].astype(object), scene_id=d["scene_id"].astype(object),
             split=np.asarray(["val"] * len(val_dump["pred"]) + ["test"] * len(test_dump["pred"]),
                              dtype=object),

@@ -1,0 +1,81 @@
+{
+  "unit": "ms to predict every agent of one canonical test sequence (one scene snapshot), incl. all samples for set packages; seed-0 models",
+  "gpu": "NVIDIA RTX 4500 Ada Generation",
+  "n_sequences": 150,
+  "warmup": 5,
+  "packages": {
+    "CV (vel_k=5)": {
+      "median_ms": 0.022199994418770075,
+      "p95_ms": 0.03783999709412455,
+      "n": 145,
+      "device": "cpu (numpy)"
+    },
+    "MLP": {
+      "median_ms": 0.6319999811239541,
+      "p95_ms": 2.4063800228759487,
+      "n": 145,
+      "device": "cpu (numpy)"
+    },
+    "ST-GAT (MHA)": {
+      "median_ms": 8.038700034376234,
+      "p95_ms": 19.25850003026424,
+      "n": 145,
+      "device": "cuda"
+    },
+    "Map-free transformer": {
+      "median_ms": 3.1649000011384487,
+      "p95_ms": 7.877960021141912,
+      "n": 145,
+      "device": "cuda"
+    },
+    "K-mode (top-1)": {
+      "median_ms": 19.43699998082593,
+      "p95_ms": 27.539580001030117,
+      "n": 145,
+      "device": "cuda"
+    },
+    "K-mode set (10 modes)": {
+      "median_ms": 18.680799985304475,
+      "p95_ms": 28.829799999948584,
+      "n": 145,
+      "device": "cuda"
+    },
+    "LED (mean-denoised)": {
+      "median_ms": 27.42469997610897,
+      "p95_ms": 41.014199994970106,
+      "n": 145,
+      "device": "cuda"
+    },
+    "LED set (10 samples)": {
+      "median_ms": 42.565699957776815,
+      "p95_ms": 85.18899996997789,
+      "n": 145,
+      "device": "cuda"
+    },
+    "AgentFormer (most-likely)": {
+      "median_ms": 58.42110002413392,
+      "p95_ms": 77.22610000055283,
+      "n": 145,
+      "device": "cuda"
+    },
+    "AgentFormer set (10 samples)": {
+      "median_ms": 102.27129998384044,
+      "p95_ms": 137.0455200434662,
+      "n": 145,
+      "device": "cuda"
+    },
+    "Trajectron++ (most-likely)": {
+      "median_ms": 195.16770000336692,
+      "p95_ms": 254.25962001318106,
+      "n": 145,
+      "device": "cuda"
+    },
+    "Trajectron++ set (10 samples)": {
+      "median_ms": 212.75879995664582,
+      "p95_ms": 245.56348000187424,
+      "n": 145,
+      "device": "cuda"
+    }
+  },
+  "when": "2026-10-27T14:58:19"
+}

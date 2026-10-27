@@ -1,6 +1,17 @@
 # Safety Scorecard — which predictor best supports safe navigation?
 
-## Status: 📌 Rule pre-registered (2026-10-27) — results pending
+## Status: ✅ Run 2026-10-27 under the rule committed in `a33f7f0`
+
+**Rule outcome: CV (vel_k=5).** This is a tie fall-through, not a safety ranking:
+- **Primary:** all 8 single-trajectory packages tie on conflict AUC (0.951–0.961, paired CIs overlap). ST-GAT leads at 0.961, the transformer is 0.960 and CV 0.951.
+- **Tie-break 1:** they also tie on pedestrians and two-wheelers (ST-GAT 0.965 is best, the rest overlap).
+- **Tie-break 2:** latency then picks CV (0.0 ms; the transformer is the fastest neural model at 3.2 ms; Trajectron++ at ~200 ms is not real-time).
+
+The multi-future sets are worse (0.90–0.94) because they raise more false alarms.
+
+**Exploratory, after the result:** current distance alone gives AUC 0.754, and 58% of conflict agents are already within 10 m when the prediction is made. On the 116 emerging conflicts (more than 10 m away at that moment), the transformer and ST-GAT score 0.956 against CV's 0.937, which is not separated. The scorecard shows motion prediction matters for safety, but it cannot certify any learned model as safer than CV. That needs closed loop ([[closed-loop-eval]]).
+
+Artifacts: `outputs/benchmark_v2/safety_scorecard.json`, `safety_latency.json`; scripts: `scripts/safety_scorecard.py`, `scripts/safety_latency.py`.
 
 Mean ADE ranks forecasters, not safety. This scorecard asks a planner's question instead: does the
 predictor foresee the agents that actually come close to our car, without flagging everyone,

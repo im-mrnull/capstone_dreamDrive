@@ -19,6 +19,8 @@ Usage:
     python scripts/eval_trajectronpp_canonical.py                 # seeds 0, 1, 2
     python scripts/eval_trajectronpp_canonical.py --seeds 0 --device cpu
     python scripts/eval_trajectronpp_canonical.py --hetero        # unicycle variant
+    # every seed's dump incl. the K samples (safety scorecard / seed-pooled bootstrap):
+    python scripts/eval_trajectronpp_canonical.py --dump-dir outputs/benchmark_v2/seed_dumps
 """
 
 from __future__ import annotations
@@ -149,7 +151,8 @@ def evaluate(seed: int, device: str, k: int) -> tuple[dict, dict]:
                               "n_agents": int(len(a))},
                           "n_short_history": n_short_history(keys, env),
                           "n_cv_fallback": int((~has).sum())}
-        dump[split] = {"pred": pred.astype(np.float32), "gt": gt.astype(np.float32),
+        dump[split] = {"pred": pred.astype(np.float32), "samples": sp.astype(np.float32),
+                       "gt": gt.astype(np.float32),
                        "fut_mask": fm, "agent_type": types,
                        "scene_id": np.asarray([sid for sid, _, _ in wins], dtype=object)}
         print(f"seed {seed} {split}: most-likely ADE={a.mean():.4f} FDE={f.mean():.4f} "
@@ -171,6 +174,9 @@ def main() -> int:
     ap.add_argument("--k", type=int, default=20)
     ap.add_argument("--dump-seed", type=int, default=0,
                     help="seed whose most-likely predictions are saved for the conformal wrapper")
+    ap.add_argument("--dump-dir", default=None,
+                    help="also write every seed's dump, with the K samples, to "
+                         "<dump-dir>/seed<s>/preds_trajectronpp_canonical.npz")
     ap.add_argument("--hetero", action="store_true",
                     help="the VEHICLE=Unicycle variant (outputs/trajectronpp_world_hetero)")
     args = ap.parse_args()
@@ -198,12 +204,18 @@ def main() -> int:
         out = OUT / f"{TAG}_canonical_seed{seed}.json"
         out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         print(f"saved metrics: {out}")
+        targets = []
         if seed == args.dump_seed and not args.hetero:
+            targets.append((OUT / "preds_trajectronpp_canonical.npz", ("pred", "gt", "fut_mask")))
+        if args.dump_dir and not args.hetero:
+            targets.append((Path(args.dump_dir) / f"seed{seed}" / "preds_trajectronpp_canonical.npz",
+                            ("pred", "samples", "gt", "fut_mask")))
+        for npz, keys in targets:
             v, t = dump["val"], dump["test"]
-            npz = OUT / "preds_trajectronpp_canonical.npz"
+            npz.parent.mkdir(parents=True, exist_ok=True)
             np.savez_compressed(
                 npz,
-                **{k: np.concatenate([v[k], t[k]]) for k in ("pred", "gt", "fut_mask")},
+                **{k: np.concatenate([v[k], t[k]]) for k in keys},
                 agent_type=np.concatenate([v["agent_type"], t["agent_type"]]).astype(object),
                 split=np.asarray(["val"] * len(v["pred"]) + ["test"] * len(t["pred"]), dtype=object),
                 scene_id=np.concatenate([v["scene_id"], t["scene_id"]]).astype(object),

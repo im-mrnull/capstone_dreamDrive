@@ -330,7 +330,7 @@ class Predictor:
             self.rows.update({(str(s), int(t0) + 19, int(a)): off + i
                               for i, (s, t0, a) in enumerate(zip(z["scene_id"], z["t0"], z["agent_id"]))})
         self.p = np.concatenate(P)
-        self.band = band_table(kind, source, seed) if fold is None else fold_band_table(key, fold, seed)
+        self.band = band_table(kind, source, seed) if fold is None else fold_band_table(key, fold, seed, kind)
 
     def at(self, sc: dict, t: int, lam: float = 1.0):
         """Agents present at frame t: list of (agent index, samples (K,60,2), band (60,))."""
@@ -378,8 +378,9 @@ def band_table(kind: str, source: str, seed: int):
 
 
 @lru_cache(maxsize=None)
-def fold_band_table(key: str, fold: int, seed: int = 0):
-    """Per-step radii calibrated on fold `fold`'s val scenes (canonical windows)."""
+def fold_band_table(key: str, fold: int, seed: int = 0, kind: str = "single"):
+    """Per-step radii calibrated on fold `fold`'s val scenes (canonical windows); for a
+    set ("set" kind) the score is the min-over-samples error, as in the scorecard."""
     import safety_scorecard as sc
     from conformal_wrapper import cv_predict
     pop = sc.load_population(REPO / "splits" / "cv_folds" / f"fold{fold}.json")
@@ -393,8 +394,10 @@ def fold_band_table(key: str, fold: int, seed: int = 0):
         d = np.load(CV_DIR / f"fold{fold}" / "dumps" / f"preds_{key}.npz", allow_pickle=True)
         assert np.array_equal(d["split"].astype(str), pop["split"]), f"fold {fold} {key}: row order"
         assert np.array_equal(d["fut_mask"].astype(bool), pop["fm"]), f"fold {fold} {key}: fut_mask"
-        pred = d["pred"].astype(np.float64)
-    s = np.linalg.norm(pred[val] - pop["gt"][val], axis=-1)
+        pred = (d["samples"][:, :10] if kind == "set" else d["pred"][:, None]).astype(np.float64)
+    if pred.ndim == 3:
+        pred = pred[:, None]
+    s = np.linalg.norm(pred[val] - pop["gt"][val][:, None], axis=-1).min(axis=1)
     marginal = radii_per_timestep(s, pop["fm"][val], sc.ALPHA)
     return marginal, radii_per_class(s, pop["fm"][val], pop["cls"][val], sc.ALPHA, marginal, sc.MIN_CAL)
 

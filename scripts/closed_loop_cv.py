@@ -38,6 +38,9 @@ DEV_GRID = REPO / "outputs" / "benchmark_v2" / "closed_loop_dev_grid.json"
 RULE_DOC = "docs/wiki/closed-loop-cv.md"
 PACKAGES_CV = ["CV (vel_k=5)", "MLP", "ST-GAT (MHA)", "Map-free transformer", "LED (mean-denoised)"]
 LEARNED = ["ST-GAT (MHA)", "Map-free transformer", "LED (mean-denoised)"]
+# Amendment 2 (secondary, not in the decision rule): multi-future packages
+SECONDARY = ["K-mode (top-1)", "K-mode set (10 modes)", "LED set (10 samples)"]
+SET_OF = {"K-mode set (10 modes)": "K-mode (top-1)", "LED set (10 samples)": "LED (mean-denoised)"}
 IGNORE = "No prediction (ignore agents)"
 
 
@@ -57,15 +60,15 @@ def run(cmd):
 def prepare(k: int) -> None:
     fd, sp = fold_dir(k), fold_split(k)
     dumps = fd / "dumps"
-    run([PY, "scripts/dump_predictions.py", "--models", "stgat", "transformer", "--seed", "0",
-         "--ckpt-dir", fd, "--splits-file", sp, "--out-dir", dumps])
+    run([PY, "scripts/dump_predictions.py", "--models", "stgat", "transformer", "mfp", "--seed", "0",
+         "--save-samples", "--ckpt-dir", fd, "--splits-file", sp, "--out-dir", dumps])
     run([PY, "scripts/model7_led_train_eval.py", "--eval-only", "--seed", "0", "--device", "cuda",
          "--data", "outputs/canonical_world_obs20_pred60.npz", "--splits-file", sp,
          "--save-ckpt", fd / "led_ckpt_seed0.pt", "--save-metrics-json", dumps / "led_evalonly.json",
-         "--save-pred-npz", dumps / "preds_led.npz"])
+         "--save-pred-npz", dumps / "preds_led.npz", "--save-samples"])
     dense = cl.CV_PRED_DIR / f"fold{k}" / "dense_windows_test.npz"
     run([PY, "scripts/closed_loop_windows.py", "--split", "test", "--splits-file", sp, "--out", dense])
-    run([PY, "scripts/closed_loop_predict.py", "--models", "cv", "mlp", "stgat", "transformer", "led",
+    run([PY, "scripts/closed_loop_predict.py", "--models", "cv", "mlp", "stgat", "transformer", "mfp", "led",
          "--seeds", "0", "--dense", dense, "--split", "test", "--splits-file", sp,
          "--ckpt-dir", fd, "--out-dir", cl.CV_PRED_DIR / f"fold{k}" / "preds"])
 
@@ -78,7 +81,7 @@ def verify() -> None:
         pop = sc.load_population(fold_split(k))
         t = pop["split"] == "test"
         for key, jf, sub in (("stgat", "stgat_seed0.json", None), ("transformer", "transformer_seed0.json", None),
-                             ("led", "led_seed0.json", "most_likely")):
+                             ("mfp", "mfp_top1sel_seed0.json", "top1"), ("led", "led_seed0.json", "most_likely")):
             d = np.load(fold_dir(k) / "dumps" / f"preds_{key}.npz", allow_pickle=True)
             assert np.array_equal(d["split"].astype(str), pop["split"]), (k, key)
             ade = masked_ade_fde_np(d["pred"][t].astype(float), pop["gt"][t], pop["fm"][t])[0].mean()
@@ -153,7 +156,20 @@ def analyse(eps_by, scene_set, counts, rng, latency) -> dict:
     adj = holm(pvals)
     for h in hyp:
         hyp[h].update({"p_one_sided": pvals[h], "p_holm": adj[h], "supported": adj[h] < 0.05})
-    return {"n_scenes": len(scene_set), "packages": pk, "decision": decision, "hypotheses": hyp}
+    # secondary family (amendment 2): does a multi-future set beat its own single trajectory?
+    shyp, sp = {}, {}
+    if all((n, lam) in reps for n in SET_OF):
+        for st, single in SET_OF.items():
+            tests = {f"S1 {st} higher score than {single}": one_sided((st, lam), (single, lam)),
+                     f"S2 {st} fewer at-fault collisions than {single}":
+                         one_sided((st, lam), (single, lam), key="af", lower_is_better=True)}
+            for label, (p, c) in tests.items():
+                shyp[label], sp[label] = {"diff_ci95": c}, p
+        sadj = holm(sp)
+        for h in shyp:
+            shyp[h].update({"p_one_sided": sp[h], "p_holm": sadj[h], "supported": sadj[h] < 0.05})
+    return {"n_scenes": len(scene_set), "packages": pk, "decision": decision, "hypotheses": hyp,
+            "secondary_multi_future": shyp}
 
 
 PLAN = None
@@ -173,7 +189,7 @@ SENSITIVITY = {
 
 def simulate(cfg, folds, scenes, workers):
     lams = sorted({PLAN["band"], 0.0, 1.0}, reverse=True)     # chosen setting + band / no band
-    tasks = [(n, 0, scenes, lam, cfg, folds) for n in PACKAGES_CV for lam in lams]
+    tasks = [(n, 0, scenes, lam, cfg, folds) for n in PACKAGES_CV + SECONDARY for lam in lams]
     tasks += [(n, 0, scenes, 1.0, cfg, folds) for n in cl.REFERENCES]
     with ProcessPoolExecutor(max_workers=workers) as ex:
         res = list(ex.map(cl.run_package, tasks))
@@ -254,8 +270,8 @@ def main() -> int:
         print(f"{n:32s} score {b['score']:.3f} {[round(x, 3) for x in b['score_ci95']]}  at-fault {b['at_fault_rate']:.3f}")
     for s in prim["decision"]["steps"]:
         print(" ->", s)
-    for h, v in prim["hypotheses"].items():
-        print(f"{h:52s} p_holm {v['p_holm']:.3f} {'SUPPORTED' if v['supported'] else ''}")
+    for h, v in {**prim["hypotheses"], **prim["secondary_multi_future"]}.items():
+        print(f"{h:60s} p_holm {v['p_holm']:.3f} {'SUPPORTED' if v['supported'] else ''}")
     print(f"saved: {OUT_JSON}")
     return 0
 

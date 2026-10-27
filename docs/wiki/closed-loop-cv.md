@@ -99,6 +99,26 @@ The headline stays the primary analysis. For each hypothesis the report states i
 the 7 variants it remains supported. A hypothesis is called **robust** only if it is supported
 in the primary analysis and in every variant.
 
+## 6. Amendment 2 (2026-10-27, before any primary result): multi-future packages
+
+The project's subject is multi-future prediction, so the confirmatory test also drives three
+multi-future packages:
+- the K-mode decoder, top-1-selected version: its top-1 and its 10 modes. It is trained per
+  fold with the benchmark settings (`--k 10 --select top1`).
+- LED's first 10 of 20 leapfrog samples. This is the same fold model as LED (mean-denoised).
+
+Each set's band is calibrated on the fold's val scenes from the min-over-samples error. The
+planner, its configuration and the band settings (×0 chosen, ×1 reported) are unchanged.
+
+These are a **secondary** analysis. They don't enter the decision rule or the primary
+hypothesis family. Their own family is Holm-corrected separately, on the primary set:
+- **S1:** each set scores higher than its own single trajectory (K-mode set vs K-mode top-1;
+  LED set vs LED mean).
+- **S2:** each set has fewer at-fault collision episodes than its own single trajectory.
+
+These test whether multi-future output helps *this* planner, which treats every sample as an
+obstacle. A probability-aware multi-future planner is the separate, later step.
+
 **Caveats:**
 - the agents don't react;
 - footprints are nominal;

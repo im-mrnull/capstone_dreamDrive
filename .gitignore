@@ -27,3 +27,12 @@ Thumbs.db
 
 # Obsidian per-user UI state (the vault notes in docs/ are tracked)
 docs/.obsidian/workspace.json
+
+# Internal planning notes: local only, never in the public repo
+docs/output/*novelty-and-ip-roadmap*.md
+docs/raw/2026-10-26-claude-project-review.md
+
+# External datasets downloaded for comparison/visualization (licensed separately)
+data_external/
+# Rendered visualization frames/videos (large; regenerate with scripts/viz_*)
+outputs/viz/

@@ -9,14 +9,15 @@
 **Hypothesis:** Modeling wheeled classes with unicycle dynamics (nuScenes-style) would improve
 predictions by incorporating heading information.
 
-**Result:** ❌ Degrades deployable most-likely ADE from 2.58 → **2.84** (+0.26m).
-- Loss concentrated on moving vehicles (riders +0.6m, cars +0.5m)
-- Oracle coverage is a wash (1.37 vs 1.37)
+**Result:** ❌ Degrades deployable most-likely ADE from 3.91 → **4.55** (+0.64m, canonical
+windows, 3 seeds; was 2.58 → 2.84 on the dense protocol).
+- Loss concentrated on moving vehicles (riders +1.0 to +1.3m, cars +1.0m; pedestrians −0.15m)
+- Oracle slightly worse too (2.08 → 2.22)
 - **Root cause:** Heading estimated from velocity direction (no true yaw in data). Unicycle
   integrates heading noise into deterministic rollout. Sampling absorbs it, most-likely can't.
 - **Prerequisite for fix:** True yaw from raw dataset or perception pipeline.
 
-**Artifacts:** `tpp_hetero_grid/`, `trajectronpp_hetero_seed{0,1,2}.json`
+**Artifacts:** `tpp_hetero_grid/`, `trajectronpp_hetero_canonical_seed{0,1,2}.json`
 
 ---
 

@@ -47,15 +47,19 @@
 
 ## Models Benchmarked (Benchmark v2 — Final)
 
+All on the same 2,177 canonical test windows, 3 seeds. Top tier = ST-GAT ≈ transformer
+(paired scene bootstrap cannot separate them); see [[bootstrap-ci]].
+
 | Model | Script | Test ADE (m) | Test FDE (m) | Status |
 |-------|--------|-------------|-------------|--------|
-| CV (vel_k=5) | `model1_baseline_cv_eval.py` | 4.36 | 9.78 | ✅ Done |
+| ST-GAT (MHA) | `model3_stgat_train_eval.py` | **3.41±0.07** | **7.35±0.16** | ✅ Top tier |
+| Map-free transformer (ours) | `model5_transformer_train_eval.py` | **3.57±0.11** | **7.85±0.18** | ✅ Top tier (tied) |
+| LED (mean-denoised) | `model7_led_train_eval.py` | 3.75±0.01 | 8.13±0.09 | ✅ Done (best val, 2.03) |
+| AgentFormer (2 Hz) | `model6_agentformer_train_eval.py` | 3.75±0.00 | 8.22±0.27 | ✅ Done |
+| Trajectron++ (most-likely) | `eval_trajectronpp_canonical.py` | 3.91±0.08 | 8.38±0.24 | ✅ Done (was 2.58 on its dense protocol — withdrawn) |
 | MLP | `model2_baseline_mlp_train_eval.py` | 3.97±0.01 | 8.66±0.05 | ✅ Done |
-| ST-GAT (MHA) | `model3_stgat_train_eval.py` | 3.41±0.07 | 7.35±0.16 | ✅ Done |
-| Map-free transformer | `model5_transformer_train_eval.py` | 3.57±0.11 | 7.85±0.18 | ✅ Done |
-| K-mode decoder (top-1) | `model4_mfp_train_eval.py` | 4.31±0.05 | 9.48±0.24 | ✅ Done |
-| Trajectron++ (most-likely) | `7_train_eval_trajectronpp.py` | **2.58±0.04** | **5.58±0.07** | ✅ Best |
-| AgentFormer | `model6_agentformer_train_eval.py` | — | — | ⚠️ Code only |
+| K-mode decoder (top-1-sel) | `model4_mfp_train_eval.py` | 4.15±0.10 | 9.21±0.26 | ✅ Done |
+| CV (vel_k=5) | `model1_baseline_cv_eval.py` | 4.36 | 9.78 | ✅ Done |
 
 ## Wiki Notes — Completed Work (13 items)
 
@@ -87,7 +91,8 @@
 
 ## Partial Items (4)
 
-- **AgentFormer:** Code exists, no 3-seed results yet
+- **CARLA visualization:** Replay scripts written (`scripts/viz_*.py`); first render blocked on
+  the DirectX End-User Runtime (`winget install --id Microsoft.DirectX --exact`)
 - **Named benchmark + packaging:** Internal harness exists, not packaged
 - **Conformal → planner:** Radii computed, no planner consumes them
 - **Two-wheeler:** Per-class conformal + unicycle ablation done, no dedicated analysis
@@ -96,6 +101,7 @@
 
 - [[2026-10-26-claude-project-review]]: methodology issues, literature/novelty check,
   prioritized publication roadmap, patent caveat
+- [[2026-10-27-novelty-and-ip-roadmap]]: internal note, local only (gitignored)
 
 ## Retraction Notice
 

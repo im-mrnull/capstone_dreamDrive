@@ -131,6 +131,13 @@ PACKAGES = {
     "LED set (10 samples)": ("set", "led", "preds_led.npz"),
     "Trajectron++ set (10 samples)": ("set", "trajectronpp", "preds_trajectronpp_canonical.npz"),
 }
+# Packages that exist only as cross-validation fold models (closed-loop v2 amendment 3);
+# kept out of PACKAGES so the frozen-split runs and the dev grid are unchanged.
+EXTRA_PACKAGES = {
+    "MF transformer (top-1)": ("single", "mftf", "preds_mftf.npz"),
+    "MF transformer set (10 modes)": ("set", "mftf", "preds_mftf.npz"),
+}
+ALL_PACKAGES = {**PACKAGES, **EXTRA_PACKAGES}
 REFERENCES = ("Human driver (log replay)", "Oracle (true future, no band)", "No prediction (ignore agents)")
 
 
@@ -310,12 +317,12 @@ class Predictor:
         """fold=None: the frozen-split models; fold=k: the cross-validation models of
         fold k, with bands calibrated on that fold's val scenes."""
         self.name, self.seed = name, seed
-        self.kind = "ref" if name in REFERENCES else PACKAGES[name][0]
+        self.kind = "ref" if name in REFERENCES else ALL_PACKAGES[name][0]
         self.cv_band = band_table("single", "cv", 0) if fold is None else fold_band_table("cv", fold, seed)
         if self.kind == "ref":
             self.rows, self.band = {}, None
             return
-        kind, key, source = PACKAGES[name]
+        kind, key, source = ALL_PACKAGES[name]
         # frozen-split models: test-scene predictions plus, when present, val-scene ones
         # (planner development); fold models: that fold's test scenes
         pdirs = [PRED_DIR, CL_DIR / "preds_val"] if fold is None else [CV_PRED_DIR / f"fold{fold}" / "preds"]

@@ -119,6 +119,37 @@ hypothesis family. Their own family is Holm-corrected separately, on the primary
 These test whether multi-future output helps *this* planner, which treats every sample as an
 obstacle. A probability-aware multi-future planner is the separate, later step.
 
+## 7. Amendment 3 (2026-10-27, before any of these models is trained): all multi-future models
+
+To answer whether multi-future prediction is needed for safety, three more multi-future
+models are trained per fold and driven in the same closed loop. They use the same scenes,
+planner, instrument and band settings (×0 chosen, ×1 reported). Each is a single trajectory
+plus its 10-future set, and their bands are calibrated per fold:
+- **Multi-future map-free transformer** (`model8`): the transformer backbone with 10 output
+  heads and a learned probability per future. It is trained like the K-mode decoder:
+  best-of-K loss + 0.1 × probability cross-entropy, selected on val top-1, 300 epochs.
+- **AgentFormer:** the benchmark settings (2 Hz, 100 epochs), with 10 prior samples.
+- **Trajectron++:** the benchmark export and settings (100 epochs), re-exported per fold, with
+  10 samples.
+
+They are run by `closed_loop_cv.py train-extra / prepare-extra / run-extra`, with results in
+`closed_loop_cv_extra.json`. Comparisons pair with the primary run's episodes on the
+**primary set**.
+
+This is a separate secondary family (Holm-corrected within itself, outside the decision
+rule):
+- **S1 / S2:** each new set has a higher score than / fewer at-fault collision episodes than
+  its own single trajectory (3 models × 2 tests).
+- **T1 / T2:** the multi-future transformer's top-1 has a higher score than / fewer at-fault
+  collisions than the single-output map-free transformer. In other words, does training with
+  multiple futures help the deployable output?
+
+The ST-GAT backbone already has a multi-future version, the K-mode decoder (amendment 2), so
+no separate multi-future ST-GAT is built.
+
+These tests use the existing planner, which treats every future as an obstacle. Whether
+*probability-aware* multi-future planning helps is the next, separately pre-registered study.
+
 **Caveats:**
 - the agents don't react;
 - footprints are nominal;

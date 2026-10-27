@@ -155,12 +155,34 @@ def load_transformer(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
     return lambda b: abs_from_rel(b.obs_abs, model(b.obs_rel, b.agent_mask))
 
 
+def load_mftf(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
+    import model8_mf_transformer_train_eval as m8
+    ck = torch.load(Path(ckpt_dir) / f"mftf_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+    a = ck["args"]
+    model = m8.MultiFutureTransformer(
+        obs_len=20, pred_len=60, k=a["k"], d_model=a["d_model"], n_heads=a["n_heads"],
+        n_temporal_layers=a["n_temporal_layers"], n_social_layers=a["n_social_layers"],
+        n_decoder_layers=a["n_decoder_layers"], ff_mult=a["ff_mult"], dropout=a["dropout"],
+        heading_k=a["heading_k"]).to(device)
+    model.load_state_dict(ck["model"]); model.eval()
+
+    def predict(b):
+        pred_rel_k, mode_logits = model(b.obs_rel, b.agent_mask)
+        return m4.top1_abs(pred_rel_k, mode_logits, b.obs_abs)
+
+    def samples(b):   # all K modes, absolute: (B,M,K,2,T)
+        return m4.abs_from_rel_k(b.obs_abs, model(b.obs_rel, b.agent_mask)[0])
+    predict.samples_fn = samples
+    return predict
+
+
 # key -> (display name, checkpoint loader, output filename). The display name is
 # what conformal_wrapper.py keys each model by (via the NPZ `model` field).
 REGISTRY = {
     "stgat": ("ST-GAT-inspired (MHA)", load_stgat, "preds_stgat.npz"),
     "mfp": ("K-mode decoder (top-1-sel)", load_mfp, "preds_mfp.npz"),
     "transformer": ("map-free transformer", load_transformer, "preds_transformer.npz"),
+    "mftf": ("multi-future transformer (top-1)", load_mftf, "preds_mftf.npz"),
 }
 
 

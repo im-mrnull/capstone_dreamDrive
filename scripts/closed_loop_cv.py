@@ -12,6 +12,9 @@ scenes (frozen val + test) are reported separately.
     python scripts/closed_loop_cv.py verify                # dumps == fold metrics JSONs
     python scripts/closed_loop_cv.py run                   # closed loop + decision rule
     python scripts/closed_loop_cv.py sensitivity           # instrument sensitivity (amendment)
+    python scripts/closed_loop_cv.py train-extra --model mftf|agentformer|trajectronpp --fold k
+    python scripts/closed_loop_cv.py prepare-extra         # amendment 3 dumps + predictions
+    python scripts/closed_loop_cv.py run-extra             # amendment 3 closed loop
 """
 
 from __future__ import annotations
@@ -71,6 +74,110 @@ def prepare(k: int) -> None:
     run([PY, "scripts/closed_loop_predict.py", "--models", "cv", "mlp", "stgat", "transformer", "mfp", "led",
          "--seeds", "0", "--dense", dense, "--split", "test", "--splits-file", sp,
          "--ckpt-dir", fd, "--out-dir", cl.CV_PRED_DIR / f"fold{k}" / "preds"])
+
+
+# ---- amendment 3: multi-future transformer, AgentFormer, Trajectron++ -----------------
+EXTRA_CV = ["MF transformer (top-1)", "MF transformer set (10 modes)", "AgentFormer (most-likely)",
+            "AgentFormer set (10 samples)", "Trajectron++ (most-likely)", "Trajectron++ set (10 samples)"]
+EXTRA_SET_OF = {"MF transformer set (10 modes)": "MF transformer (top-1)",
+                "AgentFormer set (10 samples)": "AgentFormer (most-likely)",
+                "Trajectron++ set (10 samples)": "Trajectron++ (most-likely)"}
+EXTRA_JSON = REPO / "outputs" / "benchmark_v2" / "closed_loop_cv_extra.json"
+
+
+def train_extra(model: str, k: int) -> None:
+    fd, sp = fold_dir(k), fold_split(k)
+    if model == "mftf":
+        run([PY, "scripts/model8_mf_transformer_train_eval.py", "--device", "cuda", "--seed", "0",
+             "--epochs", "300", "--splits-file", sp, "--save-metrics-json", fd / "mftf_seed0.json",
+             "--save-ckpt", fd / "mftf_ckpt_seed0.pt"])
+    elif model == "agentformer":
+        run([PY, "scripts/model6_agentformer_train_eval.py", "--device", "cuda", "--seed", "0",
+             "--epochs", "100", "--stride", "5", "--splits-file", sp,
+             "--save-metrics-json", fd / "agentformer_seed0.json", "--save-ckpt", fd / "agentformer_ckpt_seed0.pt"])
+    elif model == "trajectronpp":
+        run([PY, "scripts/6_export_trajectronpp_world.py", "--dt", "0.1", "--splits-file", sp,
+             "--out-dir", fd / "tpp_data"])
+        run([PY, "scripts/7_train_eval_trajectronpp.py", "--seed", "0", "--epochs", "100",
+             "--data-dir", fd / "tpp_data", "--log-tag", f"_cv_fold{k}",
+             "--save-metrics-json", fd / "trajectronpp_seed0.json"])
+    else:
+        raise SystemExit(f"unknown model {model}")
+
+
+def prepare_extra(k: int) -> None:
+    import shutil
+    fd, sp = fold_dir(k), fold_split(k)
+    dumps, dense = fd / "dumps", cl.CV_PRED_DIR / f"fold{k}" / "dense_windows_test.npz"
+    run([PY, "scripts/dump_predictions.py", "--models", "mftf", "--seed", "0", "--save-samples",
+         "--ckpt-dir", fd, "--splits-file", sp, "--out-dir", dumps])
+    run([PY, "scripts/model6_agentformer_train_eval.py", "--eval-only", "--seed", "0", "--device", "cuda",
+         "--splits-file", sp, "--save-ckpt", fd / "agentformer_ckpt_seed0.pt",
+         "--save-metrics-json", dumps / "agentformer_evalonly.json",
+         "--save-pred-npz", dumps / "preds_agentformer.npz", "--save-samples"])
+    run([PY, "scripts/eval_trajectronpp_canonical.py", "--seeds", "0", "--device", "cuda:0",
+         "--data-dir", fd / "tpp_data", "--metrics-dir", fd, "--splits-file", sp,
+         "--dump-seed", "-1", "--dump-dir", fd / "dumps_tpp"])
+    shutil.copyfile(fd / "dumps_tpp" / "seed0" / "preds_trajectronpp_canonical.npz", dumps / "preds_trajectronpp.npz")
+    common = ["--seeds", "0", "--dense", dense, "--split", "test", "--splits-file", sp,
+              "--ckpt-dir", fd, "--out-dir", cl.CV_PRED_DIR / f"fold{k}" / "preds"]
+    run([PY, "scripts/closed_loop_predict.py", "--models", "mftf", "agentformer", *common])
+    run([PY, "scripts/closed_loop_predict.py", "--models", "trajectronpp", *common,
+         "--tpp-data", fd / "tpp_data", "--tpp-metrics-dir", fd])
+
+
+def run_extra(workers: int) -> None:
+    """Amendment 3 closed loop: same scenes, planner and instrument as the primary run;
+    comparisons pair with the primary run's saved episodes."""
+    cfg = {k: PLAN[k] for k in ("hard_s", "soft_w", "fallback")}
+    folds = fold_of_scene()
+    scenes = sorted(folds)
+    lams = sorted({PLAN["band"], 0.0, 1.0}, reverse=True)
+    tasks = [(n, 0, scenes, lam, cfg, folds) for n in EXTRA_CV for lam in lams]
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(cl.run_package, tasks))
+    eps_by = {(n, lam): eps for (n, _, _, lam, _, _), (_, _, _, eps, _) in zip(tasks, res)}
+    prior = json.loads((cl.CV_PRED_DIR / "episodes_cv.json").read_text(encoding="utf-8"))
+    eps_by.update({(r["package"], r["band_scale"]): r["episodes"] for r in prior})
+    prim = primary_scenes(scenes)
+    scen = np.asarray(sorted(prim), dtype=object)
+    counts = bootstrap_counts(len(prim), 2000, 0)
+    rng = np.random.default_rng(1)
+    lam = PLAN["band"]
+    sel = {key: [e for e in v if e["scene"] in prim] for key, v in eps_by.items()}
+    reps = {(n, l, m): cl.replicates([e], m, scen, counts, rng)
+            for (n, l), e in sel.items() for m in ("score", "at_fault")}
+    summary = {}
+    for (n, l), e in sel.items():
+        summary.setdefault(n, {})[f"band_x{l:g}"] = {**cl.summarise(e), "score_ci95": ci(reps[(n, l, "score")])}
+    tests, pv = {}, {}
+
+    def t(label, a, b, metric, lower):
+        ra, rb = reps[(a, lam, metric)], reps[(b, lam, metric)]
+        d = (rb - ra) if lower else (ra - rb)
+        d = d[np.isfinite(d)]
+        tests[label], pv[label] = {"diff_ci95": ci(d)}, float(np.mean(d <= 0))
+
+    for st, single in EXTRA_SET_OF.items():
+        t(f"S1 {st} higher score than {single}", st, single, "score", False)
+        t(f"S2 {st} fewer at-fault collisions than {single}", st, single, "at_fault", True)
+    t("T1 MF transformer (top-1) higher score than Map-free transformer",
+      "MF transformer (top-1)", "Map-free transformer", "score", False)
+    t("T2 MF transformer (top-1) fewer at-fault collisions than Map-free transformer",
+      "MF transformer (top-1)", "Map-free transformer", "at_fault", True)
+    adj = holm(pv)
+    for h in tests:
+        tests[h].update({"p_one_sided": pv[h], "p_holm": adj[h], "supported": adj[h] < 0.05})
+    EXTRA_JSON.write_text(json.dumps({"rule_doc": RULE_DOC, "planner": PLAN, "primary_scenes": len(prim),
+                                      "packages": summary, "amendment3_hypotheses": tests,
+                                      "when": datetime.now().isoformat(timespec="seconds")}, indent=2),
+                          encoding="utf-8")
+    key = f"band_x{lam:g}"
+    for n in sorted((n for n in summary if key in summary[n]), key=lambda n: -summary[n][key]["score"]):
+        print(f"{n:32s} score {summary[n][key]['score']:.3f}  at-fault {summary[n][key]['at_fault_rate']:.3f}")
+    for h, v in tests.items():
+        print(f"{h:75s} p_holm {v['p_holm']:.3f} {'SUPPORTED' if v['supported'] else ''}")
+    print(f"saved: {EXTRA_JSON}")
 
 
 def verify() -> None:
@@ -208,7 +315,9 @@ def primary_scenes(scenes):
 def main() -> int:
     global PLAN
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["prepare", "verify", "run", "sensitivity"])
+    ap.add_argument("step", choices=["prepare", "verify", "run", "sensitivity",
+                                     "train-extra", "prepare-extra", "run-extra"])
+    ap.add_argument("--model", default=None, help="train-extra: mftf | agentformer | trajectronpp")
     ap.add_argument("--fold", type=int, default=None)
     ap.add_argument("--workers", type=int, default=24)
     args = ap.parse_args()
@@ -219,12 +328,22 @@ def main() -> int:
     if args.step == "verify":
         verify()
         return 0
+    if args.step == "train-extra":
+        train_extra(args.model, args.fold)
+        return 0
+    if args.step == "prepare-extra":
+        for k in ([args.fold] if args.fold is not None else range(FOLDS)):
+            prepare_extra(k)
+        return 0
 
     PLAN = json.loads(DEV_GRID.read_text(encoding="utf-8"))["chosen"]
     cfg = {k: PLAN[k] for k in ("hard_s", "soft_w", "fallback")}
     folds = fold_of_scene()
     scenes = sorted(folds)
     latency = json.loads(cl.LATENCY.read_text(encoding="utf-8"))["packages"] if cl.LATENCY.exists() else None
+    if args.step == "run-extra":
+        run_extra(args.workers)
+        return 0
     if args.step == "sensitivity":
         prim = primary_scenes(scenes)
         counts = bootstrap_counts(len(prim), 2000, 0)

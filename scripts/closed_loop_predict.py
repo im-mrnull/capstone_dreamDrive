@@ -37,7 +37,9 @@ SPLITS = str(REPO / "splits" / "scene_splits.json")
 SPLIT = "test"
 CKPT_DIR = BENCH
 K_SET = 10
-MODELS = ("cv", "mlp", "stgat", "transformer", "mfp", "led", "agentformer", "trajectronpp")
+MODELS = ("cv", "mlp", "stgat", "transformer", "mfp", "mftf", "led", "agentformer", "trajectronpp")
+TPP_DATA = None        # --tpp-data / --tpp-metrics-dir: a fold's Trajectron++ export and metrics
+TPP_METRICS = None
 
 
 def rows_meta() -> dict:
@@ -65,7 +67,8 @@ def dataset():
 
 def run_seq_models(keys, seed, device, meta):
     dp = _load_script("dump_predictions.py")
-    loaders = {"stgat": dp.load_stgat, "transformer": dp.load_transformer, "mfp": dp.load_mfp}
+    loaders = {"stgat": dp.load_stgat, "transformer": dp.load_transformer, "mfp": dp.load_mfp,
+               "mftf": dp.load_mftf}
     loader = DataLoader(dataset(), batch_size=64, shuffle=False, num_workers=0, collate_fn=collate_pad)
     for key in keys:
         fn = loaders[key](device, seed, CKPT_DIR)
@@ -113,6 +116,10 @@ def run_agentformer(seed, device, meta):
 def run_trajectronpp(seed, device_str, meta):
     import dill
     ev = _load_script("eval_trajectronpp_canonical.py")
+    if TPP_DATA is not None:
+        ev.TPP_DATA = Path(TPP_DATA)
+    if TPP_METRICS is not None:
+        ev.OUT = Path(TPP_METRICS)
     sys.path.insert(0, str(ev.TRAJECTRON))
     from model.model_registrar import ModelRegistrar
     from model.trajectron import Trajectron
@@ -155,7 +162,7 @@ def run_trajectronpp(seed, device_str, meta):
 
 
 def main() -> int:
-    global DENSE, PRED_DIR, SPLITS, SPLIT, CKPT_DIR
+    global DENSE, PRED_DIR, SPLITS, SPLIT, CKPT_DIR, TPP_DATA, TPP_METRICS
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", choices=MODELS, default=[m for m in MODELS if m != "trajectronpp"])
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
@@ -164,9 +171,12 @@ def main() -> int:
     ap.add_argument("--splits-file", default=SPLITS)
     ap.add_argument("--ckpt-dir", default=str(BENCH), help="model checkpoints (+ mlp_best_seed<k>.npz)")
     ap.add_argument("--out-dir", default=str(PRED_DIR))
+    ap.add_argument("--tpp-data", default=None, help="Trajectron++ export dir (fold)")
+    ap.add_argument("--tpp-metrics-dir", default=None, help="dir with trajectronpp_seed<k>.json (fold)")
     args = ap.parse_args()
     DENSE, PRED_DIR, SPLITS, SPLIT, CKPT_DIR = (Path(args.dense), Path(args.out_dir), args.splits_file,
                                                 args.split, Path(args.ckpt_dir))
+    TPP_DATA, TPP_METRICS = args.tpp_data, args.tpp_metrics_dir
     if "trajectronpp" in args.models and len(args.models) > 1:
         raise SystemExit("run trajectronpp on its own (module clash with AgentFormer)")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -177,7 +187,7 @@ def main() -> int:
         if "mlp" in args.models:
             w = np.load(CKPT_DIR / f"mlp_best_seed{seed}.npz")
             save("mlp", seed, mlp_world(meta["obs"], {k: w[k] for k in w.files}), None, meta)
-        seq = [k for k in ("stgat", "transformer", "mfp") if k in args.models]
+        seq = [k for k in ("stgat", "transformer", "mfp", "mftf") if k in args.models]
         if seq:
             run_seq_models(seq, seed, device, meta)
         if "led" in args.models:

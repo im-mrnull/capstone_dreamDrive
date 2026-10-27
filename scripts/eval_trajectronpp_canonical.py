@@ -40,6 +40,7 @@ TPP_DATA = REPO / "outputs" / "trajectronpp_world"
 TAG = "trajectronpp"   # metrics-file prefix; --hetero switches both
 TRAJECTRON = REPO / "third_party" / "trajectron-plus-plus" / "trajectron"
 OBS_LEN, PRED_LEN = 20, 60
+SPLITS_FILE = REPO / "splits" / "scene_splits.json"   # --splits-file (cross-validation folds)
 
 sys.path.insert(0, str(SCRIPTS))
 from dd_data import masked_ade_fde_np, summarize_np  # noqa: E402
@@ -66,7 +67,7 @@ def model_dir_for(seed: int) -> Path:
 def windows(split: str) -> list[tuple[str, int, int]]:
     """(scene_id, t0, row) for every canonical agent-window of `split`, in NPZ order."""
     c = np.load(REPO / "outputs" / "canonical_world_obs20_pred60.npz", allow_pickle=True)
-    mapping = load_splits(REPO / "splits" / "scene_splits.json")
+    mapping = load_splits(SPLITS_FILE)
     out = []
     for q, (a, b) in enumerate(c["seq_start_end"]):
         sid = str(c["scene_id"][q])
@@ -177,13 +178,23 @@ def main() -> int:
     ap.add_argument("--dump-dir", default=None,
                     help="also write every seed's dump, with the K samples, to "
                          "<dump-dir>/seed<s>/preds_trajectronpp_canonical.npz")
+    ap.add_argument("--data-dir", default=None, help="T++ export dir (default outputs/trajectronpp_world)")
+    ap.add_argument("--metrics-dir", default=None,
+                    help="where <tag>_seed<k>.json are read and <tag>_canonical_seed<k>.json written")
+    ap.add_argument("--splits-file", default=None, help="split file of the T++ export")
     ap.add_argument("--hetero", action="store_true",
                     help="the VEHICLE=Unicycle variant (outputs/trajectronpp_world_hetero)")
     args = ap.parse_args()
 
-    global TPP_DATA, TAG
+    global TPP_DATA, TAG, OUT, SPLITS_FILE
     if args.hetero:
         TPP_DATA, TAG = REPO / "outputs" / "trajectronpp_world_hetero", "trajectronpp_hetero"
+    if args.data_dir:
+        TPP_DATA = Path(args.data_dir)
+    if args.metrics_dir:
+        OUT = Path(args.metrics_dir)
+    if args.splits_file:
+        SPLITS_FILE = Path(args.splits_file)
     model = ("Trajectron++ (upstream, patched; VEHICLE=Unicycle for wheeled classes, "
              "PEDESTRIAN=point-mass otherwise)" if args.hetero else
              "Trajectron++ (upstream, patched; all agents as point-mass PEDESTRIAN nodes)")
@@ -196,7 +207,7 @@ def main() -> int:
                         "scored on the canonical future and mask (same population as every "
                         "other benchmark-v2 model)",
             "data": "outputs/canonical_world_obs20_pred60.npz",
-            "splits_file": "splits/scene_splits.json",
+            "splits_file": str(SPLITS_FILE),
             "eval_k": args.k,
             "device": args.device,
             **res,

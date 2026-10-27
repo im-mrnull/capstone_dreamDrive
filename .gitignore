@@ -14,6 +14,8 @@ outputs/benchmark_v2/mlp_best_seed*.npz
 # Conformal prediction dumps (intermediate; regenerated from checkpoints by
 # dump_predictions.py / 7_..._--dump-preds; conformal_metrics.json is the artifact)
 outputs/benchmark_v2/preds_*.npz
+# Seed-1/2 dumps for the seed-pooled bootstrap (bootstrap_ci.json is the artifact)
+outputs/benchmark_v2/seed_dumps/
 
 # Python
 __pycache__/
@@ -31,6 +33,9 @@ docs/.obsidian/workspace.json
 # Internal planning notes: local only, never in the public repo
 docs/output/*novelty-and-ip-roadmap*.md
 docs/raw/2026-10-26-claude-project-review.md
+docs/wiki/chaos-gap.md
+docs/wiki/rss-violations.md
+Review1-phase3_ppt*.pdf
 
 # External datasets downloaded for comparison/visualization (licensed separately)
 data_external/

@@ -125,9 +125,14 @@ def main() -> int:
     ap.add_argument("--no-rot-aug", dest="rot_aug", action="store_false", default=True)
 
     ap.add_argument("--smoke", action="store_true", help="few seqs/epochs: plumbing only")
+    ap.add_argument("--eval-only", action="store_true",
+                    help="skip training: load --save-ckpt and evaluate val + test (with "
+                         "--save-pred-npz, also dump the most-likely predictions)")
     ap.add_argument("--device", default="cuda")
     args = ap.parse_args()
 
+    if args.eval_only:
+        args.core_epochs = args.init_epochs = 0
     if args.smoke:
         args.core_epochs = min(args.core_epochs, 2)
         args.init_epochs = min(args.init_epochs, 2)
@@ -173,7 +178,8 @@ def main() -> int:
             best_core = {k: v.detach().clone() for k, v in core.state_dict().items()}
         print(f"core epoch {epoch:3d} | train_eps={np.mean(losses):.4f} | val_eps={vl:.4f}"
               + ("  (best)" if epoch == best_core_epoch else ""), flush=True)
-    core.load_state_dict(best_core)
+    if best_core is not None:
+        core.load_state_dict(best_core)
     for p in core.parameters():
         p.requires_grad_(False)
 
@@ -211,6 +217,8 @@ def main() -> int:
     # ---- final: reload best, full val + test (population contract) ---------
     ck = torch.load(args.save_ckpt, map_location=device, weights_only=False)
     core.load_state_dict(ck["core"]); init.load_state_dict(ck["init"])
+    if args.eval_only:
+        best_epoch, best_core_epoch = ck["epoch"], ck["core_epoch"]
     torch.manual_seed(args.seed)
     val_summary, val_dump = run_split(core, init, diff, val_ds, args, device, val_idx, collect=True)
     test_summary, test_dump = run_split(core, init, diff, test_ds, args, device, test_idx, collect=True)
@@ -245,6 +253,7 @@ def main() -> int:
     print(f"saved metrics: {out}")
 
     if args.save_pred_npz:
+        Path(args.save_pred_npz).parent.mkdir(parents=True, exist_ok=True)
         d = {k: np.concatenate([val_dump[k], test_dump[k]]) for k in val_dump}
         np.savez_compressed(
             args.save_pred_npz, pred=d["pred"], gt=d["gt"], fut_mask=d["fut_mask"],

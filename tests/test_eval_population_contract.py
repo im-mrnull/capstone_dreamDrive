@@ -120,6 +120,37 @@ def test_prediction_dumps_are_row_aligned_on_the_canonical_population():
             assert np.array_equal(v, ref[1][k]), f"{npz.name} vs {ref[0]}: {k} differs"
 
 
+@needs_canonical
+def test_single_agent_windows_are_rigid_copies_of_the_canonical_rows():
+    """CV and the MLP read outputs/agent_windows_canonical_obs20_pred60.npz: the same
+    rows in the same order, each re-centred and heading-rotated. ADE/FDE are only
+    unchanged if that is a pure rotation + translation (no scaling, no reflection)."""
+    import numpy as np
+
+    windows = REPO / "outputs" / "agent_windows_canonical_obs20_pred60.npz"
+    if not windows.exists():
+        pytest.skip("agent windows not generated")
+    w = np.load(windows, allow_pickle=True)
+    c = np.load(CANONICAL, allow_pickle=True)
+    sid = np.concatenate([[str(c["scene_id"][q])] * int(b - a)
+                          for q, (a, b) in enumerate(c["seq_start_end"])])
+    assert np.array_equal(w["scene_id"].astype(str), sid)
+    assert np.array_equal(w["agent_type"].astype(str), c["agent_type"].astype(str))
+    fm = w["fut_mask"]
+    assert np.array_equal(fm, c["fut_mask"].astype(bool))
+    co = c["obs_traj"].transpose(0, 2, 1).astype(np.float64)
+    cf = c["pred_traj"].transpose(0, 2, 1).astype(np.float64)
+    wo, wf = w["obs"].astype(np.float64), w["fut"].astype(np.float64)
+    for i in range(len(fm)):
+        p = np.concatenate([co[i], cf[i][fm[i]]])
+        q = np.concatenate([wo[i], wf[i][fm[i]]])
+        p, q = p - p.mean(0), q - q.mean(0)
+        u, _, vt = np.linalg.svd(p.T @ q)
+        r = u @ vt
+        assert np.linalg.det(r) > 0, f"row {i}: reflection"
+        assert np.abs(p @ r - q).max() < 1e-3, f"row {i}: not a rigid transform"
+
+
 def test_trajectronpp_canonical_windows_cover_the_population():
     """The matched Trajectron++ re-scoring visits each canonical val/test window once."""
     if not CANONICAL.exists():

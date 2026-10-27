@@ -880,6 +880,106 @@
       "p_a_not_better": 0.0011
     }
   ],
-  "when": "2026-10-27T11:46:54",
-  "note": "Scene-level percentile bootstrap over the test scenes (resampled with replacement; statistics are ratios of per-scene sums). One trained model per row (seed 0); seed spread is reported separately in the benchmark table. Paired rows reuse the same scene resample for both models; p_a_not_better = share of replicates where a's ADE >= b's. Trajectron++ rows are its denser per-timestep population over the same test scenes."
+  "seed_pooled": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "ranking_by_ade": [
+      "ST-GAT-inspired (MHA)",
+      "map-free transformer",
+      "LED (most-likely)"
+    ],
+    "models": {
+      "ST-GAT-inspired (MHA)": {
+        "ade_seed_mean": 3.4066115035766154,
+        "per_seed_ade": [
+          3.3293410470715994,
+          3.3877757444415706,
+          3.5027177192166765
+        ],
+        "ade_ci95_scene_seed": [
+          2.2528617679736067,
+          5.0354501130656635
+        ]
+      },
+      "map-free transformer": {
+        "ade_seed_mean": 3.5723128078785176,
+        "per_seed_ade": [
+          3.4274009794969316,
+          3.705195502468771,
+          3.5843419416698503
+        ],
+        "ade_ci95_scene_seed": [
+          2.3145814288228315,
+          5.276642560765563
+        ]
+      },
+      "LED (most-likely)": {
+        "ade_seed_mean": 3.7461263545609094,
+        "per_seed_ade": [
+          3.7395097200093543,
+          3.735934802884089,
+          3.7629345407892845
+        ],
+        "ade_ci95_scene_seed": [
+          2.3147986412798387,
+          5.70555271787819
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "a": "ST-GAT-inspired (MHA)",
+        "b": "map-free transformer",
+        "ade_diff_a_minus_b": -0.16570130430190222,
+        "ci95": [
+          -0.4769606887809625,
+          0.12980181983533476
+        ],
+        "p_a_not_better": 0.1434,
+        "ci95_scenes_only": [
+          -0.43383720083041444,
+          0.057587516158892786
+        ],
+        "seed_pairings_a_better": 8,
+        "seed_pairings": 9
+      },
+      {
+        "a": "ST-GAT-inspired (MHA)",
+        "b": "LED (most-likely)",
+        "ade_diff_a_minus_b": -0.339514850984294,
+        "ci95": [
+          -0.7642125272137038,
+          0.010793152469576288
+        ],
+        "p_a_not_better": 0.0294,
+        "ci95_scenes_only": [
+          -0.7575476827985554,
+          -0.0017177449452664276
+        ],
+        "seed_pairings_a_better": 9,
+        "seed_pairings": 9
+      },
+      {
+        "a": "map-free transformer",
+        "b": "LED (most-likely)",
+        "ade_diff_a_minus_b": -0.1738135466823918,
+        "ci95": [
+          -0.5509384981673416,
+          0.10802179684651864
+        ],
+        "p_a_not_better": 0.1208,
+        "ci95_scenes_only": [
+          -0.5084426399194821,
+          0.0521755736783756
+        ],
+        "seed_pairings_a_better": 9,
+        "seed_pairings": 9
+      }
+    ]
+  },
+  "when": "2026-10-27T14:34:39",
+  "note": "Scene-level percentile bootstrap over the test scenes (resampled with replacement; statistics are ratios of per-scene sums). One trained model per row (seed 0); seed spread is reported separately in the benchmark table. Paired rows reuse the same scene resample for both models; p_a_not_better = share of replicates where a's ADE >= b's. Every row is scored on the same canonical test windows. seed_pooled compares 3-seed means, resampling scenes (shared) and each model's seeds (with replacement) in every replicate."
 }

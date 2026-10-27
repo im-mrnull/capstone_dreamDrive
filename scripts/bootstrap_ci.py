@@ -17,6 +17,12 @@ cross-checked against the seed-0 metrics JSONs that feed the README table. The
 CIs cover scene-sampling uncertainty for one trained model; seed-to-seed spread is
 the separate +/- std already in the benchmark table.
 
+Seed-pooled comparisons: for models that also have seed-1/2 dumps
+(<preds_dir>/seed_dumps/seed{1,2}/, same file names; see dump_predictions.py
+--seed and model7 --eval-only), the comparison is between 3-seed means, and each
+replicate resamples the test scenes (shared, so still paired) AND each model's
+seeds with replacement, so the CI carries training-seed variation too.
+
 Usage:
     python scripts/bootstrap_ci.py
 """
@@ -35,6 +41,8 @@ from dd_bootstrap import bootstrap_counts, ci, per_scene_sums, ratio_replicates,
 from dd_data import masked_ade_fde_np
 from dd_split import load_splits
 from run_benchmark_v2 import OUT, VARIANTS, _dig
+
+SEED_DUMPS = "seed_dumps"   # <preds_dir>/seed_dumps/seed{s}/preds_*.npz for seeds != 0
 
 # preds_*.npz / numpy model name -> VARIANTS label of its seed-0 deployable row.
 VARIANT_OF = {
@@ -81,6 +89,63 @@ def test_rows(windows_path, splits_file, preds_dir) -> dict:
         out[str(p["model"])] = (*masked_ade_fde_np(p["pred"][t], p["gt"][t], p["fut_mask"][t]),
                                 p["agent_type"][t].astype(object), p["scene_id"][t].astype(object))
     return out
+
+
+def seed_pooled(preds_dir: Path, scenes: np.ndarray, counts: np.ndarray, rng_seed: int,
+                seeds=(0, 1, 2)) -> dict | None:
+    """Paired comparisons of 3-seed means for every model with a test dump per seed.
+
+    Seed 0 is the dump in preds_dir, other seeds live in preds_dir/seed_dumps/seed{s}/
+    under the same file name. Each replicate reuses the shared scene counts and draws
+    each model's seeds with replacement (independently per model)."""
+    S, B, k = len(scenes), counts.shape[0], len(seeds)
+    rng = np.random.default_rng(rng_seed + 1)
+    per_model = {}
+    for npz0 in canonical_dumps(preds_dir):
+        files = [npz0] + [preds_dir / SEED_DUMPS / f"seed{s}" / npz0.name for s in seeds[1:]]
+        if not all(f.exists() for f in files):
+            continue
+        num, den, name = [], None, None
+        for f in files:
+            p = np.load(f, allow_pickle=True)
+            t = p["split"].astype(object) == "test"
+            ade = masked_ade_fde_np(p["pred"][t], p["gt"][t], p["fut_mask"][t])[0]
+            codes, _ = scene_codes(p["scene_id"][t].astype(object), scenes)
+            n = per_scene_sums(codes, S, np.ones_like(ade))
+            assert den is None or np.array_equal(n, den), f"{f}: rows differ across seeds"
+            den, name = n, str(p["model"])
+            num.append(per_scene_sums(codes, S, ade))
+        num = np.stack(num)                                          # (k, S)
+        w = rng.multinomial(k, np.full(k, 1.0 / k), size=B) / k      # (B, k) seed resample
+        per_model[name] = {
+            "per_seed_ade": [float(x.sum() / den.sum()) for x in num],
+            "reps_scene_seed": (counts * (w @ num)).sum(1) / (counts @ den),
+            "reps_scene": counts @ num.mean(0) / (counts @ den),
+        }
+    if len(per_model) < 2:
+        return None
+    for v in per_model.values():
+        v["ade"] = float(np.mean(v["per_seed_ade"]))
+    ranked = sorted(per_model, key=lambda m: per_model[m]["ade"])
+    pairs = []
+    for i, a in enumerate(ranked):
+        for b in ranked[i + 1:]:
+            ma, mb = per_model[a], per_model[b]
+            d = ma["reps_scene_seed"] - mb["reps_scene_seed"]
+            pairs.append({
+                "a": a, "b": b, "ade_diff_a_minus_b": ma["ade"] - mb["ade"],
+                "ci95": ci(d), "p_a_not_better": float((d[np.isfinite(d)] >= 0).mean()),
+                "ci95_scenes_only": ci(ma["reps_scene"] - mb["reps_scene"]),
+                "seed_pairings_a_better": int(sum(x < y for x in ma["per_seed_ade"]
+                                                  for y in mb["per_seed_ade"])),
+                "seed_pairings": k * k,
+            })
+    return {"seeds": list(seeds), "ranking_by_ade": ranked,
+            "models": {m: {"ade_seed_mean": per_model[m]["ade"],
+                           "per_seed_ade": per_model[m]["per_seed_ade"],
+                           "ade_ci95_scene_seed": ci(per_model[m]["reps_scene_seed"])}
+                       for m in ranked},
+            "pairs": pairs}
 
 
 def main() -> int:
@@ -134,6 +199,7 @@ def main() -> int:
         }
 
     ranked = sorted(models, key=lambda k: models[k]["ade"])
+    pooled = seed_pooled(Path(args.save_json).parent, scenes, counts, args.seed)
 
     def paired(a, b):
         diff = reps[a] - reps[b]
@@ -146,13 +212,15 @@ def main() -> int:
         "level": 0.95, "ranking_by_ade": ranked, "models": models,
         "adjacent_pairs": [paired(ranked[i], ranked[i + 1]) for i in range(len(ranked) - 1)],
         "vs_best": [paired(ranked[0], m) for m in ranked[1:]],
+        "seed_pooled": pooled,
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Scene-level percentile bootstrap over the test scenes (resampled with "
                 "replacement; statistics are ratios of per-scene sums). One trained model per "
                 "row (seed 0); seed spread is reported separately in the benchmark table. "
                 "Paired rows reuse the same scene resample for both models; p_a_not_better = "
-                "share of replicates where a's ADE >= b's. Trajectron++ rows are its denser "
-                "per-timestep population over the same test scenes.",
+                "share of replicates where a's ADE >= b's. Every row is scored on the same "
+                "canonical test windows. seed_pooled compares 3-seed means, resampling scenes "
+                "(shared) and each model's seeds (with replacement) in every replicate.",
     }
     out = Path(args.save_json)
     out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -164,6 +232,13 @@ def main() -> int:
     for p in payload["adjacent_pairs"]:
         print(f"  {p['a']} vs {p['b']}: dADE {p['ade_diff_a_minus_b']:+.3f} "
               f"CI [{p['ci95'][0]:+.3f}, {p['ci95'][1]:+.3f}]  P(a not better)={p['p_a_not_better']:.3f}")
+    if pooled:
+        print("seed-pooled (3-seed means; scenes + seeds resampled):")
+        for p in pooled["pairs"]:
+            print(f"  {p['a']} vs {p['b']}: dADE {p['ade_diff_a_minus_b']:+.3f} "
+                  f"CI [{p['ci95'][0]:+.3f}, {p['ci95'][1]:+.3f}]  P(a not better)="
+                  f"{p['p_a_not_better']:.3f}  seed pairings a better: "
+                  f"{p['seed_pairings_a_better']}/{p['seed_pairings']}")
     print(f"saved: {out}")
     return 0
 

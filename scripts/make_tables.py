@@ -298,13 +298,28 @@ def bootstrap_rows() -> list[str]:
         match = {True: "yes", False: "**no**", None: "—"}[m["matches_seed0_artifact"]]
         lines.append(_row([DUMP_NAMES.get(name, name), f"{m['ade']:.2f} {_ci(m['ade_ci95'])}",
                            f"{m['fde']:.2f} {_ci(m['fde_ci95'])}", str(m["n_scenes"]), match]))
-    lines += ["", "Paired comparisons of models adjacent in the ranking (same scene resample "
-              "for both; negative = the first model is better):", "",
+    lines += ["", "Paired comparisons of the seed-0 models adjacent in the ranking (same scene "
+              "resample for both; negative = the first model is better):", "",
               _row(["Comparison", "ΔADE (m)", "95% CI", "Separated at 95%?"]), _row(["---"] * 4)]
     for p in b["adjacent_pairs"]:
         sep = "yes" if (p["ci95"][1] < 0 or p["ci95"][0] > 0) else "no"
         lines.append(_row([f"{DUMP_NAMES.get(p['a'], p['a'])} vs {DUMP_NAMES.get(p['b'], p['b'])}",
                            f"{p['ade_diff_a_minus_b']:+.2f}", _ci(p["ci95"]), sep]))
+    sp = b.get("seed_pooled")
+    if sp:
+        lines += ["", f"Seed-pooled paired comparisons for the models with a dump per seed (3-seed "
+                  f"means, seeds {', '.join(map(str, sp['seeds']))}). Each replicate resamples the "
+                  "test scenes for both models and each model's seeds with replacement, so the CI "
+                  "covers training-seed variation as well:", "",
+                  _row(["Comparison", "ΔADE (m), 3-seed means", "95% CI", "Separated at 95%?",
+                        "Seed pairings where the first is better"]), _row(["---"] * 5)]
+        for p in sp["pairs"]:
+            sep = "yes" if (p["ci95"][1] < 0 or p["ci95"][0] > 0) else "no"
+            lines.append(_row([f"{DUMP_NAMES.get(p['a'], p['a'])} vs {DUMP_NAMES.get(p['b'], p['b'])}",
+                               f"{p['ade_diff_a_minus_b']:+.2f}", _ci(p["ci95"]), sep,
+                               f"{p['seed_pairings_a_better']} of {p['seed_pairings']}"]))
+        lines += ["", "Where the two tables disagree, cite the seed-pooled row: a single seed can "
+                  "be a model's luckiest or unluckiest run."]
     best = ms[b["ranking_by_ade"][0]]
     d = best.get("ade_disparity")
     if d:

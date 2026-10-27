@@ -118,3 +118,10 @@ Claude session, continuing [[2026-10-26-claude-project-review]].
   models beat LED in 9/9 seed pairings. The seed-0 "transformer > LED separated" overstated it.
 - History cleanup before push: review PDF + chaos-gap / rss-violations notes removed from the
   unpushed vault commit (kept locally, gitignored); index titles neutralised.
+
+## 2026-10-27 (evening) — pre-registered safety scorecard
+- The user asked which model best supports safe navigation and chose: an open-loop scorecard on real ego paths, single-trajectory and multi-future candidates both allowed, and ties broken by pedestrian/two-wheeler safety, then latency.
+- The rule was committed first (`a33f7f0`, [[safety-scorecard]]). Then came all 3 seeds × 12 packages; every dump was verified against its metrics JSON (most-likely ADE exact; best-of-K exact for LED/T++/K-mode, AgentFormer within 0.02).
+- **Outcome: CV**, by tie fall-through. Conflict AUC is 0.951–0.961 for every single-trajectory model, with overlapping CIs; vulnerable road users also tie; latency then picks CV. Sets score 0.90–0.94 (more false alarms).
+- Exploratory: current distance alone gives AUC 0.754. On emerging conflicts (> 10 m away now) the transformer and ST-GAT score 0.956 and CV 0.937, which is not separated. **The open-loop proxy cannot certify any learned model as safer than CV**; that needs closed loop.
+- Latency, median per scene snapshot on the RTX 4500: transformer 3.2 ms, ST-GAT 8.0, K-mode 19, LED 27/43, AgentFormer 58/102, Trajectron++ ~200 (not real-time).

@@ -426,6 +426,29 @@ What this means:
 
 This is an open-loop proxy: the ego path is what the human driver did.
 
+### Closed-loop test (pre-registered)
+
+Each predictor drives the same planner through the recorded test scenes, in
+[`scripts/closed_loop_sim.py`](scripts/closed_loop_sim.py). The other road users replay their
+logs and do not react.
+
+- **Episodes.** There are 176 per package and seed: 22 scenes × 4 start times × 2 ego personas.
+  The *nominal* persona drives at the human's speed; the *assertive* one drives at 6 m/s or
+  more.
+- **Planner.** Every 0.2 s it chooses among 35 speed-and-swerve manoeuvres that keep clear of
+  each agent's predicted footprint, inflated by that package's val-calibrated 90% band.
+- **Score.** An episode scores 0 after a collision the ego caused. Otherwise it combines
+  progress (relative to the human driver), the absence of harsh braking and the absence of
+  near misses, in nuPlan style.
+- **Pick.** It follows the same rule as the scorecard: highest score, then pedestrian and
+  two-wheeler collisions, then latency.
+
+The protocol, including the planner fixes made on the **validation** scenes with reference
+drivers only, is in [`docs/wiki/closed-loop-test.md`](docs/wiki/closed-loop-test.md). It was
+committed before any learned predictor was run on the test scenes.
+
+*Result: pending.*
+
 ### Honest takeaways (Benchmark v2)
 
 1. **Two models share the top: the ST-GAT-inspired model and the map-free transformer.**

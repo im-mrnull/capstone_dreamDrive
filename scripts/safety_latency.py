@@ -87,10 +87,10 @@ def led_fns(device) -> dict:
             "LED set (10 samples)": lambda it: run(it, False)}
 
 
-def agentformer_fns(device) -> dict:
+def build_agentformer(ck: dict, device):
+    """AgentFormer rebuilt from a training checkpoint (its saved args) -> (model, cfg)."""
     m6 = _load_script("model6_agentformer_train_eval.py")
-    from dd_agentformer import build_map_free_cfg, keyframe_indices, predict_seq, seq_to_af_data, upsample_keyframes
-    ck = torch.load(OUT / "agentformer_ckpt_seed0.pt", map_location=device, weights_only=False)
+    from dd_agentformer import build_map_free_cfg, keyframe_indices
     a = ck["args"]
     obs_idx, fut_idx = keyframe_indices(20, 60, a["stride"])
     cfg = build_map_free_cfg(
@@ -102,6 +102,13 @@ def agentformer_fns(device) -> dict:
     cfg.stride = int(a["stride"])
     model = m6.build_model(cfg, device)
     model.load_state_dict(ck["model"]); model.eval()
+    return model, cfg
+
+
+def agentformer_fns(device) -> dict:
+    from dd_agentformer import predict_seq, seq_to_af_data, upsample_keyframes
+    ck = torch.load(OUT / "agentformer_ckpt_seed0.pt", map_location=device, weights_only=False)
+    model, cfg = build_agentformer(ck, device)
 
     def most_likely(it):   # predict_seq's z=0 rollout without the extra sample decode
         obs, pred, _, _, fm, _ = it

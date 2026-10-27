@@ -16,6 +16,8 @@ outputs/benchmark_v2/mlp_best_seed*.npz
 outputs/benchmark_v2/preds_*.npz
 # Seed-1/2 dumps for the seed-pooled bootstrap (bootstrap_ci.json is the artifact)
 outputs/benchmark_v2/seed_dumps/
+# Closed-loop dense windows + predictions (regenerable; closed_loop.json is the artifact)
+outputs/closed_loop/
 
 # Python
 __pycache__/

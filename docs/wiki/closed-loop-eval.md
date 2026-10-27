@@ -1,6 +1,6 @@
 # Closed-Loop Evaluation
 
-## Status: ❌ Not Started
+## Status: 🟡 Non-reactive Python closed loop done (2026-10-27), see [[closed-loop-test]]; CARLA version not started
 
 ## Goal
 

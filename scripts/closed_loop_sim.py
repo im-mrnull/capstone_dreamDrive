@@ -515,6 +515,8 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=min(24, os.cpu_count() or 1))
     ap.add_argument("--n-boot", type=int, default=2000)
     ap.add_argument("--save-json", default=None)
+    ap.add_argument("--episodes-out", default=None,
+                    help="also write every episode result (per package, seed, band scale) as JSON")
     args = ap.parse_args()
 
     mapping = load_splits(REPO / "splits" / "scene_splits.json")
@@ -532,6 +534,11 @@ def main() -> int:
                   f"{s['at_fault_rate']:.3f}  VRU {s['at_fault_vru_rate']:.3f}  progress {s['progress']:.2f}  "
                   f"harsh {s['harsh_braking_rate']:.2f}  near-miss {s['near_miss_rate']:.2f}", flush=True)
 
+    if args.episodes_out:
+        Path(args.episodes_out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.episodes_out).write_text(json.dumps(
+            [{"package": n, "band_scale": lam, "seed": s, "episodes": eps}
+             for (n, lam), by_seed in results.items() for s, eps in by_seed.items()]), encoding="utf-8")
     scenes = np.asarray(sorted(scene_ids), dtype=object)
     counts = bootstrap_counts(len(scenes), args.n_boot, 0)
     rng = np.random.default_rng(1)

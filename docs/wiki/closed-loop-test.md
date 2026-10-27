@@ -1,6 +1,26 @@
 # Closed-Loop Test — does a predictor make a planner drive safely?
 
-## Status: 📌 Pre-registered (2026-10-27) — test results pending
+## Status: ✅ Run 2026-10-27 under the rule committed in `b6f1a43`
+
+**Rule outcome: CV (vel_k=5)**, a tie fall-through again, not a safety ranking. Scores are
+0.69–0.75 for every single-trajectory model and 3 of 4 sets, with overlapping CIs (±0.13); the
+leader is LED at 0.745 and ST-GAT at 0.745. The K-mode set is clearly worse (0.52; harsh
+braking in 81% of episodes).
+
+- **Measurement floor:** the human replay shows 5.7% at-fault (two footprint artifacts on test:
+  a diagonal car overlap and a 52° route-heading error in a turn). The oracle is 6.2% and
+  ignoring agents 15.9%.
+- **Exploratory** (`closed_loop_explore.py`; 116 paired comparisons, uncorrected):
+  - the 90% band hurts every single-trajectory model (+0.07–0.11 without it; 37–50% harsh
+    braking with it);
+  - without the band, every predictor cuts at-fault episodes by 4–7 points vs ignoring agents;
+  - LED (+0.031) and ST-GAT (+0.025) edge out CV without the band; the transformer is
+    borderline (+0.019). These are hypotheses.
+- **Lesson:** conformal bands this wide cannot be hard planning constraints in dense traffic.
+
+Artifacts: `outputs/benchmark_v2/closed_loop.json` (incl. the `exploratory` block); per-episode
+results in `outputs/closed_loop/episodes_test.json` (gitignored, regenerable with
+`--episodes-out`).
 
 The open-loop [[safety-scorecard]] could not separate the predictors: all single-trajectory
 models tied with constant velocity. This test puts each predictor inside the same planner and

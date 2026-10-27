@@ -1,0 +1,2421 @@
+{
+  "rule_doc": "docs/wiki/closed-loop-test.md",
+  "rule_commit": "b6f1a43d39d5c5d2f62abdd00a9005220706e165",
+  "split": "test",
+  "settings": {
+    "episodes_per_scene": 8,
+    "episode_s": 5.0,
+    "replan_s": 0.2,
+    "horizon_s": 3.0,
+    "safety_buffer_m": 0.25,
+    "personas_min_speed": {
+      "nominal": 0.0,
+      "assertive": 6.0
+    },
+    "accels": [
+      -6.0,
+      -4.0,
+      -2.0,
+      -1.0,
+      0.0,
+      1.0,
+      2.0
+    ],
+    "lateral_targets": [
+      -1.5,
+      -0.75,
+      0.0,
+      0.75,
+      1.5
+    ],
+    "score_weights": [
+      5.0,
+      2.0,
+      2.0
+    ],
+    "n_boot": 2000,
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "n_scenes": 22,
+  "packages": {
+    "CV (vel_k=5)": {
+      "score": 0.7330605822049745,
+      "at_fault_rate": 0.125,
+      "at_fault_vru_rate": 0.10227272727272728,
+      "progress": 0.8602603614088467,
+      "harsh_braking_rate": 0.4318181818181818,
+      "near_miss_rate": 0.22727272727272727,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7330605822049745,
+          0.7330605822049745,
+          0.7330605822049745
+        ],
+        "at_fault_rate": [
+          0.125,
+          0.125,
+          0.125
+        ],
+        "at_fault_vru_rate": [
+          0.10227272727272728,
+          0.10227272727272728,
+          0.10227272727272728
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7319966081413095,
+          "at_fault_rate": 0.125
+        },
+        "assertive": {
+          "score": 0.7341245562686393,
+          "at_fault_rate": 0.125
+        }
+      },
+      "score_ci95": [
+        0.6060639211408148,
+        0.8455063561567873
+      ],
+      "no_band": {
+        "score": 0.7999861245271634,
+        "at_fault_rate": 0.10795454545454546,
+        "at_fault_vru_rate": 0.0909090909090909,
+        "progress": 0.9043148402136555
+      }
+    },
+    "MLP": {
+      "score": 0.7049944154066196,
+      "at_fault_rate": 0.13257575757575757,
+      "at_fault_vru_rate": 0.125,
+      "progress": 0.8528192215022138,
+      "harsh_braking_rate": 0.44507575757575757,
+      "near_miss_rate": 0.2537878787878788,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.6956613447793127,
+          0.7060734302761807,
+          0.7132484711643655
+        ],
+        "at_fault_rate": [
+          0.14772727272727273,
+          0.125,
+          0.125
+        ],
+        "at_fault_vru_rate": [
+          0.13636363636363635,
+          0.11363636363636363,
+          0.125
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7012759862486395,
+          "at_fault_rate": 0.13257575757575757
+        },
+        "assertive": {
+          "score": 0.7087128445645998,
+          "at_fault_rate": 0.13257575757575757
+        }
+      },
+      "score_ci95": [
+        0.569587204904154,
+        0.8280951866552899
+      ],
+      "no_band": {
+        "score": 0.8104038160591663,
+        "at_fault_rate": 0.0909090909090909,
+        "at_fault_vru_rate": 0.07765151515151515,
+        "progress": 0.9003089998418604
+      }
+    },
+    "ST-GAT (MHA)": {
+      "score": 0.7446464828641123,
+      "at_fault_rate": 0.12121212121212122,
+      "at_fault_vru_rate": 0.08522727272727272,
+      "progress": 0.8699144776132846,
+      "harsh_braking_rate": 0.3996212121212121,
+      "near_miss_rate": 0.2272727272727273,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7690533238158406,
+          0.7315569848551888,
+          0.7333291399213073
+        ],
+        "at_fault_rate": [
+          0.10227272727272728,
+          0.14772727272727273,
+          0.11363636363636363
+        ],
+        "at_fault_vru_rate": [
+          0.09090909090909091,
+          0.10227272727272728,
+          0.0625
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7397572344161206,
+          "at_fault_rate": 0.12121212121212122
+        },
+        "assertive": {
+          "score": 0.7495357313121039,
+          "at_fault_rate": 0.12121212121212122
+        }
+      },
+      "score_ci95": [
+        0.6129934637141373,
+        0.8572982922093058
+      ],
+      "no_band": {
+        "score": 0.8249592996196654,
+        "at_fault_rate": 0.09469696969696968,
+        "at_fault_vru_rate": 0.08712121212121211,
+        "progress": 0.9026699379066633
+      }
+    },
+    "Map-free transformer": {
+      "score": 0.7389155479045676,
+      "at_fault_rate": 0.10227272727272728,
+      "at_fault_vru_rate": 0.0909090909090909,
+      "progress": 0.8581297344020299,
+      "harsh_braking_rate": 0.40151515151515155,
+      "near_miss_rate": 0.2537878787878788,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7468251388509951,
+          0.7410077339913047,
+          0.7289137708714031
+        ],
+        "at_fault_rate": [
+          0.09090909090909091,
+          0.10227272727272728,
+          0.11363636363636363
+        ],
+        "at_fault_vru_rate": [
+          0.07954545454545454,
+          0.07954545454545454,
+          0.11363636363636363
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7372624649715723,
+          "at_fault_rate": 0.10227272727272728
+        },
+        "assertive": {
+          "score": 0.7405686308375629,
+          "at_fault_rate": 0.10227272727272728
+        }
+      },
+      "score_ci95": [
+        0.6059807312623289,
+        0.8529140464245296
+      ],
+      "no_band": {
+        "score": 0.8186605273468798,
+        "at_fault_rate": 0.09469696969696968,
+        "at_fault_vru_rate": 0.08143939393939394,
+        "progress": 0.8964112849537068
+      }
+    },
+    "K-mode (top-1)": {
+      "score": 0.7056752260896841,
+      "at_fault_rate": 0.13257575757575757,
+      "at_fault_vru_rate": 0.0965909090909091,
+      "progress": 0.8395955971673604,
+      "harsh_braking_rate": 0.49053030303030304,
+      "near_miss_rate": 0.21969696969696972,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7107248234857111,
+          0.6903156054042338,
+          0.7159852493791075
+        ],
+        "at_fault_rate": [
+          0.14772727272727273,
+          0.13636363636363635,
+          0.11363636363636363
+        ],
+        "at_fault_vru_rate": [
+          0.07954545454545454,
+          0.11931818181818182,
+          0.09090909090909091
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7023925587223231,
+          "at_fault_rate": 0.13257575757575757
+        },
+        "assertive": {
+          "score": 0.7089578934570452,
+          "at_fault_rate": 0.13257575757575757
+        }
+      },
+      "score_ci95": [
+        0.5786155388341171,
+        0.8175086596187211
+      ],
+      "no_band": {
+        "score": 0.8027840869642863,
+        "at_fault_rate": 0.11742424242424243,
+        "at_fault_vru_rate": 0.10037878787878789,
+        "progress": 0.903307261176988
+      }
+    },
+    "AgentFormer (most-likely)": {
+      "score": 0.723556727049803,
+      "at_fault_rate": 0.14015151515151514,
+      "at_fault_vru_rate": 0.11742424242424243,
+      "progress": 0.8729321643679749,
+      "harsh_braking_rate": 0.42234848484848486,
+      "near_miss_rate": 0.24621212121212122,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7414769594275735,
+          0.6895617088000986,
+          0.7396315129217371
+        ],
+        "at_fault_rate": [
+          0.11363636363636363,
+          0.1590909090909091,
+          0.14772727272727273
+        ],
+        "at_fault_vru_rate": [
+          0.10227272727272728,
+          0.11363636363636363,
+          0.13636363636363635
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.71985881713788,
+          "at_fault_rate": 0.14015151515151514
+        },
+        "assertive": {
+          "score": 0.727254636961726,
+          "at_fault_rate": 0.14015151515151514
+        }
+      },
+      "score_ci95": [
+        0.5865359677449894,
+        0.8406179669843137
+      ],
+      "no_band": {
+        "score": 0.8090080127543212,
+        "at_fault_rate": 0.10795454545454546,
+        "at_fault_vru_rate": 0.09659090909090907,
+        "progress": 0.9036686878180702
+      }
+    },
+    "LED (mean-denoised)": {
+      "score": 0.7452267160057545,
+      "at_fault_rate": 0.10606060606060606,
+      "at_fault_vru_rate": 0.08522727272727272,
+      "progress": 0.8598593710862482,
+      "harsh_braking_rate": 0.3693181818181818,
+      "near_miss_rate": 0.23484848484848486,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7402260017536442,
+          0.759474826697673,
+          0.7359793195659463
+        ],
+        "at_fault_rate": [
+          0.10227272727272728,
+          0.07954545454545454,
+          0.13636363636363635
+        ],
+        "at_fault_vru_rate": [
+          0.10227272727272728,
+          0.056818181818181816,
+          0.09659090909090909
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7412894278305145,
+          "at_fault_rate": 0.10606060606060606
+        },
+        "assertive": {
+          "score": 0.7491640041809945,
+          "at_fault_rate": 0.10606060606060606
+        }
+      },
+      "score_ci95": [
+        0.6069356405913306,
+        0.865524805270011
+      ],
+      "no_band": {
+        "score": 0.8308613697587933,
+        "at_fault_rate": 0.08712121212121211,
+        "at_fault_vru_rate": 0.08143939393939394,
+        "progress": 0.9037946501084546
+      }
+    },
+    "Trajectron++ (most-likely)": {
+      "score": 0.7149250485986777,
+      "at_fault_rate": 0.14393939393939392,
+      "at_fault_vru_rate": 0.08333333333333333,
+      "progress": 0.8624531683181326,
+      "harsh_braking_rate": 0.4507575757575757,
+      "near_miss_rate": 0.23106060606060608,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7261065214708844,
+          0.7066841626491046,
+          0.7119844616760445
+        ],
+        "at_fault_rate": [
+          0.125,
+          0.1590909090909091,
+          0.14772727272727273
+        ],
+        "at_fault_vru_rate": [
+          0.07954545454545454,
+          0.10227272727272728,
+          0.06818181818181818
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7136771818752553,
+          "at_fault_rate": 0.14393939393939392
+        },
+        "assertive": {
+          "score": 0.7161729153221005,
+          "at_fault_rate": 0.14393939393939392
+        }
+      },
+      "score_ci95": [
+        0.5822572769673899,
+        0.8360658322346373
+      ],
+      "no_band": {
+        "score": 0.7992510977216557,
+        "at_fault_rate": 0.1268939393939394,
+        "at_fault_vru_rate": 0.12310606060606061,
+        "progress": 0.9078790296832963
+      }
+    },
+    "K-mode set (10 modes)": {
+      "score": 0.5241354543019661,
+      "at_fault_rate": 0.22348484848484848,
+      "at_fault_vru_rate": 0.16098484848484848,
+      "progress": 0.7335778780791921,
+      "harsh_braking_rate": 0.8143939393939394,
+      "near_miss_rate": 0.37121212121212127,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.5440878447955785,
+          0.5075626882762411,
+          0.5207558298340786
+        ],
+        "at_fault_rate": [
+          0.21022727272727273,
+          0.2215909090909091,
+          0.23863636363636365
+        ],
+        "at_fault_vru_rate": [
+          0.14772727272727273,
+          0.16477272727272727,
+          0.17045454545454544
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.5223459632542832,
+          "at_fault_rate": 0.2272727272727273
+        },
+        "assertive": {
+          "score": 0.525924945349649,
+          "at_fault_rate": 0.21969696969696972
+        }
+      },
+      "score_ci95": [
+        0.40262934929946786,
+        0.6429445468579037
+      ],
+      "no_band": {
+        "score": 0.5087692003545773,
+        "at_fault_rate": 0.23863636363636365,
+        "at_fault_vru_rate": 0.17424242424242423,
+        "progress": 0.7140696355594901
+      }
+    },
+    "AgentFormer set (10 samples)": {
+      "score": 0.7037264260190548,
+      "at_fault_rate": 0.13446969696969696,
+      "at_fault_vru_rate": 0.11363636363636365,
+      "progress": 0.8242817200531016,
+      "harsh_braking_rate": 0.46022727272727276,
+      "near_miss_rate": 0.23863636363636365,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.6864657208653675,
+          0.6893927602765967,
+          0.7353207969152002
+        ],
+        "at_fault_rate": [
+          0.13636363636363635,
+          0.14772727272727273,
+          0.11931818181818182
+        ],
+        "at_fault_vru_rate": [
+          0.125,
+          0.10227272727272728,
+          0.11363636363636363
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7017438989913228,
+          "at_fault_rate": 0.13257575757575757
+        },
+        "assertive": {
+          "score": 0.7057089530467868,
+          "at_fault_rate": 0.13636363636363635
+        }
+      },
+      "score_ci95": [
+        0.5617836633012127,
+        0.8301174545778042
+      ],
+      "no_band": {
+        "score": 0.7498351766479773,
+        "at_fault_rate": 0.15151515151515152,
+        "at_fault_vru_rate": 0.1306818181818182,
+        "progress": 0.866301772653081
+      }
+    },
+    "LED set (10 samples)": {
+      "score": 0.6927280662476405,
+      "at_fault_rate": 0.1553030303030303,
+      "at_fault_vru_rate": 0.13257575757575757,
+      "progress": 0.8317490045539285,
+      "harsh_braking_rate": 0.49621212121212127,
+      "near_miss_rate": 0.24621212121212122,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7044373324001829,
+          0.7020677178236959,
+          0.6716791485190426
+        ],
+        "at_fault_rate": [
+          0.125,
+          0.1590909090909091,
+          0.18181818181818182
+        ],
+        "at_fault_vru_rate": [
+          0.125,
+          0.13636363636363635,
+          0.13636363636363635
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.6892276466676573,
+          "at_fault_rate": 0.1553030303030303
+        },
+        "assertive": {
+          "score": 0.6962284858276236,
+          "at_fault_rate": 0.1553030303030303
+        }
+      },
+      "score_ci95": [
+        0.5603598996799549,
+        0.8133795229335785
+      ],
+      "no_band": {
+        "score": 0.7372091854938144,
+        "at_fault_rate": 0.13825757575757577,
+        "at_fault_vru_rate": 0.1268939393939394,
+        "progress": 0.8631409648351233
+      }
+    },
+    "Trajectron++ set (10 samples)": {
+      "score": 0.6939693696771038,
+      "at_fault_rate": 0.15151515151515152,
+      "at_fault_vru_rate": 0.10227272727272728,
+      "progress": 0.840981942969511,
+      "harsh_braking_rate": 0.524621212121212,
+      "near_miss_rate": 0.24621212121212122,
+      "n_episodes": 176,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.6831084340826743,
+          0.6916588221843587,
+          0.7071408527642782
+        ],
+        "at_fault_rate": [
+          0.1590909090909091,
+          0.1590909090909091,
+          0.13636363636363635
+        ],
+        "at_fault_vru_rate": [
+          0.10227272727272728,
+          0.125,
+          0.07954545454545454
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.6937407035135634,
+          "at_fault_rate": 0.15151515151515152
+        },
+        "assertive": {
+          "score": 0.694198035840644,
+          "at_fault_rate": 0.15151515151515152
+        }
+      },
+      "score_ci95": [
+        0.5517812329637044,
+        0.815806271805508
+      ],
+      "no_band": {
+        "score": 0.7390682814391138,
+        "at_fault_rate": 0.13636363636363638,
+        "at_fault_vru_rate": 0.11742424242424243,
+        "progress": 0.8781726959272899
+      }
+    },
+    "Human driver (log replay)": {
+      "score": 0.9280303030303031,
+      "at_fault_rate": 0.056818181818181816,
+      "at_fault_vru_rate": 0.022727272727272728,
+      "progress": 1.0,
+      "harsh_braking_rate": 0.0,
+      "near_miss_rate": 0.125,
+      "n_episodes": 176,
+      "seeds": [
+        0
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.9280303030303031
+        ],
+        "at_fault_rate": [
+          0.056818181818181816
+        ],
+        "at_fault_vru_rate": [
+          0.022727272727272728
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.9280303030303031,
+          "at_fault_rate": 0.056818181818181816
+        },
+        "assertive": {
+          "score": 0.9280303030303031,
+          "at_fault_rate": 0.056818181818181816
+        }
+      },
+      "score_ci95": [
+        0.8434343434343435,
+        0.9924242424242423
+      ]
+    },
+    "Oracle (true future, no band)": {
+      "score": 0.8480631361080292,
+      "at_fault_rate": 0.0625,
+      "at_fault_vru_rate": 0.0625,
+      "progress": 0.9026890570833888,
+      "harsh_braking_rate": 0.0625,
+      "near_miss_rate": 0.26136363636363635,
+      "n_episodes": 176,
+      "seeds": [
+        0
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.8480631361080292
+        ],
+        "at_fault_rate": [
+          0.0625
+        ],
+        "at_fault_vru_rate": [
+          0.0625
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.8415281079182768,
+          "at_fault_rate": 0.056818181818181816
+        },
+        "assertive": {
+          "score": 0.8545981642977817,
+          "at_fault_rate": 0.06818181818181818
+        }
+      },
+      "score_ci95": [
+        0.7375547193666879,
+        0.9342115222109288
+      ]
+    },
+    "No prediction (ignore agents)": {
+      "score": 0.7945303594768145,
+      "at_fault_rate": 0.1590909090909091,
+      "at_fault_vru_rate": 0.14204545454545456,
+      "progress": 0.9202261115252349,
+      "harsh_braking_rate": 0.017045454545454544,
+      "near_miss_rate": 0.2556818181818182,
+      "n_episodes": 176,
+      "seeds": [
+        0
+      ],
+      "band_scale": 1.0,
+      "per_seed": {
+        "score": [
+          0.7945303594768145
+        ],
+        "at_fault_rate": [
+          0.1590909090909091
+        ],
+        "at_fault_vru_rate": [
+          0.14204545454545456
+        ]
+      },
+      "by_persona": {
+        "nominal": {
+          "score": 0.7884514267836488,
+          "at_fault_rate": 0.1590909090909091
+        },
+        "assertive": {
+          "score": 0.8006092921699803,
+          "at_fault_rate": 0.1590909090909091
+        }
+      },
+      "score_ci95": [
+        0.6475799385316446,
+        0.9139089323239448
+      ]
+    }
+  },
+  "decision": {
+    "leader": "LED (mean-denoised)",
+    "vs_leader": [
+      {
+        "a": "LED (mean-denoised)",
+        "b": "CV (vel_k=5)",
+        "diff": 0.012166133800780021,
+        "ci95": [
+          -0.049963600884580885,
+          0.06802864658537307
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "MLP",
+        "diff": 0.04023230059913496,
+        "ci95": [
+          0.010059238127037443,
+          0.07472736439147579
+        ],
+        "tied": false
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "ST-GAT (MHA)",
+        "diff": 0.000580233141642239,
+        "ci95": [
+          -0.06898167950156553,
+          0.060666332751760844
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "Map-free transformer",
+        "diff": 0.006311168101186926,
+        "ci95": [
+          -0.0356067776791233,
+          0.04416730423539304
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "K-mode (top-1)",
+        "diff": 0.03955148991607038,
+        "ci95": [
+          -0.03306420342488416,
+          0.10379518161292688
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "AgentFormer (most-likely)",
+        "diff": 0.021669988955951514,
+        "ci95": [
+          -0.029547462983520463,
+          0.07937994258647858
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "Trajectron++ (most-likely)",
+        "diff": 0.03030166740707685,
+        "ci95": [
+          -0.02848257901572283,
+          0.08618913862555601
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "K-mode set (10 modes)",
+        "diff": 0.22109126170378846,
+        "ci95": [
+          0.1243330252168122,
+          0.31370566925820964
+        ],
+        "tied": false
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "AgentFormer set (10 samples)",
+        "diff": 0.041500289986699745,
+        "ci95": [
+          -0.035394801815607196,
+          0.12943221968873597
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "LED set (10 samples)",
+        "diff": 0.052498649758114024,
+        "ci95": [
+          -0.006574500022085318,
+          0.11831515537508121
+        ],
+        "tied": true
+      },
+      {
+        "a": "LED (mean-denoised)",
+        "b": "Trajectron++ set (10 samples)",
+        "diff": 0.051257346328650755,
+        "ci95": [
+          -0.026334229263160737,
+          0.12980118021749493
+        ],
+        "tied": true
+      }
+    ],
+    "tied_on_score": [
+      "LED (mean-denoised)",
+      "CV (vel_k=5)",
+      "ST-GAT (MHA)",
+      "Map-free transformer",
+      "K-mode (top-1)",
+      "AgentFormer (most-likely)",
+      "Trajectron++ (most-likely)",
+      "AgentFormer set (10 samples)",
+      "LED set (10 samples)",
+      "Trajectron++ set (10 samples)"
+    ],
+    "vru_pairs": [
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "LED (mean-denoised)",
+        "diff": -0.0018939393939393923,
+        "ci95": [
+          -0.08333333333333331,
+          0.09469696969696968
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "CV (vel_k=5)",
+        "diff": -0.01893939393939395,
+        "ci95": [
+          -0.13257575757575757,
+          0.08333333333333333
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "ST-GAT (MHA)",
+        "diff": -0.0018939393939393923,
+        "ci95": [
+          -0.08148674242424234,
+          0.06439393939393938
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "Map-free transformer",
+        "diff": -0.007575757575757569,
+        "ci95": [
+          -0.10227272727272727,
+          0.07575757575757577
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "K-mode (top-1)",
+        "diff": -0.013257575757575774,
+        "ci95": [
+          -0.0871212121212121,
+          0.04545454545454544
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "AgentFormer (most-likely)",
+        "diff": -0.0340909090909091,
+        "ci95": [
+          -0.13257575757575757,
+          0.05303030303030304
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "AgentFormer set (10 samples)",
+        "diff": -0.030303030303030318,
+        "ci95": [
+          -0.13257575757575757,
+          0.0606060606060606
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "LED set (10 samples)",
+        "diff": -0.04924242424242424,
+        "ci95": [
+          -0.15151515151515152,
+          0.030303030303030304
+        ],
+        "tied": true
+      },
+      {
+        "a": "Trajectron++ (most-likely)",
+        "b": "Trajectron++ set (10 samples)",
+        "diff": -0.01893939393939395,
+        "ci95": [
+          -0.0946969696969697,
+          0.049242424242424226
+        ],
+        "tied": true
+      }
+    ],
+    "tied_on_vru": [
+      "Trajectron++ (most-likely)",
+      "LED (mean-denoised)",
+      "CV (vel_k=5)",
+      "ST-GAT (MHA)",
+      "Map-free transformer",
+      "K-mode (top-1)",
+      "AgentFormer (most-likely)",
+      "AgentFormer set (10 samples)",
+      "LED set (10 samples)",
+      "Trajectron++ set (10 samples)"
+    ],
+    "pick": "CV (vel_k=5)",
+    "steps": [
+      "Leader on the episode score: LED (mean-denoised) (0.745).",
+      "Tied with the leader (paired 95% CI includes 0): CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), Trajectron++ (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).",
+      "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best Trajectron++ (most-likely) (0.083); still tied: LED (mean-denoised), CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).",
+      "Tie-break 2 (latency): CV (vel_k=5)."
+    ]
+  },
+  "when": "2026-10-27T15:32:11",
+  "note": "Non-reactive closed loop: agents replay their logs. Footprints are nominal per class (no box sizes in the data).",
+  "exploratory": {
+    "note": "Exploratory, added after the pre-registered result; not used for the pick. Paired over identical episodes; seed-pooled scene bootstrap (2,000).",
+    "comparisons": [
+      {
+        "metric": "score",
+        "package": "CV (vel_k=5)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.06146977727184,
+        "ci95": [
+          -0.10997397298574431,
+          -0.01761489954812721
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "CV (vel_k=5)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.0054557650503489485,
+        "ci95": [
+          -0.026718136017217564,
+          0.03998175106049903
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "CV (vel_k=5)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.06692554232218895,
+        "ci95": [
+          0.014685139825595349,
+          0.12441277045171598
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "MLP",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.08953594407019494,
+        "ci95": [
+          -0.1877597825670574,
+          -0.004631785431896464
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "MLP",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.02806616679835494,
+        "ci95": [
+          -0.09065161280360427,
+          0.028431359904609033
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "MLP",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.01587345658235184,
+        "ci95": [
+          -0.017414746109943664,
+          0.051551847830725396
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "MLP",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.010417691532002893,
+        "ci95": [
+          -0.009244339765434668,
+          0.03412521369766532
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "MLP",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.10540940065254678,
+        "ci95": [
+          0.022323574328679263,
+          0.20011763630474122
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "ST-GAT (MHA)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.049883876612702216,
+        "ci95": [
+          -0.10824170717010348,
+          0.010011880637146156
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "ST-GAT (MHA)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.011585900659137782,
+        "ci95": [
+          -0.038667849244914926,
+          0.05893524291743086
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "ST-GAT (MHA)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.030428940142850913,
+        "ci95": [
+          0.004726548525596342,
+          0.06086949090196301
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "ST-GAT (MHA)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.024973175092501965,
+        "ci95": [
+          0.0021309739864087077,
+          0.050544899807520145
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "ST-GAT (MHA)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.08031281675555313,
+        "ci95": [
+          0.02760774945061896,
+          0.13494960476052048
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "Map-free transformer",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.0556148115722469,
+        "ci95": [
+          -0.14283686960017622,
+          0.017914499216569613
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Map-free transformer",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.005854965699593095,
+        "ci95": [
+          -0.043972931229504415,
+          0.05468322425546023
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Map-free transformer",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.024130167870065278,
+        "ci95": [
+          -0.0005955129225599779,
+          0.056521742030099714
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Map-free transformer",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.01867440281971633,
+        "ci95": [
+          -0.0006145383993449388,
+          0.03845436819289209
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Map-free transformer",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.07974497944231218,
+        "ci95": [
+          0.016867405659145362,
+          0.1600935309351203
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode (top-1)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.08885513338713036,
+        "ci95": [
+          -0.1605001196517546,
+          -0.022509276558422053
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode (top-1)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.02738535611529036,
+        "ci95": [
+          -0.08342589183935914,
+          0.024681018695046537
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "K-mode (top-1)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.008253727487471774,
+        "ci95": [
+          -0.012316097862827245,
+          0.027290313914790344
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "K-mode (top-1)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.002797962437122825,
+        "ci95": [
+          -0.02932144836017082,
+          0.0336992766014693
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "K-mode (top-1)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.09710886087460213,
+        "ci95": [
+          0.031503669359930424,
+          0.16812511492706064
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer (most-likely)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.07097363242701149,
+        "ci95": [
+          -0.14872535025395398,
+          -0.007476161149138928
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer (most-likely)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.009503855155171492,
+        "ci95": [
+          -0.05647253814223938,
+          0.03275866313121688
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer (most-likely)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.014477653277506719,
+        "ci95": [
+          -0.021325843367844367,
+          0.05561467299946282
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer (most-likely)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.00902188822715777,
+        "ci95": [
+          -0.02585236205656449,
+          0.04335445398718697
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer (most-likely)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.08545128570451821,
+        "ci95": [
+          0.015288159257751045,
+          0.16614765226414574
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "LED (mean-denoised)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.04930364347105998,
+        "ci95": [
+          -0.1457544775700222,
+          0.03404791877844125
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "LED (mean-denoised)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.012166133800780021,
+        "ci95": [
+          -0.04593431475025064,
+          0.06802258315042539
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "LED (mean-denoised)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.036331010281978826,
+        "ci95": [
+          0.008677565823939802,
+          0.07043993145708663
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "LED (mean-denoised)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.030875245231629878,
+        "ci95": [
+          0.008628492450154453,
+          0.05719041628151107
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "LED (mean-denoised)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.0856346537530388,
+        "ci95": [
+          0.009299885021875488,
+          0.17896575305776066
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ (most-likely)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.07960531087813683,
+        "ci95": [
+          -0.1608762312435331,
+          -0.007098173671639468
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ (most-likely)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.018135533606296828,
+        "ci95": [
+          -0.07799528149968608,
+          0.0333187418568468
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ (most-likely)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.004720738244841205,
+        "ci95": [
+          -0.03281632504773364,
+          0.04322020385106669
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ (most-likely)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.0007350268055077436,
+        "ci95": [
+          -0.0364880798434917,
+          0.03432867680801656
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ (most-likely)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.08432604912297803,
+        "ci95": [
+          0.011260210957323649,
+          0.15803324858716095
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode set (10 modes)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.27039490517484843,
+        "ci95": [
+          -0.36889746785976324,
+          -0.1790498738319824
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode set (10 modes)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.20892512790300843,
+        "ci95": [
+          -0.2884576268286463,
+          -0.13452694206672985
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode set (10 modes)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.2857611591222372,
+        "ci95": [
+          -0.3913041806752601,
+          -0.18250258585921322
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode set (10 modes)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.29121692417258616,
+        "ci95": [
+          -0.3968227210995459,
+          -0.19070603260982072
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "K-mode set (10 modes)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.015366253947388775,
+        "ci95": [
+          -0.07019228990944743,
+          0.04451870198409649
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer set (10 samples)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.09080393345775972,
+        "ci95": [
+          -0.17270328617688552,
+          -0.01783136358069335
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer set (10 samples)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.029334156185919724,
+        "ci95": [
+          -0.09770039875327535,
+          0.03247786370607884
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer set (10 samples)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.04469518282883722,
+        "ci95": [
+          -0.11368004644578367,
+          0.012582406793141345
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer set (10 samples)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.05015094787918617,
+        "ci95": [
+          -0.1278699842541575,
+          0.004514070667380554
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "AgentFormer set (10 samples)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.0461087506289225,
+        "ci95": [
+          -0.02620860818690238,
+          0.12567589007739957
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "LED set (10 samples)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.101802293229174,
+        "ci95": [
+          -0.1775735511978828,
+          -0.03592447305269721
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "LED set (10 samples)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.040332515957334,
+        "ci95": [
+          -0.09175321789081493,
+          0.00605118393604827
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "LED set (10 samples)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.05732117398300007,
+        "ci95": [
+          -0.13127146139200535,
+          0.003556899299500297
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "LED set (10 samples)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.06277693903334902,
+        "ci95": [
+          -0.13348298828568883,
+          -0.007516466324114872
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "LED set (10 samples)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.04448111924617393,
+        "ci95": [
+          -0.005204606432846322,
+          0.09813911664304131
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ set (10 samples)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.10056098979971073,
+        "ci95": [
+          -0.17864667369566933,
+          -0.03303654987898513
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ set (10 samples)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.03909121252787073,
+        "ci95": [
+          -0.10891502043332262,
+          0.019906440910287527
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ set (10 samples)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.055462078037700646,
+        "ci95": [
+          -0.11928701522876838,
+          0.00454892605542258
+        ],
+        "separated": false
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ set (10 samples)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.060917843088049595,
+        "ci95": [
+          -0.12289948087004875,
+          -0.0068482647211884524
+        ],
+        "separated": true
+      },
+      {
+        "metric": "score",
+        "package": "Trajectron++ set (10 samples)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.045098911762010085,
+        "ci95": [
+          -0.009630563845208492,
+          0.09383185341891247
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "CV (vel_k=5)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.03409090909090909,
+        "ci95": [
+          -0.09090909090909094,
+          0.022727272727272707
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "CV (vel_k=5)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.05113636363636363,
+        "ci95": [
+          -0.10795454545454544,
+          -0.011363636363636354
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "CV (vel_k=5)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.017045454545454544,
+        "ci95": [
+          -0.0625,
+          0.028409090909090884
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "MLP",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.02651515151515152,
+        "ci95": [
+          -0.12121212121212122,
+          0.07196969696969693
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "MLP",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.007575757575757569,
+        "ci95": [
+          -0.04545454545454547,
+          0.07575757575757576
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "MLP",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.06818181818181819,
+        "ci95": [
+          -0.13257575757575757,
+          -0.015151515151515155
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "MLP",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.017045454545454558,
+        "ci95": [
+          -0.06818181818181818,
+          0.02840909090909091
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "MLP",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.04166666666666667,
+        "ci95": [
+          -0.11742424242424242,
+          0.015151515151515152
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "ST-GAT (MHA)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.03787878787878787,
+        "ci95": [
+          -0.09090909090909091,
+          0.0037878787878787845
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "ST-GAT (MHA)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.0037878787878787845,
+        "ci95": [
+          -0.049337121212121055,
+          0.05681818181818182
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "ST-GAT (MHA)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.0643939393939394,
+        "ci95": [
+          -0.125,
+          -0.015151515151515155
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "ST-GAT (MHA)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.013257575757575774,
+        "ci95": [
+          -0.05497159090909083,
+          0.02083333333333333
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "ST-GAT (MHA)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.026515151515151533,
+        "ci95": [
+          -0.07007575757575757,
+          0.005681818181818177
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Map-free transformer",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.05681818181818181,
+        "ci95": [
+          -0.14403409090909078,
+          0.03409090909090909
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Map-free transformer",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.02272727272727272,
+        "ci95": [
+          -0.07575757575757575,
+          0.03030303030303029
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Map-free transformer",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.0643939393939394,
+        "ci95": [
+          -0.12878787878787878,
+          -0.011363636363636364
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "Map-free transformer",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.013257575757575774,
+        "ci95": [
+          -0.04166666666666663,
+          0.01136363636363636
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Map-free transformer",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.007575757575757597,
+        "ci95": [
+          -0.07575757575757576,
+          0.049242424242424254
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode (top-1)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.02651515151515152,
+        "ci95": [
+          -0.08712121212121213,
+          0.018939393939393923
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode (top-1)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.007575757575757569,
+        "ci95": [
+          -0.041666666666666685,
+          0.07196969696969696
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode (top-1)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.04166666666666666,
+        "ci95": [
+          -0.08522727272727273,
+          -0.005634469696969951
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode (top-1)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.009469696969696975,
+        "ci95": [
+          -0.0246212121212121,
+          0.060606060606060594
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode (top-1)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.015151515151515138,
+        "ci95": [
+          -0.06439393939393936,
+          0.0246212121212121
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer (most-likely)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.01893939393939395,
+        "ci95": [
+          -0.09090909090909093,
+          0.05303030303030302
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer (most-likely)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.015151515151515138,
+        "ci95": [
+          -0.030397727272727132,
+          0.06439393939393939
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer (most-likely)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.05113636363636363,
+        "ci95": [
+          -0.12310606060606061,
+          0.0
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer (most-likely)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.0,
+        "ci95": [
+          -0.05307765151515144,
+          0.05681818181818181
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer (most-likely)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.03219696969696968,
+        "ci95": [
+          -0.09848484848484848,
+          0.020833333333333315
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED (mean-denoised)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.053030303030303025,
+        "ci95": [
+          -0.1477272727272727,
+          0.030303030303030304
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED (mean-denoised)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": -0.018939393939393936,
+        "ci95": [
+          -0.06827651515151503,
+          0.0378787878787879
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED (mean-denoised)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.07196969696969698,
+        "ci95": [
+          -0.14015151515151517,
+          -0.015151515151515152
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED (mean-denoised)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": -0.020833333333333343,
+        "ci95": [
+          -0.06249999999999997,
+          0.00572916666666643
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED (mean-denoised)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.01893939393939395,
+        "ci95": [
+          -0.07765151515151514,
+          0.03598484848484848
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ (most-likely)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.015151515151515166,
+        "ci95": [
+          -0.07954545454545459,
+          0.04166666666666666
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ (most-likely)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.018939393939393923,
+        "ci95": [
+          -0.045454545454545456,
+          0.09090909090909088
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ (most-likely)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.032196969696969696,
+        "ci95": [
+          -0.08712121212121213,
+          0.011363636363636354
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ (most-likely)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.018939393939393936,
+        "ci95": [
+          -0.04545454545454543,
+          0.0946969696969697
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ (most-likely)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.01704545454545453,
+        "ci95": [
+          -0.06628787878787876,
+          0.04166666666666663
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode set (10 modes)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": 0.06439393939393939,
+        "ci95": [
+          -0.034138257575757516,
+          0.17803030303030298
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode set (10 modes)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.09848484848484848,
+        "ci95": [
+          0.02840909090909094,
+          0.18371212121212116
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode set (10 modes)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": 0.07954545454545456,
+        "ci95": [
+          -0.03030303030303033,
+          0.1893939393939394
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode set (10 modes)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.13068181818181818,
+        "ci95": [
+          0.024621212121212155,
+          0.24436553030303004
+        ],
+        "separated": true
+      },
+      {
+        "metric": "at_fault",
+        "package": "K-mode set (10 modes)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.015151515151515166,
+        "ci95": [
+          -0.06628787878787878,
+          0.09090909090909088
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer set (10 samples)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.024621212121212127,
+        "ci95": [
+          -0.10606060606060608,
+          0.053030303030303025
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer set (10 samples)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.009469696969696961,
+        "ci95": [
+          -0.05681818181818181,
+          0.08721590909090861
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer set (10 samples)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.007575757575757569,
+        "ci95": [
+          -0.07575757575757575,
+          0.06439393939393938
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer set (10 samples)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.043560606060606064,
+        "ci95": [
+          -0.024621212121212127,
+          0.13636363636363635
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "AgentFormer set (10 samples)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": 0.017045454545454558,
+        "ci95": [
+          -0.049289772727272654,
+          0.07575757575757575
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED set (10 samples)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.0037878787878787845,
+        "ci95": [
+          -0.060606060606060635,
+          0.056818181818181816
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED set (10 samples)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.030303030303030304,
+        "ci95": [
+          -0.022727272727272735,
+          0.09848484848484848
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED set (10 samples)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.020833333333333315,
+        "ci95": [
+          -0.0946969696969697,
+          0.053030303030303025
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED set (10 samples)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.030303030303030318,
+        "ci95": [
+          -0.028456439393939315,
+          0.09848484848484848
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "LED set (10 samples)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.01704545454545453,
+        "ci95": [
+          -0.06818181818181818,
+          0.02651515151515152
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ set (10 samples)",
+        "band": true,
+        "against": "vs ignoring agents",
+        "diff": -0.007575757575757569,
+        "ci95": [
+          -0.06818181818181818,
+          0.053030303030303025
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ set (10 samples)",
+        "band": true,
+        "against": "vs CV, same band setting",
+        "diff": 0.02651515151515152,
+        "ci95": [
+          -0.02651515151515152,
+          0.09479166666666615
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ set (10 samples)",
+        "band": false,
+        "against": "vs ignoring agents",
+        "diff": -0.022727272727272707,
+        "ci95": [
+          -0.09285037878787868,
+          0.03787878787878787
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ set (10 samples)",
+        "band": false,
+        "against": "vs CV, same band setting",
+        "diff": 0.028409090909090925,
+        "ci95": [
+          -0.049242424242424254,
+          0.12878787878787878
+        ],
+        "separated": false
+      },
+      {
+        "metric": "at_fault",
+        "package": "Trajectron++ set (10 samples)",
+        "band": null,
+        "against": "without band vs with band",
+        "diff": -0.015151515151515138,
+        "ci95": [
+          -0.07954545454545453,
+          0.04924242424242422
+        ],
+        "separated": false
+      }
+    ]
+  }
+}

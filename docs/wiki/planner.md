@@ -1,6 +1,6 @@
 # Frenét / MPC Planner
 
-## Status: ❌ Not Started
+## Status: 🟡 First version (2026-10-27): sampling planner in `scripts/closed_loop_sim.py`, see [[closed-loop-test]]
 
 ## Goal
 

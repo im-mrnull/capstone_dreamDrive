@@ -125,3 +125,16 @@ Claude session, continuing [[2026-10-26-claude-project-review]].
 - **Outcome: CV**, by tie fall-through. Conflict AUC is 0.951–0.961 for every single-trajectory model, with overlapping CIs; vulnerable road users also tie; latency then picks CV. Sets score 0.90–0.94 (more false alarms).
 - Exploratory: current distance alone gives AUC 0.754. On emerging conflicts (> 10 m away now) the transformer and ST-GAT score 0.956 and CV 0.937, which is not separated. **The open-loop proxy cannot certify any learned model as safer than CV**; that needs closed loop.
 - Latency, median per scene snapshot on the RTX 4500: transformer 3.2 ms, ST-GAT 8.0, K-mode 19, LED 27/43, AgentFormer 58/102, Trajectron++ ~200 (not real-time).
+
+## 2026-10-27 (night) — pre-registered closed-loop test
+- The user chose a Python non-reactive replay simulator, with a planner that can change speed and make small swerves. Pre-registered in `b6f1a43` ([[closed-loop-test]]).
+- Developed on the val scenes with reference drivers only. Fixes:
+  - ego footprint measured from train+val (centre 0.5 m ahead of the sensor);
+  - nuPlan-style at-fault rule;
+  - denser planner checks and a 0.25 m buffer.
+
+  Val check: human 0%, oracle 0%, ignore 3.7%.
+- Dense predictions for all models and seeds (12,074 rows), identical to the verified dumps where windows coincide (LED / T++ within GPU noise).
+- **Outcome: CV**, a tie fall-through. Single trajectories score 0.69–0.75 with CIs ±0.13; the K-mode set is clearly worse. The human replay has a 5.7% floor (2 footprint artifacts on test).
+- Exploratory: the band hurts all models (+0.07–0.11 without it). Without the band, prediction cuts at-fault episodes by 4–7 points vs ignoring agents, and LED/ST-GAT edge out CV by about 0.03 (hypothesis).
+- Re-run with `--episodes-out` reproduced packages and decision exactly.

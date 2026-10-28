@@ -69,7 +69,8 @@ All on the same 2,177 canonical test windows, 3 seeds. Top tier = ST-GAT ≈ tra
 - [[fairness-audit]] — 16× ADE disparity across 15 classes
 - [[conformal-prediction]] — 6 models, class-conditional uncertainty bands
 - [[gap-decomposition]] — oracle vs deployable analysis (Trajectron++)
-- [[negative-results]] — hetero T++, EWTA annealing, content scorer
+- [[negative-results]] — hetero T++, EWTA annealing, content scorer, multi-future sets under an obstacle planner, learned vs CV in closed loop
+- [[closed-loop-cv]] — confirmatory 5-fold closed-loop test: CV picked (all tied), prediction cuts collisions 16% → 2–3%, bands hurt
 - [[ci-provenance]] — structural anti-fabrication guards
 
 ## Wiki Notes — Not Started (12 items, priority order)

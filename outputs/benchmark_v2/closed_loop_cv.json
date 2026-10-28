@@ -1,0 +1,2289 @@
+{
+  "rule_doc": "docs/wiki/closed-loop-cv.md",
+  "rule_commit": "24684e2c75b792c5948c1451c7a93ceedbc20a59",
+  "planner": {
+    "band": 0.0,
+    "hard_s": 1.0,
+    "soft_w": 5.0,
+    "fallback": "least_penetration"
+  },
+  "instrument": {
+    "ego_rect": [
+      3.4,
+      1.7
+    ],
+    "ego_centre": 0.3,
+    "collision_tol": 0.25,
+    "glitch_m": 1.0
+  },
+  "excluded_episodes_per_package": {
+    "CV (vel_k=5)": 92,
+    "MLP": 92,
+    "ST-GAT (MHA)": 92,
+    "Map-free transformer": 92,
+    "LED (mean-denoised)": 92,
+    "K-mode (top-1)": 92,
+    "K-mode set (10 modes)": 92,
+    "LED set (10 samples)": 92,
+    "Human driver (log replay)": 92,
+    "Oracle (true future, no band)": 92,
+    "No prediction (ignore agents)": 92
+  },
+  "analyses": {
+    "primary (73 frozen-train scenes, never evaluated before)": {
+      "n_scenes": 73,
+      "packages": {
+        "CV (vel_k=5)": {
+          "band_x1": {
+            "score": 0.6565147230684429,
+            "at_fault_rate": 0.05152671755725191,
+            "at_fault_vru_rate": 0.03244274809160305,
+            "progress": 0.8068773738635843,
+            "harsh_braking_rate": 0.6984732824427481,
+            "near_miss_rate": 0.2824427480916031,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6600642931410032,
+                "at_fault_rate": 0.04961832061068702
+              },
+              "assertive": {
+                "score": 0.6529651529958826,
+                "at_fault_rate": 0.05343511450381679
+              }
+            },
+            "score_ci95": [
+              0.6093900323682253,
+              0.6987704514792596
+            ]
+          },
+          "band_x0": {
+            "score": 0.8017542490558753,
+            "at_fault_rate": 0.02480916030534351,
+            "at_fault_vru_rate": 0.022900763358778626,
+            "progress": 0.908023563162023,
+            "harsh_braking_rate": 0.17748091603053434,
+            "near_miss_rate": 0.4198473282442748,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8159112298088653,
+                "at_fault_rate": 0.019083969465648856
+              },
+              "assertive": {
+                "score": 0.7875972683028853,
+                "at_fault_rate": 0.030534351145038167
+              }
+            },
+            "score_ci95": [
+              0.754998454398378,
+              0.8416953618426417
+            ]
+          }
+        },
+        "MLP": {
+          "band_x1": {
+            "score": 0.6657802555218078,
+            "at_fault_rate": 0.03435114503816794,
+            "at_fault_vru_rate": 0.02480916030534351,
+            "progress": 0.7963246601748757,
+            "harsh_braking_rate": 0.700381679389313,
+            "near_miss_rate": 0.24045801526717558,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6691158071556695,
+                "at_fault_rate": 0.030534351145038167
+              },
+              "assertive": {
+                "score": 0.662444703887946,
+                "at_fault_rate": 0.03816793893129771
+              }
+            },
+            "score_ci95": [
+              0.6181404878639803,
+              0.7104346089453348
+            ]
+          },
+          "band_x0": {
+            "score": 0.7986445065557353,
+            "at_fault_rate": 0.03435114503816794,
+            "at_fault_vru_rate": 0.02480916030534351,
+            "progress": 0.9065295455869876,
+            "harsh_braking_rate": 0.22328244274809161,
+            "near_miss_rate": 0.37213740458015265,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.814592481956226,
+                "at_fault_rate": 0.026717557251908396
+              },
+              "assertive": {
+                "score": 0.7826965311552448,
+                "at_fault_rate": 0.04198473282442748
+              }
+            },
+            "score_ci95": [
+              0.7520645955925306,
+              0.839746742013006
+            ]
+          }
+        },
+        "ST-GAT (MHA)": {
+          "band_x1": {
+            "score": 0.6528934047842871,
+            "at_fault_rate": 0.04198473282442748,
+            "at_fault_vru_rate": 0.030534351145038167,
+            "progress": 0.8042069431026975,
+            "harsh_braking_rate": 0.700381679389313,
+            "near_miss_rate": 0.2900763358778626,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6540248840683592,
+                "at_fault_rate": 0.04198473282442748
+              },
+              "assertive": {
+                "score": 0.6517619255002152,
+                "at_fault_rate": 0.04198473282442748
+              }
+            },
+            "score_ci95": [
+              0.6087626226653386,
+              0.6957643368666065
+            ]
+          },
+          "band_x0": {
+            "score": 0.7977661257208579,
+            "at_fault_rate": 0.02099236641221374,
+            "at_fault_vru_rate": 0.013358778625954198,
+            "progress": 0.9005632994118549,
+            "harsh_braking_rate": 0.2099236641221374,
+            "near_miss_rate": 0.40458015267175573,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8114518739794107,
+                "at_fault_rate": 0.015267175572519083
+              },
+              "assertive": {
+                "score": 0.7840803774623053,
+                "at_fault_rate": 0.026717557251908396
+              }
+            },
+            "score_ci95": [
+              0.7527020581409604,
+              0.8394186340446134
+            ]
+          }
+        },
+        "Map-free transformer": {
+          "band_x1": {
+            "score": 0.667910898614806,
+            "at_fault_rate": 0.05534351145038168,
+            "at_fault_vru_rate": 0.04007633587786259,
+            "progress": 0.8135439566124504,
+            "harsh_braking_rate": 0.6679389312977099,
+            "near_miss_rate": 0.2652671755725191,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6699213376518887,
+                "at_fault_rate": 0.05343511450381679
+              },
+              "assertive": {
+                "score": 0.6659004595777233,
+                "at_fault_rate": 0.05725190839694656
+              }
+            },
+            "score_ci95": [
+              0.6163299045116102,
+              0.7160929411372563
+            ]
+          },
+          "band_x0": {
+            "score": 0.800643201110049,
+            "at_fault_rate": 0.02862595419847328,
+            "at_fault_vru_rate": 0.02099236641221374,
+            "progress": 0.9063066025374549,
+            "harsh_braking_rate": 0.1946564885496183,
+            "near_miss_rate": 0.3931297709923664,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8143086509158334,
+                "at_fault_rate": 0.019083969465648856
+              },
+              "assertive": {
+                "score": 0.7869777513042645,
+                "at_fault_rate": 0.03816793893129771
+              }
+            },
+            "score_ci95": [
+              0.7527025109067783,
+              0.8409678124302388
+            ]
+          }
+        },
+        "LED (mean-denoised)": {
+          "band_x1": {
+            "score": 0.6719377775814905,
+            "at_fault_rate": 0.05343511450381679,
+            "at_fault_vru_rate": 0.04198473282442748,
+            "progress": 0.8111267933691518,
+            "harsh_braking_rate": 0.6564885496183206,
+            "near_miss_rate": 0.24045801526717558,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6733001993972959,
+                "at_fault_rate": 0.05343511450381679
+              },
+              "assertive": {
+                "score": 0.6705753557656852,
+                "at_fault_rate": 0.05343511450381679
+              }
+            },
+            "score_ci95": [
+              0.6212540333807746,
+              0.718492148680025
+            ]
+          },
+          "band_x0": {
+            "score": 0.793124629679008,
+            "at_fault_rate": 0.03435114503816794,
+            "at_fault_vru_rate": 0.02862595419847328,
+            "progress": 0.9078897907843866,
+            "harsh_braking_rate": 0.21755725190839695,
+            "near_miss_rate": 0.4064885496183206,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8044424862078754,
+                "at_fault_rate": 0.030534351145038167
+              },
+              "assertive": {
+                "score": 0.7818067731501406,
+                "at_fault_rate": 0.03816793893129771
+              }
+            },
+            "score_ci95": [
+              0.7438233353688084,
+              0.8350484077529786
+            ]
+          }
+        },
+        "K-mode (top-1)": {
+          "band_x1": {
+            "score": 0.6641158492553932,
+            "at_fault_rate": 0.05343511450381679,
+            "at_fault_vru_rate": 0.03816793893129771,
+            "progress": 0.8079919970715168,
+            "harsh_braking_rate": 0.6889312977099237,
+            "near_miss_rate": 0.24618320610687022,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6680199981877198,
+                "at_fault_rate": 0.05343511450381679
+              },
+              "assertive": {
+                "score": 0.6602117003230665,
+                "at_fault_rate": 0.05343511450381679
+              }
+            },
+            "score_ci95": [
+              0.6163742010659524,
+              0.7079918517837563
+            ]
+          },
+          "band_x0": {
+            "score": 0.791017664530434,
+            "at_fault_rate": 0.04580152671755725,
+            "at_fault_vru_rate": 0.03816793893129771,
+            "progress": 0.8986600158675828,
+            "harsh_braking_rate": 0.1965648854961832,
+            "near_miss_rate": 0.38549618320610685,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.804326870947736,
+                "at_fault_rate": 0.03816793893129771
+              },
+              "assertive": {
+                "score": 0.7777084581131319,
+                "at_fault_rate": 0.05343511450381679
+              }
+            },
+            "score_ci95": [
+              0.7427332633353229,
+              0.833245249354373
+            ]
+          }
+        },
+        "K-mode set (10 modes)": {
+          "band_x1": {
+            "score": 0.5370387398937398,
+            "at_fault_rate": 0.14885496183206107,
+            "at_fault_vru_rate": 0.11259541984732824,
+            "progress": 0.7661456663944802,
+            "harsh_braking_rate": 0.8416030534351145,
+            "near_miss_rate": 0.3931297709923664,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.5409674012124636,
+                "at_fault_rate": 0.14122137404580154
+              },
+              "assertive": {
+                "score": 0.5331100785750164,
+                "at_fault_rate": 0.15648854961832062
+              }
+            },
+            "score_ci95": [
+              0.47801229126350675,
+              0.5913386521461595
+            ]
+          },
+          "band_x0": {
+            "score": 0.6257855497322357,
+            "at_fault_rate": 0.13358778625954199,
+            "at_fault_vru_rate": 0.09351145038167939,
+            "progress": 0.8100425029003117,
+            "harsh_braking_rate": 0.6335877862595419,
+            "near_miss_rate": 0.3568702290076336,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6243833178807087,
+                "at_fault_rate": 0.1297709923664122
+              },
+              "assertive": {
+                "score": 0.6271877815837628,
+                "at_fault_rate": 0.13740458015267176
+              }
+            },
+            "score_ci95": [
+              0.5636545220633588,
+              0.6887926897327323
+            ]
+          }
+        },
+        "LED set (10 samples)": {
+          "band_x1": {
+            "score": 0.6208191942164618,
+            "at_fault_rate": 0.07633587786259542,
+            "at_fault_vru_rate": 0.05534351145038168,
+            "progress": 0.7871868209319088,
+            "harsh_braking_rate": 0.7099236641221374,
+            "near_miss_rate": 0.3110687022900763,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6216738245822294,
+                "at_fault_rate": 0.06870229007633588
+              },
+              "assertive": {
+                "score": 0.6199645638506943,
+                "at_fault_rate": 0.08396946564885496
+              }
+            },
+            "score_ci95": [
+              0.5676315361134407,
+              0.6685626445375784
+            ]
+          },
+          "band_x0": {
+            "score": 0.6821112788584012,
+            "at_fault_rate": 0.07442748091603053,
+            "at_fault_vru_rate": 0.04770992366412214,
+            "progress": 0.8361075620837908,
+            "harsh_braking_rate": 0.5591603053435115,
+            "near_miss_rate": 0.33396946564885494,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6685597314450347,
+                "at_fault_rate": 0.07251908396946564
+              },
+              "assertive": {
+                "score": 0.6956628262717677,
+                "at_fault_rate": 0.07633587786259542
+              }
+            },
+            "score_ci95": [
+              0.6290192579110462,
+              0.7334821655996372
+            ]
+          }
+        },
+        "Human driver (log replay)": {
+          "band_x1": {
+            "score": 0.9342663273960985,
+            "at_fault_rate": 0.011450381679389313,
+            "at_fault_vru_rate": 0.0,
+            "progress": 1.0,
+            "harsh_braking_rate": 0.0,
+            "near_miss_rate": 0.25572519083969464,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.9342663273960984,
+                "at_fault_rate": 0.011450381679389313
+              },
+              "assertive": {
+                "score": 0.9342663273960984,
+                "at_fault_rate": 0.011450381679389313
+              }
+            },
+            "score_ci95": [
+              0.9018226090637057,
+              0.961391702720116
+            ]
+          }
+        },
+        "Oracle (true future, no band)": {
+          "band_x1": {
+            "score": 0.8214838592597855,
+            "at_fault_rate": 0.003816793893129771,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9053980063857884,
+            "harsh_braking_rate": 0.12786259541984732,
+            "near_miss_rate": 0.43320610687022904,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8296756223966436,
+                "at_fault_rate": 0.0
+              },
+              "assertive": {
+                "score": 0.8132920961229274,
+                "at_fault_rate": 0.007633587786259542
+              }
+            },
+            "score_ci95": [
+              0.7849697136354278,
+              0.8556044762656587
+            ]
+          }
+        },
+        "No prediction (ignore agents)": {
+          "band_x1": {
+            "score": 0.7290581899810992,
+            "at_fault_rate": 0.16412213740458015,
+            "at_fault_vru_rate": 0.09732824427480916,
+            "progress": 0.9167231120786196,
+            "harsh_braking_rate": 0.015267175572519083,
+            "near_miss_rate": 0.46946564885496184,
+            "n_episodes": 524,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7919737002163831,
+                "at_fault_rate": 0.08015267175572519
+              },
+              "assertive": {
+                "score": 0.6661426797458152,
+                "at_fault_rate": 0.2480916030534351
+              }
+            },
+            "score_ci95": [
+              0.6606651324326706,
+              0.7898867393972213
+            ]
+          }
+        }
+      },
+      "decision": {
+        "leader": "CV (vel_k=5)",
+        "vs_leader": [
+          {
+            "a": "CV (vel_k=5)",
+            "b": "MLP",
+            "diff": 0.003109742500140067,
+            "ci95": [
+              -0.009966507306025855,
+              0.015571064692621284
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "ST-GAT (MHA)",
+            "diff": 0.003988123335017413,
+            "ci95": [
+              -0.010508518552457711,
+              0.019410352800942905
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "Map-free transformer",
+            "diff": 0.0011110479458262823,
+            "ci95": [
+              -0.014220405073331362,
+              0.015639702337692678
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "LED (mean-denoised)",
+            "diff": 0.008629619376867348,
+            "ci95": [
+              -0.0037164183372931847,
+              0.020682278657145874
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_score": [
+          "CV (vel_k=5)",
+          "MLP",
+          "ST-GAT (MHA)",
+          "Map-free transformer",
+          "LED (mean-denoised)"
+        ],
+        "vru_pairs": [
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "CV (vel_k=5)",
+            "diff": -0.009541984732824428,
+            "ci95": [
+              -0.030864197530864196,
+              0.00740878938640132
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "MLP",
+            "diff": -0.011450381679389313,
+            "ci95": [
+              -0.029851489564131535,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "Map-free transformer",
+            "diff": -0.0076335877862595426,
+            "ci95": [
+              -0.02390438247011952,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "LED (mean-denoised)",
+            "diff": -0.015267175572519083,
+            "ci95": [
+              -0.04117702137034589,
+              0.0
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_vru": [
+          "ST-GAT (MHA)",
+          "CV (vel_k=5)",
+          "MLP",
+          "Map-free transformer",
+          "LED (mean-denoised)"
+        ],
+        "pick": "CV (vel_k=5)",
+        "steps": [
+          "Leader on the episode score: CV (vel_k=5) (0.802).",
+          "Tied with the leader (paired 95% CI includes 0): MLP, ST-GAT (MHA), Map-free transformer, LED (mean-denoised).",
+          "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best ST-GAT (MHA) (0.013); still tied: CV (vel_k=5), MLP, Map-free transformer, LED (mean-denoised).",
+          "Tie-break 2 (latency): CV (vel_k=5)."
+        ]
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "diff_ci95": [
+            -0.019410352800942905,
+            0.010508518552457696
+          ],
+          "p_one_sided": 0.713,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.014499438472645584,
+            0.025495233666589137
+          ],
+          "p_one_sided": 0.408,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "diff_ci95": [
+            -0.015639702337692688,
+            0.014220405073331353
+          ],
+          "p_one_sided": 0.5625,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.017110266159695818,
+            0.009365062539749834
+          ],
+          "p_one_sided": 0.776,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "diff_ci95": [
+            -0.020682278657145878,
+            0.0037164183372931795
+          ],
+          "p_one_sided": 0.923,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.024098814613291875,
+            0.0038910505836575876
+          ],
+          "p_one_sided": 0.9325,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.08426180194532955,
+            0.19852941176470587
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.07563880372259607,
+            0.19066346015275973
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.08745017456570597,
+            0.20498084291187738
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.08052434456928839,
+            0.19669515690134318
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.07462188105275151,
+            0.19068421366489244
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.11076402761754102,
+            0.17957107615285983
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.0962637856237361,
+            0.16729284009851622
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.10881912792169225,
+            0.1807355445289307
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.0961822680355225,
+            0.16999448588461527
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.08585602371087601,
+            0.158131812989524
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        }
+      },
+      "secondary_multi_future": {
+        "S1 K-mode set (10 modes) higher score than K-mode (top-1)": {
+          "diff_ci95": [
+            -0.2174157713797312,
+            -0.11100220412760363
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)": {
+          "diff_ci95": [
+            -0.13833992094861658,
+            -0.043713906915577985
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S1 LED set (10 samples) higher score than LED (mean-denoised)": {
+          "diff_ci95": [
+            -0.1490286259909707,
+            -0.07525554804518282
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)": {
+          "diff_ci95": [
+            -0.06944578507078507,
+            -0.0133587786259542
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        }
+      }
+    },
+    "development (32 frozen val + test scenes)": {
+      "n_scenes": 32,
+      "packages": {
+        "CV (vel_k=5)": {
+          "band_x1": {
+            "score": 0.6885528627344115,
+            "at_fault_rate": 0.08482142857142858,
+            "at_fault_vru_rate": 0.03125,
+            "progress": 0.8098942866478291,
+            "harsh_braking_rate": 0.6339285714285714,
+            "near_miss_rate": 0.16964285714285715,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6962957323365464,
+                "at_fault_rate": 0.08035714285714286
+              },
+              "assertive": {
+                "score": 0.6808099931322767,
+                "at_fault_rate": 0.08928571428571429
+              }
+            },
+            "score_ci95": [
+              0.5940561399798288,
+              0.7786394596457785
+            ]
+          },
+          "band_x0": {
+            "score": 0.9014959644095991,
+            "at_fault_rate": 0.013392857142857142,
+            "at_fault_vru_rate": 0.008928571428571428,
+            "progress": 0.9417218757636707,
+            "harsh_braking_rate": 0.07142857142857142,
+            "near_miss_rate": 0.19642857142857142,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8892855526761329,
+                "at_fault_rate": 0.017857142857142856
+              },
+              "assertive": {
+                "score": 0.9137063761430654,
+                "at_fault_rate": 0.008928571428571428
+              }
+            },
+            "score_ci95": [
+              0.8533650862126101,
+              0.9432465277989219
+            ]
+          }
+        },
+        "MLP": {
+          "band_x1": {
+            "score": 0.7076582621456675,
+            "at_fault_rate": 0.08035714285714286,
+            "at_fault_vru_rate": 0.017857142857142856,
+            "progress": 0.8371104719262553,
+            "harsh_braking_rate": 0.59375,
+            "near_miss_rate": 0.17857142857142858,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7102991713469847,
+                "at_fault_rate": 0.08928571428571429
+              },
+              "assertive": {
+                "score": 0.7050173529443505,
+                "at_fault_rate": 0.07142857142857142
+              }
+            },
+            "score_ci95": [
+              0.6078249935504367,
+              0.8011003165077448
+            ]
+          },
+          "band_x0": {
+            "score": 0.8865118657042157,
+            "at_fault_rate": 0.013392857142857142,
+            "at_fault_vru_rate": 0.008928571428571428,
+            "progress": 0.9313238082449614,
+            "harsh_braking_rate": 0.13839285714285715,
+            "near_miss_rate": 0.16964285714285715,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8678253317820032,
+                "at_fault_rate": 0.008928571428571428
+              },
+              "assertive": {
+                "score": 0.9051983996264283,
+                "at_fault_rate": 0.017857142857142856
+              }
+            },
+            "score_ci95": [
+              0.8187429673730633,
+              0.9420463209847597
+            ]
+          }
+        },
+        "ST-GAT (MHA)": {
+          "band_x1": {
+            "score": 0.6992892943116527,
+            "at_fault_rate": 0.04017857142857143,
+            "at_fault_vru_rate": 0.013392857142857142,
+            "progress": 0.8062015073408643,
+            "harsh_braking_rate": 0.625,
+            "near_miss_rate": 0.16964285714285715,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7036790855606696,
+                "at_fault_rate": 0.044642857142857144
+              },
+              "assertive": {
+                "score": 0.6948995030626356,
+                "at_fault_rate": 0.03571428571428571
+              }
+            },
+            "score_ci95": [
+              0.6050086485797351,
+              0.7869130130938824
+            ]
+          },
+          "band_x0": {
+            "score": 0.900089515634556,
+            "at_fault_rate": 0.022321428571428572,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9415513451179207,
+            "harsh_braking_rate": 0.07142857142857142,
+            "near_miss_rate": 0.17410714285714285,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8921173413924032,
+                "at_fault_rate": 0.026785714285714284
+              },
+              "assertive": {
+                "score": 0.9080616898767089,
+                "at_fault_rate": 0.017857142857142856
+              }
+            },
+            "score_ci95": [
+              0.8331882528113608,
+              0.9506160957261566
+            ]
+          }
+        },
+        "Map-free transformer": {
+          "band_x1": {
+            "score": 0.7048260334226194,
+            "at_fault_rate": 0.07142857142857142,
+            "at_fault_vru_rate": 0.008928571428571428,
+            "progress": 0.8228820110126003,
+            "harsh_braking_rate": 0.5982142857142857,
+            "near_miss_rate": 0.1875,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7109669261622017,
+                "at_fault_rate": 0.07142857142857142
+              },
+              "assertive": {
+                "score": 0.6986851406830372,
+                "at_fault_rate": 0.07142857142857142
+              }
+            },
+            "score_ci95": [
+              0.6077363212617377,
+              0.7956473343044214
+            ]
+          },
+          "band_x0": {
+            "score": 0.895524258287747,
+            "at_fault_rate": 0.017857142857142856,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9408346498862873,
+            "harsh_braking_rate": 0.08482142857142858,
+            "near_miss_rate": 0.1875,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8844478522476048,
+                "at_fault_rate": 0.017857142857142856
+              },
+              "assertive": {
+                "score": 0.9066006643278894,
+                "at_fault_rate": 0.017857142857142856
+              }
+            },
+            "score_ci95": [
+              0.8405367761797655,
+              0.9419290640398006
+            ]
+          }
+        },
+        "LED (mean-denoised)": {
+          "band_x1": {
+            "score": 0.6998712124770325,
+            "at_fault_rate": 0.08928571428571429,
+            "at_fault_vru_rate": 0.026785714285714284,
+            "progress": 0.8352902535756132,
+            "harsh_braking_rate": 0.6294642857142857,
+            "near_miss_rate": 0.16071428571428573,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7053093220329926,
+                "at_fault_rate": 0.08928571428571429
+              },
+              "assertive": {
+                "score": 0.6944331029210726,
+                "at_fault_rate": 0.08928571428571429
+              }
+            },
+            "score_ci95": [
+              0.6049673594917647,
+              0.7890219487639066
+            ]
+          },
+          "band_x0": {
+            "score": 0.9056406442454816,
+            "at_fault_rate": 0.008928571428571428,
+            "at_fault_vru_rate": 0.008928571428571428,
+            "progress": 0.9395200047360258,
+            "harsh_braking_rate": 0.07142857142857142,
+            "near_miss_rate": 0.1875,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8954194746549711,
+                "at_fault_rate": 0.008928571428571428
+              },
+              "assertive": {
+                "score": 0.9158618138359923,
+                "at_fault_rate": 0.008928571428571428
+              }
+            },
+            "score_ci95": [
+              0.8561785130991966,
+              0.9471780210383868
+            ]
+          }
+        },
+        "K-mode (top-1)": {
+          "band_x1": {
+            "score": 0.6873480656508193,
+            "at_fault_rate": 0.08035714285714286,
+            "at_fault_vru_rate": 0.044642857142857144,
+            "progress": 0.8093088063677448,
+            "harsh_braking_rate": 0.6428571428571429,
+            "near_miss_rate": 0.16071428571428573,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6978743842126345,
+                "at_fault_rate": 0.08035714285714286
+              },
+              "assertive": {
+                "score": 0.6768217470890044,
+                "at_fault_rate": 0.08035714285714286
+              }
+            },
+            "score_ci95": [
+              0.593731582527992,
+              0.7728244637304312
+            ]
+          },
+          "band_x0": {
+            "score": 0.88056784499024,
+            "at_fault_rate": 0.03571428571428571,
+            "at_fault_vru_rate": 0.017857142857142856,
+            "progress": 0.94497190602316,
+            "harsh_braking_rate": 0.08482142857142858,
+            "near_miss_rate": 0.20982142857142858,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.864272501290892,
+                "at_fault_rate": 0.05357142857142857
+              },
+              "assertive": {
+                "score": 0.8968631886895881,
+                "at_fault_rate": 0.017857142857142856
+              }
+            },
+            "score_ci95": [
+              0.8151902274853144,
+              0.9356811417894096
+            ]
+          }
+        },
+        "K-mode set (10 modes)": {
+          "band_x1": {
+            "score": 0.5901642338693696,
+            "at_fault_rate": 0.14285714285714285,
+            "at_fault_vru_rate": 0.08482142857142858,
+            "progress": 0.75757956853018,
+            "harsh_braking_rate": 0.8080357142857143,
+            "near_miss_rate": 0.28125,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.5892045731054418,
+                "at_fault_rate": 0.14285714285714285
+              },
+              "assertive": {
+                "score": 0.5911238946332974,
+                "at_fault_rate": 0.14285714285714285
+              }
+            },
+            "score_ci95": [
+              0.5004109957011371,
+              0.6739961158200846
+            ]
+          },
+          "band_x0": {
+            "score": 0.6732938557942312,
+            "at_fault_rate": 0.12053571428571429,
+            "at_fault_vru_rate": 0.06696428571428571,
+            "progress": 0.8121683754960588,
+            "harsh_braking_rate": 0.5848214285714286,
+            "near_miss_rate": 0.2767857142857143,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6674856959786568,
+                "at_fault_rate": 0.11607142857142858
+              },
+              "assertive": {
+                "score": 0.6791020156098057,
+                "at_fault_rate": 0.125
+              }
+            },
+            "score_ci95": [
+              0.5802041807789919,
+              0.7581459800917104
+            ]
+          }
+        },
+        "LED set (10 samples)": {
+          "band_x1": {
+            "score": 0.7051467309447074,
+            "at_fault_rate": 0.08035714285714286,
+            "at_fault_vru_rate": 0.03571428571428571,
+            "progress": 0.8267516973520266,
+            "harsh_braking_rate": 0.6160714285714286,
+            "near_miss_rate": 0.16964285714285715,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7063959012100798,
+                "at_fault_rate": 0.08035714285714286
+              },
+              "assertive": {
+                "score": 0.7038975606793351,
+                "at_fault_rate": 0.08035714285714286
+              }
+            },
+            "score_ci95": [
+              0.6102441785210954,
+              0.7959277047865085
+            ]
+          },
+          "band_x0": {
+            "score": 0.8287301735547938,
+            "at_fault_rate": 0.049107142857142856,
+            "at_fault_vru_rate": 0.026785714285714284,
+            "progress": 0.8996838116822046,
+            "harsh_braking_rate": 0.30357142857142855,
+            "near_miss_rate": 0.16071428571428573,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8181483013082576,
+                "at_fault_rate": 0.05357142857142857
+              },
+              "assertive": {
+                "score": 0.8393120458013298,
+                "at_fault_rate": 0.044642857142857144
+              }
+            },
+            "score_ci95": [
+              0.7395950781011462,
+              0.9067905845226425
+            ]
+          }
+        },
+        "Human driver (log replay)": {
+          "band_x1": {
+            "score": 0.9861111111111113,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 1.0,
+            "harsh_braking_rate": 0.0,
+            "near_miss_rate": 0.0625,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.9861111111111113,
+                "at_fault_rate": 0.0
+              },
+              "assertive": {
+                "score": 0.9861111111111113,
+                "at_fault_rate": 0.0
+              }
+            },
+            "score_ci95": [
+              0.9682539682539681,
+              0.9981167608286252
+            ]
+          }
+        },
+        "Oracle (true future, no band)": {
+          "band_x1": {
+            "score": 0.9014147221697034,
+            "at_fault_rate": 0.013392857142857142,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9422377270708713,
+            "harsh_braking_rate": 0.044642857142857144,
+            "near_miss_rate": 0.21875,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8855910431926003,
+                "at_fault_rate": 0.017857142857142856
+              },
+              "assertive": {
+                "score": 0.9172384011468065,
+                "at_fault_rate": 0.008928571428571428
+              }
+            },
+            "score_ci95": [
+              0.8520517759743926,
+              0.942380669919643
+            ]
+          }
+        },
+        "No prediction (ignore agents)": {
+          "band_x1": {
+            "score": 0.8942337552896993,
+            "at_fault_rate": 0.04017857142857143,
+            "at_fault_vru_rate": 0.022321428571428572,
+            "progress": 0.9432073551987463,
+            "harsh_braking_rate": 0.0,
+            "near_miss_rate": 0.20982142857142858,
+            "n_episodes": 224,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8952651263071972,
+                "at_fault_rate": 0.026785714285714284
+              },
+              "assertive": {
+                "score": 0.8932023842722014,
+                "at_fault_rate": 0.05357142857142857
+              }
+            },
+            "score_ci95": [
+              0.8417332522345955,
+              0.939689191124229
+            ]
+          }
+        }
+      },
+      "decision": {
+        "leader": "LED (mean-denoised)",
+        "vs_leader": [
+          {
+            "a": "LED (mean-denoised)",
+            "b": "CV (vel_k=5)",
+            "diff": 0.004144679835882514,
+            "ci95": [
+              -0.005030486160405966,
+              0.01352989448280906
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "MLP",
+            "diff": 0.019128778541265934,
+            "ci95": [
+              0.0012668027530321627,
+              0.04357168378910285
+            ],
+            "tied": false
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "ST-GAT (MHA)",
+            "diff": 0.00555112861092566,
+            "ci95": [
+              -0.02033437645770914,
+              0.04116196073997456
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Map-free transformer",
+            "diff": 0.010116385957734675,
+            "ci95": [
+              -0.015831888459498917,
+              0.036579553694799684
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_score": [
+          "LED (mean-denoised)",
+          "CV (vel_k=5)",
+          "ST-GAT (MHA)",
+          "Map-free transformer"
+        ],
+        "vru_pairs": [
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "LED (mean-denoised)",
+            "diff": -0.008928571428571428,
+            "ci95": [
+              -0.02830188679245283,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "CV (vel_k=5)",
+            "diff": -0.008928571428571428,
+            "ci95": [
+              -0.02830188679245283,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "Map-free transformer",
+            "diff": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_vru": [
+          "ST-GAT (MHA)",
+          "LED (mean-denoised)",
+          "CV (vel_k=5)",
+          "Map-free transformer"
+        ],
+        "pick": "CV (vel_k=5)",
+        "steps": [
+          "Leader on the episode score: LED (mean-denoised) (0.906).",
+          "Tied with the leader (paired 95% CI includes 0): CV (vel_k=5), ST-GAT (MHA), Map-free transformer.",
+          "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best ST-GAT (MHA) (0.000); still tied: LED (mean-denoised), CV (vel_k=5), Map-free transformer.",
+          "Tie-break 2 (latency): CV (vel_k=5)."
+        ]
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "diff_ci95": [
+            -0.032704467290363096,
+            0.022078663957582494
+          ],
+          "p_one_sided": 0.507,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.05309734513274337,
+            0.022058823529411326
+          ],
+          "p_one_sided": 0.746,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "diff_ci95": [
+            -0.029118203999529427,
+            0.017926499274895206
+          ],
+          "p_one_sided": 0.7165,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.03125,
+            0.021372126436781585
+          ],
+          "p_one_sided": 0.723,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "diff_ci95": [
+            -0.005030486160405966,
+            0.01352989448280906
+          ],
+          "p_one_sided": 0.1665,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            0.0,
+            0.013888888888888888
+          ],
+          "p_one_sided": 0.3545,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.004309423813734159,
+            0.05670894375113036
+          ],
+          "p_one_sided": 0.0155,
+          "p_holm": 0.17049999999999998,
+          "supported": false
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.004309423813734159,
+            0.05670894375113036
+          ],
+          "p_one_sided": 0.0155,
+          "p_holm": 0.17049999999999998,
+          "supported": false
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            -0.024042338709677404,
+            0.05825444983818769
+          ],
+          "p_one_sided": 0.214,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            -0.004273504273504272,
+            0.053104862960735424
+          ],
+          "p_one_sided": 0.073,
+          "p_holm": 0.584,
+          "supported": false
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.004503499034749037,
+            0.06363859180035648
+          ],
+          "p_one_sided": 0.0155,
+          "p_holm": 0.17049999999999998,
+          "supported": false
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.13954320757716687,
+            0.28851145800650757
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.10809193283544691,
+            0.2523522773908157
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.13156169844568866,
+            0.27481798558131987
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.1237955272734989,
+            0.25767941364126495
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.1323369710939993,
+            0.28095265286225585
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        }
+      },
+      "secondary_multi_future": {
+        "S1 K-mode set (10 modes) higher score than K-mode (top-1)": {
+          "diff_ci95": [
+            -0.29000492330519206,
+            -0.1334439741315466
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)": {
+          "diff_ci95": [
+            -0.16071428571428573,
+            -0.016116431451612973
+          ],
+          "p_one_sided": 0.9935,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S1 LED set (10 samples) higher score than LED (mean-denoised)": {
+          "diff_ci95": [
+            -0.14522095861449053,
+            -0.023336280734612302
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)": {
+          "diff_ci95": [
+            -0.11364633173843698,
+            0.01402199788397106
+          ],
+          "p_one_sided": 0.9235,
+          "p_holm": 1.0,
+          "supported": false
+        }
+      }
+    },
+    "all 105 scenes": {
+      "n_scenes": 105,
+      "packages": {
+        "CV (vel_k=5)": {
+          "band_x1": {
+            "score": 0.6661090322732249,
+            "at_fault_rate": 0.06149732620320856,
+            "at_fault_vru_rate": 0.03208556149732621,
+            "progress": 0.8077808343765133,
+            "harsh_braking_rate": 0.679144385026738,
+            "near_miss_rate": 0.24866310160427807,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.670914349798492,
+                "at_fault_rate": 0.058823529411764705
+              },
+              "assertive": {
+                "score": 0.6613037147479578,
+                "at_fault_rate": 0.06417112299465241
+              }
+            },
+            "score_ci95": [
+              0.6224698466318006,
+              0.7075027428109487
+            ]
+          },
+          "band_x0": {
+            "score": 0.8316234258462953,
+            "at_fault_rate": 0.0213903743315508,
+            "at_fault_vru_rate": 0.01871657754010695,
+            "progress": 0.918115036454495,
+            "harsh_braking_rate": 0.14572192513368984,
+            "near_miss_rate": 0.35294117647058826,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.837884289063234,
+                "at_fault_rate": 0.01871657754010695
+              },
+              "assertive": {
+                "score": 0.8253625626293563,
+                "at_fault_rate": 0.02406417112299465
+              }
+            },
+            "score_ci95": [
+              0.7943528460857422,
+              0.8653512901431151
+            ]
+          }
+        },
+        "MLP": {
+          "band_x1": {
+            "score": 0.6783212628530171,
+            "at_fault_rate": 0.0481283422459893,
+            "at_fault_vru_rate": 0.022727272727272728,
+            "progress": 0.80853859310577,
+            "harsh_braking_rate": 0.6684491978609626,
+            "near_miss_rate": 0.22192513368983957,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6814487932236569,
+                "at_fault_rate": 0.0481283422459893
+              },
+              "assertive": {
+                "score": 0.6751937324823774,
+                "at_fault_rate": 0.0481283422459893
+              }
+            },
+            "score_ci95": [
+              0.6334713380919273,
+              0.7235972208228288
+            ]
+          },
+          "band_x0": {
+            "score": 0.8249577264076867,
+            "at_fault_rate": 0.02807486631016043,
+            "at_fault_vru_rate": 0.020053475935828877,
+            "progress": 0.9139545654203913,
+            "harsh_braking_rate": 0.19786096256684493,
+            "near_miss_rate": 0.3114973262032086,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8305338701393463,
+                "at_fault_rate": 0.0213903743315508
+              },
+              "assertive": {
+                "score": 0.819381582676027,
+                "at_fault_rate": 0.034759358288770054
+              }
+            },
+            "score_ci95": [
+              0.7866658484774721,
+              0.8602199057869263
+            ]
+          }
+        },
+        "ST-GAT (MHA)": {
+          "band_x1": {
+            "score": 0.6667873610063859,
+            "at_fault_rate": 0.04144385026737968,
+            "at_fault_vru_rate": 0.02540106951871658,
+            "progress": 0.8048042457622554,
+            "harsh_braking_rate": 0.6778074866310161,
+            "near_miss_rate": 0.2540106951871658,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6688945914671259,
+                "at_fault_rate": 0.0427807486631016
+              },
+              "assertive": {
+                "score": 0.6646801305456458,
+                "at_fault_rate": 0.040106951871657755
+              }
+            },
+            "score_ci95": [
+              0.6236089168776361,
+              0.7085185553836807
+            ]
+          },
+          "band_x0": {
+            "score": 0.8284084243046392,
+            "at_fault_rate": 0.0213903743315508,
+            "at_fault_vru_rate": 0.009358288770053475,
+            "progress": 0.9128377943826553,
+            "harsh_braking_rate": 0.16844919786096257,
+            "near_miss_rate": 0.3355614973262032,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8356083775897186,
+                "at_fault_rate": 0.01871657754010695
+              },
+              "assertive": {
+                "score": 0.8212084710195598,
+                "at_fault_rate": 0.02406417112299465
+              }
+            },
+            "score_ci95": [
+              0.7885913073433457,
+              0.8637715736293522
+            ]
+          }
+        },
+        "Map-free transformer": {
+          "band_x1": {
+            "score": 0.678965698343349,
+            "at_fault_rate": 0.06016042780748663,
+            "at_fault_vru_rate": 0.03074866310160428,
+            "progress": 0.8163403793205167,
+            "harsh_braking_rate": 0.6470588235294118,
+            "near_miss_rate": 0.24197860962566844,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6822130646924102,
+                "at_fault_rate": 0.058823529411764705
+              },
+              "assertive": {
+                "score": 0.6757183319942879,
+                "at_fault_rate": 0.06149732620320856
+              }
+            },
+            "score_ci95": [
+              0.6340699279150448,
+              0.7240397442203692
+            ]
+          },
+          "band_x0": {
+            "score": 0.8290567797301083,
+            "at_fault_rate": 0.02540106951871658,
+            "at_fault_vru_rate": 0.014705882352941176,
+            "progress": 0.9166465525456613,
+            "harsh_braking_rate": 0.16176470588235295,
+            "near_miss_rate": 0.3315508021390374,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8353129037210696,
+                "at_fault_rate": 0.01871657754010695
+              },
+              "assertive": {
+                "score": 0.8228006557391468,
+                "at_fault_rate": 0.03208556149732621
+              }
+            },
+            "score_ci95": [
+              0.791323497306018,
+              0.8632346322514086
+            ]
+          }
+        },
+        "LED (mean-denoised)": {
+          "band_x1": {
+            "score": 0.6803028703844336,
+            "at_fault_rate": 0.06417112299465241,
+            "at_fault_vru_rate": 0.0374331550802139,
+            "progress": 0.8183629097946161,
+            "harsh_braking_rate": 0.6483957219251337,
+            "near_miss_rate": 0.21657754010695188,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6828858190101248,
+                "at_fault_rate": 0.06417112299465241
+              },
+              "assertive": {
+                "score": 0.6777199217587423,
+                "at_fault_rate": 0.06417112299465241
+              }
+            },
+            "score_ci95": [
+              0.6374884169395723,
+              0.7227651537864037
+            ]
+          },
+          "band_x0": {
+            "score": 0.8268192650572033,
+            "at_fault_rate": 0.026737967914438502,
+            "at_fault_vru_rate": 0.022727272727272728,
+            "progress": 0.9173619404169631,
+            "harsh_braking_rate": 0.17379679144385027,
+            "near_miss_rate": 0.3409090909090909,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8316869319460429,
+                "at_fault_rate": 0.02406417112299465
+              },
+              "assertive": {
+                "score": 0.8219515981683636,
+                "at_fault_rate": 0.029411764705882353
+              }
+            },
+            "score_ci95": [
+              0.7886934052514594,
+              0.8614302882759822
+            ]
+          }
+        },
+        "K-mode (top-1)": {
+          "band_x1": {
+            "score": 0.6710730905288899,
+            "at_fault_rate": 0.06149732620320856,
+            "at_fault_vru_rate": 0.040106951871657755,
+            "progress": 0.8083863356842911,
+            "harsh_braking_rate": 0.6751336898395722,
+            "near_miss_rate": 0.22058823529411764,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6769603490828814,
+                "at_fault_rate": 0.06149732620320856
+              },
+              "assertive": {
+                "score": 0.6651858319748982,
+                "at_fault_rate": 0.06149732620320856
+              }
+            },
+            "score_ci95": [
+              0.6264487791612245,
+              0.7107832206405554
+            ]
+          },
+          "band_x0": {
+            "score": 0.8178348308713385,
+            "at_fault_rate": 0.0427807486631016,
+            "at_fault_vru_rate": 0.03208556149732621,
+            "progress": 0.9125288171975952,
+            "harsh_braking_rate": 0.16310160427807488,
+            "near_miss_rate": 0.33288770053475936,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8222785035638683,
+                "at_fault_rate": 0.0427807486631016
+              },
+              "assertive": {
+                "score": 0.8133911581788086,
+                "at_fault_rate": 0.0427807486631016
+              }
+            },
+            "score_ci95": [
+              0.7775963822132915,
+              0.8539111246003559
+            ]
+          }
+        },
+        "K-mode set (10 modes)": {
+          "band_x1": {
+            "score": 0.5529479787313617,
+            "at_fault_rate": 0.14705882352941177,
+            "at_fault_vru_rate": 0.10427807486631016,
+            "progress": 0.7635804178361871,
+            "harsh_braking_rate": 0.8315508021390374,
+            "near_miss_rate": 0.35962566844919786,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.5554127575012698,
+                "at_fault_rate": 0.14171122994652408
+              },
+              "assertive": {
+                "score": 0.5504831999614535,
+                "at_fault_rate": 0.15240641711229946
+              }
+            },
+            "score_ci95": [
+              0.5042419705780463,
+              0.6002107248957473
+            ]
+          },
+          "band_x0": {
+            "score": 0.6400126360395714,
+            "at_fault_rate": 0.12967914438502673,
+            "at_fault_vru_rate": 0.0855614973262032,
+            "progress": 0.8106791278487707,
+            "harsh_braking_rate": 0.6189839572192514,
+            "near_miss_rate": 0.33288770053475936,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6372909819100406,
+                "at_fault_rate": 0.12566844919786097
+              },
+              "assertive": {
+                "score": 0.6427342901691018,
+                "at_fault_rate": 0.13368983957219252
+              }
+            },
+            "score_ci95": [
+              0.5881968365881836,
+              0.6908453428886987
+            ]
+          }
+        },
+        "LED set (10 samples)": {
+          "band_x1": {
+            "score": 0.6460723602955086,
+            "at_fault_rate": 0.07754010695187166,
+            "at_fault_vru_rate": 0.04946524064171123,
+            "progress": 0.7990351261700189,
+            "harsh_braking_rate": 0.6818181818181818,
+            "near_miss_rate": 0.26871657754010697,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6470451416472541,
+                "at_fault_rate": 0.07219251336898395
+              },
+              "assertive": {
+                "score": 0.6450995789437631,
+                "at_fault_rate": 0.08288770053475936
+              }
+            },
+            "score_ci95": [
+              0.5988573707625875,
+              0.6911488669347591
+            ]
+          },
+          "band_x0": {
+            "score": 0.726018541441278,
+            "at_fault_rate": 0.06684491978609626,
+            "at_fault_vru_rate": 0.04144385026737968,
+            "progress": 0.8551464389688772,
+            "harsh_braking_rate": 0.48262032085561496,
+            "near_miss_rate": 0.2820855614973262,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.713356308516374,
+                "at_fault_rate": 0.06684491978609626
+              },
+              "assertive": {
+                "score": 0.738680774366182,
+                "at_fault_rate": 0.06684491978609626
+              }
+            },
+            "score_ci95": [
+              0.6787721566796082,
+              0.7716371834043716
+            ]
+          }
+        },
+        "Human driver (log replay)": {
+          "band_x1": {
+            "score": 0.9497920380273321,
+            "at_fault_rate": 0.008021390374331552,
+            "at_fault_vru_rate": 0.0,
+            "progress": 1.0,
+            "harsh_braking_rate": 0.0,
+            "near_miss_rate": 0.19786096256684493,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.9497920380273321,
+                "at_fault_rate": 0.008021390374331552
+              },
+              "assertive": {
+                "score": 0.9497920380273321,
+                "at_fault_rate": 0.008021390374331552
+              }
+            },
+            "score_ci95": [
+              0.9245443604406968,
+              0.9698906223296468
+            ]
+          }
+        },
+        "Oracle (true future, no band)": {
+          "band_x1": {
+            "score": 0.8454203743558037,
+            "at_fault_rate": 0.0066844919786096255,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9164302222059202,
+            "harsh_braking_rate": 0.10294117647058823,
+            "near_miss_rate": 0.3689839572192513,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8464203473408873,
+                "at_fault_rate": 0.0053475935828877
+              },
+              "assertive": {
+                "score": 0.84442040137072,
+                "at_fault_rate": 0.008021390374331552
+              }
+            },
+            "score_ci95": [
+              0.8138255232725864,
+              0.8738692738070611
+            ]
+          }
+        },
+        "No prediction (ignore agents)": {
+          "band_x1": {
+            "score": 0.7785225303943697,
+            "at_fault_rate": 0.1270053475935829,
+            "at_fault_vru_rate": 0.0748663101604278,
+            "progress": 0.924654222317802,
+            "harsh_braking_rate": 0.0106951871657754,
+            "near_miss_rate": 0.3917112299465241,
+            "n_episodes": 748,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8229058919868942,
+                "at_fault_rate": 0.06417112299465241
+              },
+              "assertive": {
+                "score": 0.7341391688018453,
+                "at_fault_rate": 0.18983957219251338
+              }
+            },
+            "score_ci95": [
+              0.7235786896775143,
+              0.8287427550704746
+            ]
+          }
+        }
+      },
+      "decision": {
+        "leader": "CV (vel_k=5)",
+        "vs_leader": [
+          {
+            "a": "CV (vel_k=5)",
+            "b": "MLP",
+            "diff": 0.006665699438608619,
+            "ci95": [
+              -0.00443863550836959,
+              0.01788858410837303
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "ST-GAT (MHA)",
+            "diff": 0.003215001541656104,
+            "ci95": [
+              -0.009511110424094128,
+              0.017848670936238355
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "Map-free transformer",
+            "diff": 0.0025666461161870657,
+            "ci95": [
+              -0.010791818455147617,
+              0.015634944764799534
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "LED (mean-denoised)",
+            "diff": 0.004804160789092071,
+            "ci95": [
+              -0.00429339391145101,
+              0.01386282177978965
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_score": [
+          "CV (vel_k=5)",
+          "MLP",
+          "ST-GAT (MHA)",
+          "Map-free transformer",
+          "LED (mean-denoised)"
+        ],
+        "vru_pairs": [
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "CV (vel_k=5)",
+            "diff": -0.009358288770053475,
+            "ci95": [
+              -0.024657979007294075,
+              0.0027777777777777783
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "MLP",
+            "diff": -0.010695187165775402,
+            "ci95": [
+              -0.024431093528578172,
+              -0.001295336787564768
+            ],
+            "tied": false
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "Map-free transformer",
+            "diff": -0.005347593582887701,
+            "ci95": [
+              -0.016620498614958446,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "ST-GAT (MHA)",
+            "b": "LED (mean-denoised)",
+            "diff": -0.013368983957219253,
+            "ci95": [
+              -0.03264135879881854,
+              -0.0012919896640826867
+            ],
+            "tied": false
+          }
+        ],
+        "tied_on_vru": [
+          "ST-GAT (MHA)",
+          "CV (vel_k=5)",
+          "Map-free transformer"
+        ],
+        "pick": "CV (vel_k=5)",
+        "steps": [
+          "Leader on the episode score: CV (vel_k=5) (0.832).",
+          "Tied with the leader (paired 95% CI includes 0): MLP, ST-GAT (MHA), Map-free transformer, LED (mean-denoised).",
+          "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best ST-GAT (MHA) (0.009); still tied: CV (vel_k=5), Map-free transformer.",
+          "Tie-break 2 (latency): CV (vel_k=5)."
+        ]
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "diff_ci95": [
+            -0.017848670936238365,
+            0.009511110424094126
+          ],
+          "p_one_sided": 0.683,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.01877313060962815,
+            0.017428622012819483
+          ],
+          "p_one_sided": 0.5395,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "diff_ci95": [
+            -0.015634944764799534,
+            0.010791818455147614
+          ],
+          "p_one_sided": 0.666,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.01621841950646298,
+            0.007979790078507224
+          ],
+          "p_one_sided": 0.785,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "diff_ci95": [
+            -0.013862821779789652,
+            0.004293393911451009
+          ],
+          "p_one_sided": 0.853,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "diff_ci95": [
+            -0.015959580157014444,
+            0.004280142828662463
+          ],
+          "p_one_sided": 0.873,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.06420673709125975,
+            0.1518395592675697
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.05841450255248366,
+            0.14669305222088833
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.061007957559681705,
+            0.15384615384615383
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.058733476105579004,
+            0.1498601297282839
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "diff_ci95": [
+            0.06004903449113433,
+            0.14722438621340883
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.1320549841349292,
+            0.20169989867417767
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.11371952330138758,
+            0.18006469549114096
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.1280889606467461,
+            0.19672636003091903
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.11676261369670578,
+            0.1841681471050718
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "diff_ci95": [
+            0.11244130658307924,
+            0.18275141931138614
+          ],
+          "p_one_sided": 0.0,
+          "p_holm": 0.0,
+          "supported": true
+        }
+      },
+      "secondary_multi_future": {
+        "S1 K-mode set (10 modes) higher score than K-mode (top-1)": {
+          "diff_ci95": [
+            -0.22390703872713794,
+            -0.134076811094087
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)": {
+          "diff_ci95": [
+            -0.12773050839493794,
+            -0.04748451953793282
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S1 LED set (10 samples) higher score than LED (mean-denoised)": {
+          "diff_ci95": [
+            -0.13391436658110026,
+            -0.06899649745761073
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)": {
+          "diff_ci95": [
+            -0.07046472371503376,
+            -0.014625724698863007
+          ],
+          "p_one_sided": 1.0,
+          "p_holm": 1.0,
+          "supported": false
+        }
+      }
+    }
+  },
+  "when": "2026-10-28T13:30:37"
+}

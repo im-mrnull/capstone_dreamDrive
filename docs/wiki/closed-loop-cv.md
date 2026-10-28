@@ -1,6 +1,6 @@
 # Closed-Loop Test v2 — cross-validated, fixed instrument, fixed planner
 
-## Status: 📌 Pre-registered (2026-10-27) — results pending
+## Status: ✅ Primary result in (2026-10-28) — amendment 3 pending
 
 The first closed-loop test ([[closed-loop-test]], 22 scenes) could not separate the predictors.
 It also showed three problems:
@@ -149,6 +149,34 @@ no separate multi-future ST-GAT is built.
 
 These tests use the existing planner, which treats every future as an obstacle. Whether
 *probability-aware* multi-future planning helps is the next, separately pre-registered study.
+
+## 8. Results (primary set: 73 scenes, 524 episodes per package)
+
+Full tables: README "Closed-loop test v2" (generated from `outputs/benchmark_v2/closed_loop_cv.json`
+and `closed_loop_cv_sensitivity.json`). The rule commit is `24684e2`.
+
+- **Pick: CV.** All 5 single-trajectory packages are tied on score (0.793–0.802). Tie-break 1
+  leaves all of them tied; ST-GAT is lowest on pedestrian / two-wheeler at-fault collisions
+  (1.3%), but not separated. Tie-break 2 is latency.
+- **H1 / H1b:** not supported for any learned model.
+- **H2:** supported for all 5 (16.4% → 2–3% at-fault).
+- **H3:** supported for all 5 (≈ 0.80 without the band vs ≈ 0.66 with it).
+- **Sensitivity:** the pick is CV in all 7 variants. H2 and H3 are supported in 7/7 (robust);
+  H1 / H1b in 0/7.
+- **S1 / S2 (multi-future sets, planner v2):** not supported. Both sets are *significantly
+  worse* than their own single trajectory:
+
+  | Set | Score (vs its single) | At-fault (vs its single) |
+  |---|---|---|
+  | K-mode | 0.626 vs 0.791 | 13.4% vs 4.6% |
+  | LED | 0.682 vs 0.793 | 7.4% vs 3.4% |
+
+  Every 95% CI excludes zero in the harmful direction.
+- **References:**
+  - the oracle scores 0.821, so the planner is the limit on these scenes;
+  - the human replay scores 0.934;
+  - ignoring agents scores 0.729.
+- **Development and all-105 sets:** the pick is CV in both.
 
 **Caveats:**
 - the agents don't react;

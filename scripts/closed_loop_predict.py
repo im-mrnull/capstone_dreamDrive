@@ -6,6 +6,8 @@ outputs/closed_loop/dense_windows_test.npz (sequence order, agents in order):
   samples  (N,10,60,2) float16  multi-future models only (K-mode: its 10 modes;
            LED: first 10 of its 20 leapfrog samples; AgentFormer / Trajectron++:
            10 prior samples), as in the safety scorecard
+  probs    (N,10) float32  K-mode / multi-future transformer only: each mode's
+           predicted probability (softmax of the mode scorer), same order as samples
   scene_id, t0, agent_id  for alignment checks
 Trajectron++ is run in its own interpreter (`--models trajectronpp`): it and
 AgentFormer both ship a top-level `model` package.
@@ -51,10 +53,12 @@ def rows_meta() -> dict:
             "obs": d["obs_traj"].transpose(0, 2, 1).astype(np.float64)}
 
 
-def save(key: str, seed: int, pred, samples, meta) -> None:
+def save(key: str, seed: int, pred, samples, meta, probs=None) -> None:
     out = PRED_DIR / f"seed{seed}" / f"{key}.npz"
     out.parent.mkdir(parents=True, exist_ok=True)
     extra = {} if samples is None else {"samples": np.asarray(samples, dtype=np.float16)}
+    if probs is not None:
+        extra["probs"] = np.asarray(probs, dtype=np.float32)
     np.savez_compressed(out, pred=np.asarray(pred, dtype=np.float32), **extra,
                         scene_id=meta["scene_id"], t0=meta["t0"], agent_id=meta["agent_id"])
     print(f"seed {seed} {key}: {len(pred)} rows" + ("" if samples is None else f", samples {np.shape(samples)[1]}")
@@ -74,7 +78,20 @@ def run_seq_models(keys, seed, device, meta):
         fn = loaders[key](device, seed, CKPT_DIR)
         pred = dp.flatten(loader, fn, device, "test")[0]
         samples = dp.flatten_samples(loader, fn.samples_fn, device) if hasattr(fn, "samples_fn") else None
-        save(key, seed, pred, samples, meta)
+        probs = flatten_probs(loader, fn.probs_fn, device) if hasattr(fn, "probs_fn") else None
+        save(key, seed, pred, samples, meta, probs)
+
+
+def flatten_probs(loader, probs_fn, device) -> list:
+    """Per real agent (flatten order): mode probabilities (K,) from probs_fn(b) -> (B,M,K)."""
+    out = []
+    for batch in loader:
+        b = batch.to(device)
+        with torch.no_grad():
+            p = probs_fn(b).cpu().numpy()
+        am = b.agent_mask.cpu().numpy()
+        out += [p[i, j] for i in range(am.shape[0]) for j in range(am.shape[1]) if am[i, j]]
+    return out
 
 
 def run_led(seed, device, meta):

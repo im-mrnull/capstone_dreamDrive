@@ -139,7 +139,10 @@ def load_mfp(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
 
     def samples(b):   # all K modes, absolute: (B,M,K,2,T)
         return m4.abs_from_rel_k(b.obs_abs, model(b.obs_rel, b.agent_mask)[0])
-    predict.samples_fn = samples
+
+    def probs(b):     # mode probabilities: (B,M,K)
+        return torch.softmax(model(b.obs_rel, b.agent_mask)[1].float(), dim=-1)
+    predict.samples_fn, predict.probs_fn = samples, probs
     return predict
 
 
@@ -172,7 +175,10 @@ def load_mftf(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
 
     def samples(b):   # all K modes, absolute: (B,M,K,2,T)
         return m4.abs_from_rel_k(b.obs_abs, model(b.obs_rel, b.agent_mask)[0])
-    predict.samples_fn = samples
+
+    def probs(b):     # mode probabilities: (B,M,K)
+        return torch.softmax(model(b.obs_rel, b.agent_mask)[1].float(), dim=-1)
+    predict.samples_fn, predict.probs_fn = samples, probs
     return predict
 
 

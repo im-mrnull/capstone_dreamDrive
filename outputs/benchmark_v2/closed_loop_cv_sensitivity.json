@@ -1,0 +1,745 @@
+{
+  "primary_scenes": 73,
+  "variants": {
+    "collision tolerance 0 m": {
+      "instrument": {
+        "collision_tol": 0.0
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 92,
+        "MLP": 92,
+        "ST-GAT (MHA)": 92,
+        "Map-free transformer": 92,
+        "LED (mean-denoised)": 92,
+        "K-mode (top-1)": 92,
+        "K-mode set (10 modes)": 92,
+        "LED set (10 samples)": 92,
+        "Human driver (log replay)": 92,
+        "Oracle (true future, no band)": 92,
+        "No prediction (ignore agents)": 92
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.7879488244762586,
+        "MLP": 0.786228625976847,
+        "ST-GAT (MHA)": 0.7716772272982382,
+        "Map-free transformer": 0.7782813939904452,
+        "LED (mean-denoised)": 0.7763076978633401,
+        "K-mode (top-1)": 0.7756091561688844,
+        "K-mode set (10 modes)": 0.5992470067335276,
+        "LED set (10 samples)": 0.6614331672708574
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.05343511450381679,
+        "MLP": 0.06297709923664122,
+        "ST-GAT (MHA)": 0.07251908396946564,
+        "Map-free transformer": 0.07442748091603053,
+        "LED (mean-denoised)": 0.06679389312977099,
+        "K-mode (top-1)": 0.07824427480916031,
+        "K-mode set (10 modes)": 0.19083969465648856,
+        "LED set (10 samples)": 0.11641221374045801
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    },
+    "collision tolerance 0.5 m": {
+      "instrument": {
+        "collision_tol": 0.5
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 92,
+        "MLP": 92,
+        "ST-GAT (MHA)": 92,
+        "Map-free transformer": 92,
+        "LED (mean-denoised)": 92,
+        "K-mode (top-1)": 92,
+        "K-mode set (10 modes)": 92,
+        "LED set (10 samples)": 92,
+        "Human driver (log replay)": 92,
+        "Oracle (true future, no band)": 92,
+        "No prediction (ignore agents)": 92
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.80527817677039,
+        "MLP": 0.8035294192849886,
+        "ST-GAT (MHA)": 0.8023799522232911,
+        "Map-free transformer": 0.8101165450892136,
+        "LED (mean-denoised)": 0.7950109380657373,
+        "K-mode (top-1)": 0.8029559189332003,
+        "K-mode set (10 modes)": 0.6490066240345844,
+        "LED set (10 samples)": 0.6966070859116271
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.01717557251908397,
+        "MLP": 0.02480916030534351,
+        "ST-GAT (MHA)": 0.009541984732824428,
+        "Map-free transformer": 0.013358778625954198,
+        "LED (mean-denoised)": 0.030534351145038167,
+        "K-mode (top-1)": 0.022900763358778626,
+        "K-mode set (10 modes)": 0.07251908396946564,
+        "LED set (10 samples)": 0.04007633587786259
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    },
+    "ego footprint 4.5 x 1.7 m nominal car (centre +0.5 m)": {
+      "instrument": {
+        "ego_rect": [
+          4.5,
+          1.7
+        ],
+        "ego_centre": 0.5
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 92,
+        "MLP": 92,
+        "ST-GAT (MHA)": 92,
+        "Map-free transformer": 92,
+        "LED (mean-denoised)": 92,
+        "K-mode (top-1)": 92,
+        "K-mode set (10 modes)": 92,
+        "LED set (10 samples)": 92,
+        "Human driver (log replay)": 92,
+        "Oracle (true future, no band)": 92,
+        "No prediction (ignore agents)": 92
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.7836912697199991,
+        "MLP": 0.773498898032695,
+        "ST-GAT (MHA)": 0.7802946190672151,
+        "Map-free transformer": 0.7809206627722816,
+        "LED (mean-denoised)": 0.7755192137391094,
+        "K-mode (top-1)": 0.7756417049858557,
+        "K-mode set (10 modes)": 0.5968530308601157,
+        "LED set (10 samples)": 0.6608924762626394
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.03816793893129771,
+        "MLP": 0.05534351145038168,
+        "ST-GAT (MHA)": 0.03435114503816794,
+        "Map-free transformer": 0.04007633587786259,
+        "LED (mean-denoised)": 0.04770992366412214,
+        "K-mode (top-1)": 0.05343511450381679,
+        "K-mode set (10 modes)": 0.16793893129770993,
+        "LED set (10 samples)": 0.10877862595419847
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    },
+    "glitch threshold 0.5 m": {
+      "instrument": {
+        "glitch_m": 0.5
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 170,
+        "MLP": 170,
+        "ST-GAT (MHA)": 170,
+        "Map-free transformer": 170,
+        "LED (mean-denoised)": 170,
+        "K-mode (top-1)": 170,
+        "K-mode set (10 modes)": 170,
+        "LED set (10 samples)": 170,
+        "Human driver (log replay)": 170,
+        "Oracle (true future, no band)": 170,
+        "No prediction (ignore agents)": 170
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.7999958395383985,
+        "MLP": 0.7973870243637132,
+        "ST-GAT (MHA)": 0.7985379747794246,
+        "Map-free transformer": 0.8010740292040781,
+        "LED (mean-denoised)": 0.7904928901796537,
+        "K-mode (top-1)": 0.7867325752340019,
+        "K-mode set (10 modes)": 0.618470190161588,
+        "LED set (10 samples)": 0.6724172110103305
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.023605150214592276,
+        "MLP": 0.034334763948497854,
+        "ST-GAT (MHA)": 0.019313304721030045,
+        "Map-free transformer": 0.027896995708154508,
+        "LED (mean-denoised)": 0.034334763948497854,
+        "K-mode (top-1)": 0.04721030042918455,
+        "K-mode set (10 modes)": 0.14163090128755365,
+        "LED set (10 samples)": 0.07939914163090128
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    },
+    "glitch threshold 2.0 m": {
+      "instrument": {
+        "glitch_m": 2.0
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 38,
+        "MLP": 38,
+        "ST-GAT (MHA)": 38,
+        "Map-free transformer": 38,
+        "LED (mean-denoised)": 38,
+        "K-mode (top-1)": 38,
+        "K-mode set (10 modes)": 38,
+        "LED set (10 samples)": 38,
+        "Human driver (log replay)": 38,
+        "Oracle (true future, no band)": 38,
+        "No prediction (ignore agents)": 38
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.7957916165271417,
+        "MLP": 0.7913697175521048,
+        "ST-GAT (MHA)": 0.7887373782819764,
+        "Map-free transformer": 0.7900567084512544,
+        "LED (mean-denoised)": 0.7861870106480114,
+        "K-mode (top-1)": 0.7836983559411037,
+        "K-mode set (10 modes)": 0.6207929776695473,
+        "LED set (10 samples)": 0.67872685175579
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.02717391304347826,
+        "MLP": 0.034420289855072464,
+        "ST-GAT (MHA)": 0.028985507246376812,
+        "Map-free transformer": 0.03804347826086957,
+        "LED (mean-denoised)": 0.03804347826086957,
+        "K-mode (top-1)": 0.04891304347826087,
+        "K-mode set (10 modes)": 0.13405797101449277,
+        "LED set (10 samples)": 0.07427536231884058
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    },
+    "agent sizes -20%": {
+      "instrument": {
+        "agent_scale": 0.8
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 92,
+        "MLP": 92,
+        "ST-GAT (MHA)": 92,
+        "Map-free transformer": 92,
+        "LED (mean-denoised)": 92,
+        "K-mode (top-1)": 92,
+        "K-mode set (10 modes)": 92,
+        "LED set (10 samples)": 92,
+        "Human driver (log replay)": 92,
+        "Oracle (true future, no band)": 92,
+        "No prediction (ignore agents)": 92
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.8288075250207784,
+        "MLP": 0.8241667017503057,
+        "ST-GAT (MHA)": 0.8231513217741148,
+        "Map-free transformer": 0.8264086941190728,
+        "LED (mean-denoised)": 0.8188570837428065,
+        "K-mode (top-1)": 0.8169928903881535,
+        "K-mode set (10 modes)": 0.6446034129587122,
+        "LED set (10 samples)": 0.705737915312755
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.019083969465648856,
+        "MLP": 0.022900763358778626,
+        "ST-GAT (MHA)": 0.013358778625954198,
+        "Map-free transformer": 0.022900763358778626,
+        "LED (mean-denoised)": 0.02862595419847328,
+        "K-mode (top-1)": 0.03244274809160305,
+        "K-mode set (10 modes)": 0.10114503816793893,
+        "LED set (10 samples)": 0.04961832061068702
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    },
+    "agent sizes +20%": {
+      "instrument": {
+        "agent_scale": 1.2
+      },
+      "excluded_episodes": {
+        "CV (vel_k=5)": 92,
+        "MLP": 92,
+        "ST-GAT (MHA)": 92,
+        "Map-free transformer": 92,
+        "LED (mean-denoised)": 92,
+        "K-mode (top-1)": 92,
+        "K-mode set (10 modes)": 92,
+        "LED set (10 samples)": 92,
+        "Human driver (log replay)": 92,
+        "Oracle (true future, no band)": 92,
+        "No prediction (ignore agents)": 92
+      },
+      "pick": "CV (vel_k=5)",
+      "scores": {
+        "CV (vel_k=5)": 0.7691637665427389,
+        "MLP": 0.756546402563469,
+        "ST-GAT (MHA)": 0.7597942530240066,
+        "Map-free transformer": 0.7715303434319798,
+        "LED (mean-denoised)": 0.755701509514829,
+        "K-mode (top-1)": 0.7582717304158269,
+        "K-mode set (10 modes)": 0.5835191368681439,
+        "LED set (10 samples)": 0.6556149316323778
+      },
+      "at_fault": {
+        "CV (vel_k=5)": 0.06297709923664122,
+        "MLP": 0.07633587786259542,
+        "ST-GAT (MHA)": 0.061068702290076333,
+        "Map-free transformer": 0.05152671755725191,
+        "LED (mean-denoised)": 0.07633587786259542,
+        "K-mode (top-1)": 0.07251908396946564,
+        "K-mode set (10 modes)": 0.18702290076335878,
+        "LED set (10 samples)": 0.10687022900763359
+      },
+      "hypotheses": {
+        "H1 ST-GAT (MHA) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b ST-GAT (MHA) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1 Map-free transformer higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b Map-free transformer fewer at-fault collisions than CV": {
+          "p_holm": 0.99,
+          "supported": false
+        },
+        "H1 LED (mean-denoised) higher score than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H1b LED (mean-denoised) fewer at-fault collisions than CV": {
+          "p_holm": 1.0,
+          "supported": false
+        },
+        "H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 MLP fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 Map-free transformer fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 MLP chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 Map-free transformer chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        },
+        "H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1": {
+          "p_holm": 0.0,
+          "supported": true
+        }
+      }
+    }
+  },
+  "when": "2026-10-28T14:41:00"
+}

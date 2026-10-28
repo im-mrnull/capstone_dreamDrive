@@ -1,6 +1,6 @@
 # Negative Results (Honest, Documented)
 
-## Status: ✅ All Three Fully Done
+## Status: ✅ All Five Fully Done
 
 ---
 
@@ -50,3 +50,34 @@ length, heading) instead of just context would improve top-1 selection.
   target objective/structure (jointly-trained mixture density, or anchor/goal modes).
 
 **Artifacts:** `mfp_content_grid/`, `tests/test_mode_scorer.py`
+
+---
+
+## 4. Multi-Future Sets Under an Obstacle Planner (closed loop, confirmatory)
+
+**Hypothesis (pre-registered, S1 / S2 in [[closed-loop-cv]]):** driving against all 10
+futures of a multi-future set is safer than driving against the set's single trajectory.
+
+**Result:** ❌ The opposite, and significantly so, on the 73 primary scenes:
+
+| Set | Score (vs its single) | At-fault (vs its single) | Harsh braking |
+|---|---|---|---|
+| K-mode set | 0.626 vs 0.791 | 13.4% vs 4.6% | 63% |
+| LED set | 0.682 vs 0.793 | 7.4% vs 3.4% | 56% |
+
+- **Root cause:** ten futures leave no feasible manoeuvre. The least-penetration fallback then
+  drives into agents, and the car brakes hard far more often.
+- **Implication:** multi-future prediction is only as useful as the planner that consumes it.
+  How a planner should consume multiple futures is the open question (separate work).
+
+## 5. Learned Predictors vs Constant Velocity (closed loop, confirmatory)
+
+**Hypothesis (H1 / H1b in [[closed-loop-cv]]):** ST-GAT, the map-free transformer and LED
+each score higher than, and collide less than, constant velocity.
+
+**Result:** ❌ Not supported for any of them, in the primary analysis or in any of the 7
+instrument variants.
+- All 5 single-trajectory packages score 0.793–0.802.
+- The oracle scores only 0.821, so on these scenes the planner, not prediction accuracy, sets
+  the limit.
+

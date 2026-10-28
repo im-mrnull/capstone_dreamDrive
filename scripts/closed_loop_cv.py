@@ -347,13 +347,13 @@ def main() -> int:
     if args.step == "sensitivity":
         prim = primary_scenes(scenes)
         counts = bootstrap_counts(len(prim), 2000, 0)
-        out = {}
+        out, key = {}, f"band_x{PLAN['band']:g}"     # references are run at x1 only
         for label, inst in SENSITIVITY.items():
             eps_by, excluded = simulate({**cfg, "instrument": inst}, folds, scenes, args.workers)
             a = analyse(eps_by, prim, counts, np.random.default_rng(1), latency)
             out[label] = {"instrument": inst, "excluded_episodes": excluded, "pick": a["decision"]["pick"],
-                          "scores": {n: v[f"band_x{PLAN['band']:g}"]["score"] for n, v in a["packages"].items()},
-                          "at_fault": {n: v[f"band_x{PLAN['band']:g}"]["at_fault_rate"] for n, v in a["packages"].items()},
+                          "scores": {n: v[key]["score"] for n, v in a["packages"].items() if key in v},
+                          "at_fault": {n: v[key]["at_fault_rate"] for n, v in a["packages"].items() if key in v},
                           "hypotheses": {h: {"p_holm": v["p_holm"], "supported": v["supported"]}
                                          for h, v in a["hypotheses"].items()}}
             sup = [h.split(" ")[0] + " " + h.split(" ")[1] for h, v in a["hypotheses"].items() if v["supported"]]

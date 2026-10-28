@@ -122,3 +122,32 @@ def test_instrument_overrides_reset_to_primary():
     assert cl.COLLISION_TOL == 0.5 and cl.RECTS["Car"][0] == pytest.approx(4.3 * 1.2)
     cl.set_instrument({})
     assert cl.COLLISION_TOL == cl.PRIMARY_INSTRUMENT["collision_tol"] and cl.RECTS["Car"] == (4.3, 1.7)
+
+
+def test_planner_v3_terms_vanish_at_the_v2_defaults():
+    cands = [(a, d) for a in cl.ACCELS for d in cl.LAT_TARGETS]
+    sc = {"cmd_prev": (-2.0, 0.75)}
+    cl.PLAN_CFG.update(cl.V3_DEFAULTS)
+    assert np.all(cl.v3_cost(cands, sc, np.ones(len(cands))) == 0.0)
+    cl.PLAN_CFG.update({"jerk_w": 0.5, "lat_w": 0.1})
+    c = cl.v3_cost(cands, sc, np.zeros(len(cands)))
+    assert c[cands.index((-2.0, 0.75))] == 0.0                   # repeating the command is free
+    assert c[cands.index((0.0, 0.75))] == pytest.approx(0.5 * 4.0)
+    cl.PLAN_CFG.update(cl.V3_DEFAULTS)
+
+
+def test_clearance_cost_keeps_distance_without_changing_v2_by_default():
+    """A pedestrian standing 1.6 m from the lane centre (clear of the hard constraint):
+    v2 passes 0.45 m from it, the clearance cost moves the ego away; back at the
+    defaults the episode is v2's again."""
+    T = 100
+    sc = straight_scene(np.tile([[25.0, 1.6]], (T, 1)), cls="Pedestrian")
+    cl.PLAN_CFG.update(cl.V3_DEFAULTS)
+    r_v2 = cl.run_episode(sc, 19, 0.0, Truth())
+    cl.PLAN_CFG.update({"clear_w": 5.0, "clear_m": 1.0})
+    r_v3 = cl.run_episode(sc, 19, 0.0, Truth())
+    cl.PLAN_CFG.update(cl.V3_DEFAULTS)
+    assert not r_v2["at_fault"] and not r_v3["at_fault"]
+    assert r_v3["min_clearance_m"] > r_v2["min_clearance_m"] + 0.3
+    r_again = cl.run_episode(sc, 19, 0.0, Truth())
+    assert {k: v for k, v in r_again.items() if k != "plan_ms"} == {k: v for k, v in r_v2.items() if k != "plan_ms"}

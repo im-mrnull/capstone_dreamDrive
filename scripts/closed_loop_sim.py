@@ -29,6 +29,7 @@ import argparse
 import json
 import os
 import subprocess
+import time
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from functools import lru_cache
@@ -81,6 +82,14 @@ COLLISION_TOL = 0.25                # m of footprint overlap tolerated before a 
 # Planner band handling (v1 defaults: band is a hard constraint over the whole horizon,
 # least-penetration fallback). Overridden per run via run_package's cfg.
 PLAN_CFG = {"hard_s": 3.0, "soft_w": 0.0, "fallback": "least_penetration"}
+# Planner v3 options (development, docs/wiki/planner.md); these defaults reproduce v2 and
+# are reset on every run_package call.
+#   accels   longitudinal accelerations to sample
+#   clear_w  weight of the clearance cost: sum over agents of max(0, clear_m - gap)^2,
+#            gap = predicted footprint-to-footprint distance (no band, no buffer)
+#   jerk_w   weight of (a - previous a)^2;  lat_w  weight of (d_target - previous d_target)^2
+V3_DEFAULTS = {"accels": ACCELS, "clear_w": 0.0, "clear_m": 1.0, "jerk_w": 0.0, "lat_w": 0.0}
+PLAN_CFG.update(V3_DEFAULTS)
 
 # Nominal footprints (IDD-3D box sizes are not in this repo): circle centres along
 # the heading and a common radius.
@@ -439,8 +448,9 @@ def rollout(s0, d0, v0, a, d_target, n_frames):
 
 
 def plan(sc, route, s0, d0, v0, v_ref, preds):
-    """Choose (a, d_target) for the next replan interval."""
-    cands = [(a, dt) for a in ACCELS for dt in LAT_TARGETS]
+    """Choose (a, d_target) for the next replan interval. Reads the previous command from
+    sc["cmd_prev"] and leaves sc["plan_fallback"] (True when no manoeuvre was clear)."""
+    cands = [(a, dt) for a in PLAN_CFG["accels"] for dt in LAT_TARGETS]
     idx = PLAN_OFFSETS - 1                                               # prediction indices
     n_steps = len(idx)
     E, v_end = [], []
@@ -453,6 +463,8 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
     hard = PLAN_OFFSETS * DT <= PLAN_CFG["hard_s"] + 1e-9                # steps under the hard constraint
     worst = np.zeros(len(cands))                                         # hard-step penetration
     soft = np.zeros(len(cands))                                          # later-step penetration
+    clear = np.zeros(len(cands))                                         # clearance cost (v3)
+    clear_on = PLAN_CFG["clear_w"] > 0
     ego_c = E.mean(axis=2)                                               # centres (C, steps, 2)
     for a_idx, samples, band in preds:
         fp = footprint(sc["cls"][a_idx])
@@ -467,12 +479,17 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
         n = np.linalg.norm(hd, axis=-1, keepdims=True)
         hd = np.where(n > 0.5, hd / np.maximum(n, 1e-9), sc["head_now"][a_idx])
         reach = EGO[1] + fp[1] + band[idx] + EGO_REACH + max(np.abs(fp[0])) + 0.5
+        if clear_on:
+            reach = reach + PLAN_CFG["clear_m"]
         cd = np.linalg.norm(ego_c[:, None] - np.where(ok[..., None], P, 1e9)[None], axis=-1)   # (C,K,15)
         if not (cd < reach[None, None]).any():
             continue
         hd = np.where(np.isfinite(hd), hd, sc["head_now"][a_idx])
         A = circles(np.where(ok[..., None], P, 1e9), hd, fp)             # (K, steps, m, 2)
         dist = np.linalg.norm(E[:, None, :, :, None] - A[None, :, :, None, :, :], axis=-1)  # (C,K,steps,3,m)
+        if clear_on:
+            gap = dist.min(axis=(3, 4)) - (EGO[1] + fp[1])               # (C,K,steps)
+            clear += np.clip(PLAN_CFG["clear_m"] - gap, 0, None).max(axis=(1, 2)) ** 2
         need = EGO[1] + fp[1] + band[idx] + SAFETY_BUFFER                # (steps,)
         pen = ((need[None, None, :, None, None] - dist) / need[None, None, :, None, None]).max(axis=(1, 3, 4))
         worst = np.maximum(worst, pen[:, hard].max(axis=1))             # pen: (C, steps)
@@ -481,6 +498,8 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
     feasible = worst <= 0.0
     cost = np.array([((ve - v_ref) / 2.0) ** 2 + 0.05 * a * a + 0.3 * dt * dt + 0.5 * abs(dt - d0)
                      for (a, dt), ve in zip(cands, v_end)]) + PLAN_CFG["soft_w"] * soft
+    cost = cost + v3_cost(cands, sc, clear)
+    sc["plan_fallback"] = not feasible.any()
     if feasible.any():
         return cands[int(np.argmin(np.where(feasible, cost, np.inf)))]
     if PLAN_CFG["fallback"] == "brake":                                  # emergency stop, no swerve
@@ -488,13 +507,22 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
     return cands[int(np.lexsort((cost, worst))[0])]                      # least penetration
 
 
+def v3_cost(cands, sc, clear) -> np.ndarray:
+    """Planner v3 terms: clearance plus command smoothness (0 with the v2 defaults)."""
+    a_prev, d_prev = sc.get("cmd_prev", (0.0, 0.0))
+    a, dt = np.array(cands, dtype=float).T
+    return (PLAN_CFG["clear_w"] * clear + PLAN_CFG["jerk_w"] * (a - a_prev) ** 2
+            + PLAN_CFG["lat_w"] * (dt - d_prev) ** 2)
+
+
 def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
     route, T = sc["route"], sc["T"]
     human = predictor.name == "Human driver (log replay)"
     s, d, v = sc["s_h"][t_start], 0.0, sc["v_h"][t_start]
     a_cmd, d_target = 0.0, 0.0
-    harsh, min_clear = False, np.inf
+    harsh, min_clear, min_clear_moving = False, np.inf, np.inf
     hit, hit_vru, hits = False, False, set()
+    cmds, n_fallback, plan_s = [], 0, 0.0              # diagnostics (not in the score)
     for f in range(t_start, t_start + EP_LEN):
         d_prev = d
         if human:
@@ -504,7 +532,14 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
                 sc["pos_now"] = sc["pos"][f]
                 sc["head_now"] = sc["heading"][f]
                 v_ref = max(sc["v_h"][min(f + 30, T - 1)], persona_min_v)
+                sc["cmd_prev"] = (a_cmd, d_target)
+                sc.pop("plan_fallback", None)
+                t_plan = time.perf_counter()
                 a_cmd, d_target = plan(sc, route, s, d, v, v_ref, predictor.at(sc, f, lam))
+                plan_s += time.perf_counter() - t_plan
+                fb = sc.pop("plan_fallback", None)              # None: the planner doesn't report it
+                n_fallback = None if fb is None or n_fallback is None else n_fallback + fb
+                cmds.append(a_cmd)
                 harsh |= a_cmd <= HARSH_DECEL
             (s,), (d,), (v,) = rollout(s, d, v, a_cmd, d_target, 1)
         # ground truth at frame f+1
@@ -525,6 +560,8 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
             lon, lat = float(rel @ tan), float(rel @ nrm)
             if lon >= AT_FAULT_REAR_M:
                 min_clear = min(min_clear, gap)
+                if v >= AT_FAULT_MIN_SPEED:
+                    min_clear_moving = min(min_clear_moving, gap)
             if gap < -COLLISION_TOL and v >= AT_FAULT_MIN_SPEED and a not in hits and at_fault(sc, g, a, lon, lat, ddot, size):
                 hits.add(a); hit = True
                 hit_vru |= sc["cls"][a] in VRU
@@ -538,7 +575,13 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
     return {"scene": sc["sid"], "t_start": t_start, "score": float(score), "at_fault": hit,
             "at_fault_vru": hit_vru, "n_at_fault_agents": len(hits), "progress": float(progress),
             "harsh_braking": harsh, "near_miss": not no_near,
-            "min_clearance_m": float(min_clear) if np.isfinite(min_clear) else None}
+            "min_clearance_m": float(min_clear) if np.isfinite(min_clear) else None,
+            # diagnostics: near-miss while the ego moves, fallback replans, command jerk
+            # (RMS change of the commanded acceleration per second), planning time
+            "near_miss_moving": bool(min_clear_moving < NEAR_MISS_M),
+            "n_replans": len(cmds), "n_fallback": n_fallback,
+            "jerk_rms": float(np.sqrt(np.mean((np.diff(cmds) / (REPLAN * DT)) ** 2))) if len(cmds) > 1 else 0.0,
+            "plan_ms": 1000.0 * plan_s / max(len(cmds), 1)}
 
 
 def at_fault(sc, g, a, lon, lat, ddot, size) -> bool:
@@ -586,7 +629,7 @@ def run_package(args) -> tuple:
     name, seed, scene_ids, lam, cfg, folds = args
     cfg = dict(cfg)
     set_instrument(cfg.pop("instrument", {}))   # pool workers are reused: reset every task
-    PLAN_CFG.update(cfg)
+    PLAN_CFG.update({**V3_DEFAULTS, **cfg})
     predictors, eps, excluded = {}, [], 0
     for sid in scene_ids:
         fold = None if folds is None else folds[sid]

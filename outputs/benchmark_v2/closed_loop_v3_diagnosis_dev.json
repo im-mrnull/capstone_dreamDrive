@@ -1,0 +1,523 @@
+{
+  "dev_scenes": [
+    "20220118103308_seq_10",
+    "20220118103308_seq_19",
+    "20220118103308_seq_20",
+    "20220118103308_seq_21",
+    "20220118103308_seq_27",
+    "20220118103308_seq_28",
+    "20220118103308_seq_5",
+    "20220118103308_seq_6",
+    "20220118103308_seq_7",
+    "20220118103808_seq_11",
+    "20220118103808_seq_18",
+    "20220118103808_seq_22",
+    "20220118103808_seq_25",
+    "20220118103808_seq_27",
+    "20220118103808_seq_28",
+    "20220118103808_seq_3",
+    "20220118103808_seq_6",
+    "20220118103808_seq_8",
+    "20220118104308_seq_10",
+    "20220118104308_seq_13",
+    "20220118105341_seq_0",
+    "20220118105838_seq_8",
+    "20220118110338_seq_11",
+    "20220118110338_seq_12",
+    "20220118110338_seq_14",
+    "20220118110338_seq_16",
+    "20220118110338_seq_17",
+    "20220118111338_seq_4",
+    "20220118112945_seq_22",
+    "20220118112945_seq_24",
+    "20220118112945_seq_26",
+    "20220118115526_seq_2"
+  ],
+  "seed": 0,
+  "planner": {
+    "hard_s": 1.0,
+    "soft_w": 5.0,
+    "fallback": "least_penetration",
+    "band": 0.0
+  },
+  "attribution_rule": "a failure is 'prediction' if the oracle (true future) avoids it on the same episode; otherwise 'planner', split by whether the package found no clear manoeuvre at some replan",
+  "packages": {
+    "CV (vel_k=5)": {
+      "score": 0.9014959644095991,
+      "at_fault_rate": 0.013392857142857142,
+      "at_fault_vru_rate": 0.008928571428571428,
+      "progress": 0.9417218757636707,
+      "harsh_braking_rate": 0.07142857142857142,
+      "near_miss_rate": 0.19642857142857142,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.19196428571428573,
+      "jerk_rms": 2.097670002351133,
+      "fallback_replan_rate": 0.015714285714285715,
+      "plan_ms_parallel": 3.3485190363093613,
+      "attribution": {
+        "at_fault": {
+          "n": 3,
+          "prediction": 2,
+          "planner_no_option": 1,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 44,
+          "prediction": 0,
+          "planner_no_option": 19,
+          "planner_choice": 25,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 16,
+          "prediction": 8,
+          "planner_no_option": 6,
+          "planner_choice": 2
+        }
+      }
+    },
+    "MLP": {
+      "score": 0.8881990958705505,
+      "at_fault_rate": 0.017857142857142856,
+      "at_fault_vru_rate": 0.008928571428571428,
+      "progress": 0.9340072082825215,
+      "harsh_braking_rate": 0.11607142857142858,
+      "near_miss_rate": 0.19196428571428573,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.1875,
+      "jerk_rms": 2.529582298763567,
+      "fallback_replan_rate": 0.023214285714285715,
+      "plan_ms_parallel": 3.0882892306960588,
+      "attribution": {
+        "at_fault": {
+          "n": 4,
+          "prediction": 3,
+          "planner_no_option": 1,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 43,
+          "prediction": 2,
+          "planner_no_option": 23,
+          "planner_choice": 18,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 26,
+          "prediction": 18,
+          "planner_no_option": 8,
+          "planner_choice": 0
+        }
+      }
+    },
+    "ST-GAT (MHA)": {
+      "score": 0.8987644248139041,
+      "at_fault_rate": 0.017857142857142856,
+      "at_fault_vru_rate": 0.008928571428571428,
+      "progress": 0.9389230407507092,
+      "harsh_braking_rate": 0.0625,
+      "near_miss_rate": 0.19196428571428573,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.18303571428571427,
+      "jerk_rms": 1.8972610022578016,
+      "fallback_replan_rate": 0.014821428571428572,
+      "plan_ms_parallel": 3.3865111075283494,
+      "attribution": {
+        "at_fault": {
+          "n": 4,
+          "prediction": 3,
+          "planner_no_option": 1,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 43,
+          "prediction": 0,
+          "planner_no_option": 19,
+          "planner_choice": 24,
+          "while_stopped": 2
+        },
+        "harsh_braking": {
+          "n": 14,
+          "prediction": 7,
+          "planner_no_option": 7,
+          "planner_choice": 0
+        }
+      }
+    },
+    "Map-free transformer": {
+      "score": 0.889188206829804,
+      "at_fault_rate": 0.026785714285714284,
+      "at_fault_vru_rate": 0.008928571428571428,
+      "progress": 0.9358241655790599,
+      "harsh_braking_rate": 0.08035714285714286,
+      "near_miss_rate": 0.19642857142857142,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.1875,
+      "jerk_rms": 2.1470487732344674,
+      "fallback_replan_rate": 0.015,
+      "plan_ms_parallel": 3.3017738382373603,
+      "attribution": {
+        "at_fault": {
+          "n": 6,
+          "prediction": 3,
+          "planner_no_option": 3,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 44,
+          "prediction": 0,
+          "planner_no_option": 23,
+          "planner_choice": 21,
+          "while_stopped": 2
+        },
+        "harsh_braking": {
+          "n": 18,
+          "prediction": 11,
+          "planner_no_option": 7,
+          "planner_choice": 0
+        }
+      }
+    },
+    "K-mode (top-1)": {
+      "score": 0.8875478690891809,
+      "at_fault_rate": 0.022321428571428572,
+      "at_fault_vru_rate": 0.008928571428571428,
+      "progress": 0.9402779171463252,
+      "harsh_braking_rate": 0.08482142857142858,
+      "near_miss_rate": 0.21875,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.21428571428571427,
+      "jerk_rms": 2.0263066259249602,
+      "fallback_replan_rate": 0.016428571428571428,
+      "plan_ms_parallel": 3.2554057679330333,
+      "attribution": {
+        "at_fault": {
+          "n": 5,
+          "prediction": 5,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 49,
+          "prediction": 6,
+          "planner_no_option": 18,
+          "planner_choice": 25,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 19,
+          "prediction": 11,
+          "planner_no_option": 6,
+          "planner_choice": 2
+        }
+      }
+    },
+    "AgentFormer (most-likely)": {
+      "score": 0.8941416814125164,
+      "at_fault_rate": 0.008928571428571428,
+      "at_fault_vru_rate": 0.008928571428571428,
+      "progress": 0.9371467223478603,
+      "harsh_braking_rate": 0.10714285714285714,
+      "near_miss_rate": 0.1875,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.18303571428571427,
+      "jerk_rms": 2.4017328609575452,
+      "fallback_replan_rate": 0.030535714285714284,
+      "plan_ms_parallel": 3.308233750618196,
+      "attribution": {
+        "at_fault": {
+          "n": 2,
+          "prediction": 2,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 42,
+          "prediction": 1,
+          "planner_no_option": 27,
+          "planner_choice": 14,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 24,
+          "prediction": 15,
+          "planner_no_option": 7,
+          "planner_choice": 2
+        }
+      }
+    },
+    "LED (mean-denoised)": {
+      "score": 0.9015690641896015,
+      "at_fault_rate": 0.0,
+      "at_fault_vru_rate": 0.0,
+      "progress": 0.9371100298269968,
+      "harsh_braking_rate": 0.09375,
+      "near_miss_rate": 0.19196428571428573,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.1875,
+      "jerk_rms": 2.205721033980442,
+      "fallback_replan_rate": 0.015714285714285715,
+      "plan_ms_parallel": 3.28348510599296,
+      "attribution": {
+        "at_fault": {
+          "n": 0,
+          "prediction": 0,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 43,
+          "prediction": 1,
+          "planner_no_option": 23,
+          "planner_choice": 19,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 21,
+          "prediction": 12,
+          "planner_no_option": 8,
+          "planner_choice": 1
+        }
+      }
+    },
+    "Trajectron++ (most-likely)": {
+      "score": 0.8871683193142442,
+      "at_fault_rate": 0.03571428571428571,
+      "at_fault_vru_rate": 0.017857142857142856,
+      "progress": 0.9375378676792706,
+      "harsh_braking_rate": 0.09375,
+      "near_miss_rate": 0.17857142857142858,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.17410714285714285,
+      "jerk_rms": 2.335689750408522,
+      "fallback_replan_rate": 0.02625,
+      "plan_ms_parallel": 3.35069715897719,
+      "attribution": {
+        "at_fault": {
+          "n": 8,
+          "prediction": 7,
+          "planner_no_option": 1,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 40,
+          "prediction": 2,
+          "planner_no_option": 24,
+          "planner_choice": 14,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 21,
+          "prediction": 13,
+          "planner_no_option": 8,
+          "planner_choice": 0
+        }
+      }
+    },
+    "K-mode set (10 modes)": {
+      "score": 0.6228352099915646,
+      "at_fault_rate": 0.16071428571428573,
+      "at_fault_vru_rate": 0.08928571428571429,
+      "progress": 0.7477984981381578,
+      "harsh_braking_rate": 0.625,
+      "near_miss_rate": 0.2767857142857143,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.26785714285714285,
+      "jerk_rms": 9.090884226459027,
+      "fallback_replan_rate": 0.46517857142857144,
+      "plan_ms_parallel": 11.744956696825934,
+      "attribution": {
+        "at_fault": {
+          "n": 36,
+          "prediction": 34,
+          "planner_no_option": 2,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 62,
+          "prediction": 30,
+          "planner_no_option": 32,
+          "planner_choice": 0,
+          "while_stopped": 2
+        },
+        "harsh_braking": {
+          "n": 140,
+          "prediction": 130,
+          "planner_no_option": 10,
+          "planner_choice": 0
+        }
+      }
+    },
+    "AgentFormer set (10 samples)": {
+      "score": 0.876028796516436,
+      "at_fault_rate": 0.022321428571428572,
+      "at_fault_vru_rate": 0.017857142857142856,
+      "progress": 0.9310613032206891,
+      "harsh_braking_rate": 0.18303571428571427,
+      "near_miss_rate": 0.16517857142857142,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.16071428571428573,
+      "jerk_rms": 3.1499277815035165,
+      "fallback_replan_rate": 0.033928571428571426,
+      "plan_ms_parallel": 8.339471213902081,
+      "attribution": {
+        "at_fault": {
+          "n": 5,
+          "prediction": 4,
+          "planner_no_option": 1,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 37,
+          "prediction": 4,
+          "planner_no_option": 25,
+          "planner_choice": 8,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 41,
+          "prediction": 32,
+          "planner_no_option": 9,
+          "planner_choice": 0
+        }
+      }
+    },
+    "LED set (10 samples)": {
+      "score": 0.8180256977123944,
+      "at_fault_rate": 0.03125,
+      "at_fault_vru_rate": 0.026785714285714284,
+      "progress": 0.8899608775488995,
+      "harsh_braking_rate": 0.3705357142857143,
+      "near_miss_rate": 0.13839285714285715,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.13839285714285715,
+      "jerk_rms": 5.085225406530912,
+      "fallback_replan_rate": 0.15803571428571428,
+      "plan_ms_parallel": 9.206109605833522,
+      "attribution": {
+        "at_fault": {
+          "n": 7,
+          "prediction": 7,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 31,
+          "prediction": 5,
+          "planner_no_option": 26,
+          "planner_choice": 0,
+          "while_stopped": 0
+        },
+        "harsh_braking": {
+          "n": 83,
+          "prediction": 73,
+          "planner_no_option": 10,
+          "planner_choice": 0
+        }
+      }
+    },
+    "Trajectron++ set (10 samples)": {
+      "score": 0.8349151980722366,
+      "at_fault_rate": 0.026785714285714284,
+      "at_fault_vru_rate": 0.022321428571428572,
+      "progress": 0.9061247143252447,
+      "harsh_braking_rate": 0.3482142857142857,
+      "near_miss_rate": 0.12053571428571429,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.11607142857142858,
+      "jerk_rms": 5.236510926765614,
+      "fallback_replan_rate": 0.08035714285714286,
+      "plan_ms_parallel": 8.7763166789955,
+      "attribution": {
+        "at_fault": {
+          "n": 6,
+          "prediction": 6,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 27,
+          "prediction": 3,
+          "planner_no_option": 23,
+          "planner_choice": 1,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 78,
+          "prediction": 68,
+          "planner_no_option": 10,
+          "planner_choice": 0
+        }
+      }
+    },
+    "Oracle (true future, no band)": {
+      "score": 0.9014147221697034,
+      "at_fault_rate": 0.013392857142857142,
+      "at_fault_vru_rate": 0.0,
+      "progress": 0.9422377270708713,
+      "harsh_braking_rate": 0.044642857142857144,
+      "near_miss_rate": 0.21875,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.21428571428571427,
+      "jerk_rms": 1.6523047511058724,
+      "fallback_replan_rate": 0.00875,
+      "plan_ms_parallel": 3.3369076072163546,
+      "attribution": {
+        "at_fault": {
+          "n": 3,
+          "prediction": 0,
+          "planner_no_option": 3,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 49,
+          "prediction": 0,
+          "planner_no_option": 15,
+          "planner_choice": 34,
+          "while_stopped": 1
+        },
+        "harsh_braking": {
+          "n": 10,
+          "prediction": 0,
+          "planner_no_option": 9,
+          "planner_choice": 1
+        }
+      }
+    },
+    "Human driver (log replay)": {
+      "score": 0.9861111111111113,
+      "at_fault_rate": 0.0,
+      "at_fault_vru_rate": 0.0,
+      "progress": 1.0,
+      "harsh_braking_rate": 0.0,
+      "near_miss_rate": 0.0625,
+      "n_episodes": 224,
+      "near_miss_moving_rate": 0.05357142857142857,
+      "jerk_rms": 0.0,
+      "fallback_replan_rate": null,
+      "plan_ms_parallel": 0.0,
+      "attribution": {
+        "at_fault": {
+          "n": 0,
+          "prediction": 0,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        },
+        "near_miss": {
+          "n": 14,
+          "prediction": 0,
+          "planner_no_option": 0,
+          "planner_choice": 14,
+          "while_stopped": 2
+        },
+        "harsh_braking": {
+          "n": 0,
+          "prediction": 0,
+          "planner_no_option": 0,
+          "planner_choice": 0
+        }
+      }
+    }
+  },
+  "when": "2026-10-29T02:25:37"
+}

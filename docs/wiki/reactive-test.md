@@ -151,6 +151,30 @@ with seed-pooled scene-bootstrap CIs.
 | 3. Probability quality | energy score (all; probability-weighted where a model has probabilities); NLL of the best mode, top-mode accuracy and ECE for K-mode and the multi-future transformer |
 | 4. Driving usefulness | this test |
 
+**Result (2026-10-29).** Frozen test windows, 3 seeds, K = 10. Lower is better except where noted.
+
+| Model | ML ADE / FDE | minADE / minFDE@10 | Miss@10 | Spread (m) | Implausible | Energy | Top-mode acc. ↑ / ECE | GPU ms |
+|---|---|---|---|---|---|---|---|---|
+| K-mode decoder | 4.15 / 9.21 | **2.01 / 3.56** | 0.47 | 42.6 | 0.40 | **3.59** | 0.52 / 0.11 | 19 |
+| Multi-future transformer | 3.98 / 8.68 | 2.47 / 4.88 | 0.50 | 52.8 | 0.21 | 3.96 | 0.66 / 0.13 | 5 |
+| AgentFormer | 3.75 / 8.22 | 2.43 / 4.65 | 0.41 | 6.6 | **0.15** | 3.97 | — | 102 |
+| LED | **3.75 / 8.13** | 2.49 / 5.39 | **0.40** | 7.9 | 0.46 | 3.96 | — | 43 |
+| Trajectron++ | 3.91 / 8.38 | 2.38 / 4.40 | 0.41 | 6.8 | 0.42 | 3.75 | — | 213 ✗ |
+
+- **No model wins on every criterion.**
+  - AgentFormer / LED have the best most-likely trajectories.
+  - The K-mode decoder has the best coverage (minFDE@10) and energy score.
+  - AgentFormer has the fewest physically implausible samples.
+- **The energy-score CIs overlap widely**, e.g. K-mode [2.43, 5.16] vs AgentFormer [2.56, 5.75],
+  so criterion 3 doesn't separate the models.
+- **The two K-mode models fan out much more** (42–53 m mean endpoint spread). About 40% of their
+  modes carry under 1% probability. Unweighted spread counts those modes equally, while the
+  probability-weighted energy score discounts them.
+- **Their top-mode probabilities are moderately miscalibrated** (ECE 0.11–0.13).
+- **Trajectron++ fails the real-time filter** (213 ms > 200 ms).
+
+Source: `outputs/benchmark_v2/multifuture_scorecard.json`.
+
 ## 7. Caveats (stated in advance)
 
 - The reaction model is simple and uncalibrated: IDM along logged paths, no swerving, no

@@ -84,10 +84,23 @@ def flatten_samples(loader: DataLoader, samples_fn, device: torch.device) -> lis
     return out
 
 
+@torch.no_grad()
+def flatten_probs(loader: DataLoader, probs_fn, device: torch.device) -> list:
+    """Per real agent (same order as flatten): mode probabilities (K,) from probs_fn(b) -> (B,M,K)."""
+    out = []
+    for batch in loader:
+        b = batch.to(device)
+        p = probs_fn(b).cpu().numpy()
+        am = b.agent_mask.cpu().numpy()
+        out += [p[i, j] for i in range(am.shape[0]) for j in range(am.shape[1]) if am[i, j]]
+    return out
+
+
 def dump(name: str, predict_fn, device: torch.device, out_path: Path,
          save_samples: bool = False) -> None:
-    P, G, M, C, S, Z, K = [], [], [], [], [], [], []
+    P, G, M, C, S, Z, K, R = [], [], [], [], [], [], [], []
     samples_fn = getattr(predict_fn, "samples_fn", None) if save_samples else None
+    probs_fn = getattr(predict_fn, "probs_fn", None) if save_samples else None
     for split in ("val", "test"):
         loader = make_loader(split)
         p, g, m, c, s = flatten(loader, predict_fn, device, split)
@@ -96,7 +109,11 @@ def dump(name: str, predict_fn, device: torch.device, out_path: Path,
         P += p; G += g; M += m; C += c; S += s; Z += z
         if samples_fn is not None:
             K += flatten_samples(loader, samples_fn, device)
+        if probs_fn is not None:
+            R += flatten_probs(loader, probs_fn, device)
     extra = {"samples": np.asarray(K, dtype=np.float32)} if samples_fn is not None else {}
+    if probs_fn is not None:
+        extra["probs"] = np.asarray(R, dtype=np.float32)
     np.savez_compressed(
         out_path, **extra,
         pred=np.asarray(P, dtype=np.float32), gt=np.asarray(G, dtype=np.float32),
@@ -204,7 +221,8 @@ def main() -> int:
     ap.add_argument("--data", default=str(DATA))
     ap.add_argument("--splits-file", default=SPLITS)
     ap.add_argument("--save-samples", action="store_true",
-                    help="also store every mode of multi-output models (K-mode) as samples")
+                    help="also store every mode of multi-output models (K-mode, multi-future "
+                         "transformer) as samples, with their mode probabilities as probs")
     ap.add_argument("--out-dir", default=str(OUT),
                     help="output directory; keep non-seed-0 dumps out of outputs/benchmark_v2 "
                          "itself, whose preds_*.npz are the conformal inputs")

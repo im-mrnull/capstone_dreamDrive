@@ -549,6 +549,8 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
             xy, tan = sc["ego_raw"][g], sc["ego_head_raw"][g]
         sc["route_tan_now"] = tan
         ego = rect(xy + EGO_CENTRE * tan, tan, EGO_RECT)
+        if "react" in sc:               # reactive agents (reactive_sim.py) move to frame g first
+            sc["react"](g, xy + EGO_CENTRE * tan, tan, float(v))
         nrm = np.array([-tan[1], tan[0]])
         ddot = (d - d_prev) / DT
         for a in np.where(sc["mask"][g])[0]:

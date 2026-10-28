@@ -64,6 +64,12 @@ futures of a multi-future set is safer than driving against the set's single tra
 |---|---|---|---|
 | K-mode set | 0.626 vs 0.791 | 13.4% vs 4.6% | 63% |
 | LED set | 0.682 vs 0.793 | 7.4% vs 3.4% | 56% |
+| Multi-future transformer set (amendment 3) | 0.438 vs 0.790 | 19.3% vs 3.6% | 93% |
+| Trajectron++ set (amendment 3) | 0.752 vs 0.799 | 4.4% vs 3.4% | 44% |
+| AgentFormer set (amendment 3) | 0.793 vs 0.800 | 3.4% vs 2.9% | 25% |
+
+None of the five sets beats its single trajectory. AgentFormer's set, which blocks the
+planner least, is the only one level with it.
 
 - **Root cause:** ten futures leave no feasible manoeuvre. The least-penetration fallback then
   drives into agents, and the car brakes hard far more often.

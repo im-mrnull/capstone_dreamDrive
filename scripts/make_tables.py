@@ -53,6 +53,7 @@ LAT_PATH = "outputs/benchmark_v2/safety_latency.json"
 CL_PATH = "outputs/benchmark_v2/closed_loop.json"
 CLCV_PATH = "outputs/benchmark_v2/closed_loop_cv.json"
 CLCV_SENS_PATH = "outputs/benchmark_v2/closed_loop_cv_sensitivity.json"
+CLCV_EXTRA_PATH = "outputs/benchmark_v2/closed_loop_cv_extra.json"
 
 # Prediction-dump model names (conformal / bootstrap artifacts) -> table display
 # name, in display order (strongest deployable first).
@@ -538,8 +539,27 @@ def closed_loop_cv_rows() -> list[str]:
                       f"{len(variants)} variants." if len(picks) == 1 else
                   f"Instrument sensitivity: picks across variants: {', '.join(picks)}."]
     others = [f"{k}: pick {cl['analyses'][k]['decision']['pick']}" for k in cl["analyses"] if k != prim_key]
-    lines += ["", "Other scene sets (reported, not used for the decision): " + "; ".join(others) + ".",
-              "", f"Source artifacts: [`{CLCV_PATH}`]({CLCV_PATH}), [`{CLCV_SENS_PATH}`]({CLCV_SENS_PATH})."]
+    lines += ["", "Other scene sets (reported, not used for the decision): " + "; ".join(others) + "."]
+    srcs = [CLCV_PATH, CLCV_SENS_PATH]
+    ex = _load(CLCV_EXTRA_PATH)
+    if ex is not None:
+        srcs.append(CLCV_EXTRA_PATH)
+        epk = ex["packages"]
+        lines += ["", "Amendment 3 (secondary, same primary scenes and planner): three more multi-future models, "
+                      "each as its single trajectory and its 10-future set.", "",
+                  _row(["Package", "Episode score [95% CI]", "At-fault collision episodes",
+                        "…with pedestrians / two-wheelers", "Harsh braking", "Score with the full 90% band"]),
+                  _row(["---"] * 6)]
+        for n in [n for n in epk if n not in pk]:
+            v, v1 = epk[n][key], epk[n]["band_x1"]
+            lines.append(_row([n, f"{v['score']:.3f} {_ci(v['score_ci95'], 3)}", f"{v['at_fault_rate']:.1%}",
+                               f"{v['at_fault_vru_rate']:.1%}", f"{v['harsh_braking_rate']:.0%}",
+                               f"{v1['score']:.3f}"]))
+        lines += ["", _row(["Hypothesis (one-sided, Holm within amendment 3)", "Difference, 95% CI", "p (Holm)",
+                            "Supported"]), _row(["---"] * 4)]
+        for h, v in ex["amendment3_hypotheses"].items():
+            lines.append(_row([h, _ci(v["diff_ci95"], 3), f"{v['p_holm']:.3f}", "yes" if v["supported"] else "no"]))
+    lines += ["", "Source artifacts: " + ", ".join(f"[`{x}`]({x})" for x in srcs) + "."]
     return lines
 
 

@@ -1,0 +1,834 @@
+{
+  "rule_doc": "docs/wiki/closed-loop-cv.md",
+  "planner": {
+    "band": 0.0,
+    "hard_s": 1.0,
+    "soft_w": 5.0,
+    "fallback": "least_penetration"
+  },
+  "primary_scenes": 73,
+  "packages": {
+    "MF transformer (top-1)": {
+      "band_x1": {
+        "score": 0.6501155878207882,
+        "at_fault_rate": 0.05152671755725191,
+        "at_fault_vru_rate": 0.03244274809160305,
+        "progress": 0.7943712145021918,
+        "harsh_braking_rate": 0.6908396946564885,
+        "near_miss_rate": 0.2824427480916031,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6558824328727028,
+            "at_fault_rate": 0.04580152671755725
+          },
+          "assertive": {
+            "score": 0.6443487427688736,
+            "at_fault_rate": 0.05725190839694656
+          }
+        },
+        "score_ci95": [
+          0.5995911567276389,
+          0.6972214107014123
+        ]
+      },
+      "band_x0": {
+        "score": 0.7903049699067255,
+        "at_fault_rate": 0.03625954198473282,
+        "at_fault_vru_rate": 0.02480916030534351,
+        "progress": 0.9033992333164785,
+        "harsh_braking_rate": 0.22137404580152673,
+        "near_miss_rate": 0.4064885496183206,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8054317408741045,
+            "at_fault_rate": 0.026717557251908396
+          },
+          "assertive": {
+            "score": 0.775178198939346,
+            "at_fault_rate": 0.04580152671755725
+          }
+        },
+        "score_ci95": [
+          0.7417339148025164,
+          0.8330448387269525
+        ]
+      }
+    },
+    "MF transformer set (10 modes)": {
+      "band_x1": {
+        "score": 0.42511657222085536,
+        "at_fault_rate": 0.20038167938931298,
+        "at_fault_vru_rate": 0.1183206106870229,
+        "progress": 0.6442125988774524,
+        "harsh_braking_rate": 0.9484732824427481,
+        "near_miss_rate": 0.49236641221374045,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.430239469113958,
+            "at_fault_rate": 0.19083969465648856
+          },
+          "assertive": {
+            "score": 0.4199936753277529,
+            "at_fault_rate": 0.2099236641221374
+          }
+        },
+        "score_ci95": [
+          0.3693636119107627,
+          0.4765994622388349
+        ]
+      },
+      "band_x0": {
+        "score": 0.43778896248104787,
+        "at_fault_rate": 0.19274809160305342,
+        "at_fault_vru_rate": 0.12022900763358779,
+        "progress": 0.6586431949475371,
+        "harsh_braking_rate": 0.9255725190839694,
+        "near_miss_rate": 0.5133587786259542,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.4275074253518754,
+            "at_fault_rate": 0.20229007633587787
+          },
+          "assertive": {
+            "score": 0.4480704996102205,
+            "at_fault_rate": 0.183206106870229
+          }
+        },
+        "score_ci95": [
+          0.3791510493227722,
+          0.4935271542990483
+        ]
+      }
+    },
+    "AgentFormer (most-likely)": {
+      "band_x1": {
+        "score": 0.6637355862798133,
+        "at_fault_rate": 0.0648854961832061,
+        "at_fault_vru_rate": 0.05152671755725191,
+        "progress": 0.8057691608754715,
+        "harsh_braking_rate": 0.6374045801526718,
+        "near_miss_rate": 0.28053435114503816,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6667177587799834,
+            "at_fault_rate": 0.061068702290076333
+          },
+          "assertive": {
+            "score": 0.6607534137796434,
+            "at_fault_rate": 0.06870229007633588
+          }
+        },
+        "score_ci95": [
+          0.610382966251169,
+          0.7126987529717327
+        ]
+      },
+      "band_x0": {
+        "score": 0.8002160187550453,
+        "at_fault_rate": 0.02862595419847328,
+        "at_fault_vru_rate": 0.02480916030534351,
+        "progress": 0.9053208062891135,
+        "harsh_braking_rate": 0.19083969465648856,
+        "near_miss_rate": 0.40458015267175573,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8168513459532181,
+            "at_fault_rate": 0.019083969465648856
+          },
+          "assertive": {
+            "score": 0.7835806915568727,
+            "at_fault_rate": 0.03816793893129771
+          }
+        },
+        "score_ci95": [
+          0.7545627676578418,
+          0.8404490159672044
+        ]
+      }
+    },
+    "AgentFormer set (10 samples)": {
+      "band_x1": {
+        "score": 0.6733818898751778,
+        "at_fault_rate": 0.04198473282442748,
+        "at_fault_vru_rate": 0.03244274809160305,
+        "progress": 0.8150710310080915,
+        "harsh_braking_rate": 0.6545801526717557,
+        "near_miss_rate": 0.2786259541984733,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6717903653090458,
+            "at_fault_rate": 0.03816793893129771
+          },
+          "assertive": {
+            "score": 0.6749734144413099,
+            "at_fault_rate": 0.04580152671755725
+          }
+        },
+        "score_ci95": [
+          0.6236590583726646,
+          0.7194343355007751
+        ]
+      },
+      "band_x0": {
+        "score": 0.792720764016301,
+        "at_fault_rate": 0.03435114503816794,
+        "at_fault_vru_rate": 0.02862595419847328,
+        "progress": 0.8988567778683278,
+        "harsh_braking_rate": 0.25,
+        "near_miss_rate": 0.35877862595419846,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8042715778120604,
+            "at_fault_rate": 0.022900763358778626
+          },
+          "assertive": {
+            "score": 0.7811699502205417,
+            "at_fault_rate": 0.04580152671755725
+          }
+        },
+        "score_ci95": [
+          0.7430975418475907,
+          0.8375968826694398
+        ]
+      }
+    },
+    "Trajectron++ (most-likely)": {
+      "band_x1": {
+        "score": 0.6497615548523747,
+        "at_fault_rate": 0.05534351145038168,
+        "at_fault_vru_rate": 0.03435114503816794,
+        "progress": 0.7848256085447011,
+        "harsh_braking_rate": 0.6679389312977099,
+        "near_miss_rate": 0.2652671755725191,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.654932379195678,
+            "at_fault_rate": 0.04961832061068702
+          },
+          "assertive": {
+            "score": 0.6445907305090713,
+            "at_fault_rate": 0.061068702290076333
+          }
+        },
+        "score_ci95": [
+          0.5936495603152487,
+          0.702825678601272
+        ]
+      },
+      "band_x0": {
+        "score": 0.7991792712656568,
+        "at_fault_rate": 0.03435114503816794,
+        "at_fault_vru_rate": 0.030534351145038167,
+        "progress": 0.9127587304158903,
+        "harsh_braking_rate": 0.20038167938931298,
+        "near_miss_rate": 0.40458015267175573,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8176826866046933,
+            "at_fault_rate": 0.026717557251908396
+          },
+          "assertive": {
+            "score": 0.7806758559266201,
+            "at_fault_rate": 0.04198473282442748
+          }
+        },
+        "score_ci95": [
+          0.7512819975843763,
+          0.8411150040077416
+        ]
+      }
+    },
+    "Trajectron++ set (10 samples)": {
+      "band_x1": {
+        "score": 0.616946313171375,
+        "at_fault_rate": 0.07442748091603053,
+        "at_fault_vru_rate": 0.04198473282442748,
+        "progress": 0.8012379909567074,
+        "harsh_braking_rate": 0.7977099236641222,
+        "near_miss_rate": 0.30916030534351147,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6128839788543559,
+            "at_fault_rate": 0.07633587786259542
+          },
+          "assertive": {
+            "score": 0.621008647488394,
+            "at_fault_rate": 0.07251908396946564
+          }
+        },
+        "score_ci95": [
+          0.5642540740461988,
+          0.6654780579389816
+        ]
+      },
+      "band_x0": {
+        "score": 0.7521085111317605,
+        "at_fault_rate": 0.04389312977099236,
+        "at_fault_vru_rate": 0.03435114503816794,
+        "progress": 0.8827120888365525,
+        "harsh_braking_rate": 0.44274809160305345,
+        "near_miss_rate": 0.30916030534351147,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.7530060933777198,
+            "at_fault_rate": 0.04198473282442748
+          },
+          "assertive": {
+            "score": 0.7512109288858012,
+            "at_fault_rate": 0.04580152671755725
+          }
+        },
+        "score_ci95": [
+          0.6971348124332127,
+          0.7979943372190773
+        ]
+      }
+    },
+    "CV (vel_k=5)": {
+      "band_x1": {
+        "score": 0.6565147230684429,
+        "at_fault_rate": 0.05152671755725191,
+        "at_fault_vru_rate": 0.03244274809160305,
+        "progress": 0.8068773738635843,
+        "harsh_braking_rate": 0.6984732824427481,
+        "near_miss_rate": 0.2824427480916031,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6600642931410032,
+            "at_fault_rate": 0.04961832061068702
+          },
+          "assertive": {
+            "score": 0.6529651529958826,
+            "at_fault_rate": 0.05343511450381679
+          }
+        },
+        "score_ci95": [
+          0.6093900323682253,
+          0.6987704514792596
+        ]
+      },
+      "band_x0": {
+        "score": 0.8017542490558753,
+        "at_fault_rate": 0.02480916030534351,
+        "at_fault_vru_rate": 0.022900763358778626,
+        "progress": 0.908023563162023,
+        "harsh_braking_rate": 0.17748091603053434,
+        "near_miss_rate": 0.4198473282442748,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8159112298088653,
+            "at_fault_rate": 0.019083969465648856
+          },
+          "assertive": {
+            "score": 0.7875972683028853,
+            "at_fault_rate": 0.030534351145038167
+          }
+        },
+        "score_ci95": [
+          0.754998454398378,
+          0.8416953618426417
+        ]
+      }
+    },
+    "MLP": {
+      "band_x1": {
+        "score": 0.6657802555218078,
+        "at_fault_rate": 0.03435114503816794,
+        "at_fault_vru_rate": 0.02480916030534351,
+        "progress": 0.7963246601748757,
+        "harsh_braking_rate": 0.700381679389313,
+        "near_miss_rate": 0.24045801526717558,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6691158071556695,
+            "at_fault_rate": 0.030534351145038167
+          },
+          "assertive": {
+            "score": 0.662444703887946,
+            "at_fault_rate": 0.03816793893129771
+          }
+        },
+        "score_ci95": [
+          0.6181404878639803,
+          0.7104346089453348
+        ]
+      },
+      "band_x0": {
+        "score": 0.7986445065557353,
+        "at_fault_rate": 0.03435114503816794,
+        "at_fault_vru_rate": 0.02480916030534351,
+        "progress": 0.9065295455869876,
+        "harsh_braking_rate": 0.22328244274809161,
+        "near_miss_rate": 0.37213740458015265,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.814592481956226,
+            "at_fault_rate": 0.026717557251908396
+          },
+          "assertive": {
+            "score": 0.7826965311552448,
+            "at_fault_rate": 0.04198473282442748
+          }
+        },
+        "score_ci95": [
+          0.7520645955925306,
+          0.839746742013006
+        ]
+      }
+    },
+    "ST-GAT (MHA)": {
+      "band_x1": {
+        "score": 0.6528934047842871,
+        "at_fault_rate": 0.04198473282442748,
+        "at_fault_vru_rate": 0.030534351145038167,
+        "progress": 0.8042069431026975,
+        "harsh_braking_rate": 0.700381679389313,
+        "near_miss_rate": 0.2900763358778626,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6540248840683592,
+            "at_fault_rate": 0.04198473282442748
+          },
+          "assertive": {
+            "score": 0.6517619255002152,
+            "at_fault_rate": 0.04198473282442748
+          }
+        },
+        "score_ci95": [
+          0.6087626226653386,
+          0.6957643368666065
+        ]
+      },
+      "band_x0": {
+        "score": 0.7977661257208579,
+        "at_fault_rate": 0.02099236641221374,
+        "at_fault_vru_rate": 0.013358778625954198,
+        "progress": 0.9005632994118549,
+        "harsh_braking_rate": 0.2099236641221374,
+        "near_miss_rate": 0.40458015267175573,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8114518739794107,
+            "at_fault_rate": 0.015267175572519083
+          },
+          "assertive": {
+            "score": 0.7840803774623053,
+            "at_fault_rate": 0.026717557251908396
+          }
+        },
+        "score_ci95": [
+          0.7527020581409604,
+          0.8394186340446134
+        ]
+      }
+    },
+    "Map-free transformer": {
+      "band_x1": {
+        "score": 0.667910898614806,
+        "at_fault_rate": 0.05534351145038168,
+        "at_fault_vru_rate": 0.04007633587786259,
+        "progress": 0.8135439566124504,
+        "harsh_braking_rate": 0.6679389312977099,
+        "near_miss_rate": 0.2652671755725191,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6699213376518887,
+            "at_fault_rate": 0.05343511450381679
+          },
+          "assertive": {
+            "score": 0.6659004595777233,
+            "at_fault_rate": 0.05725190839694656
+          }
+        },
+        "score_ci95": [
+          0.6163299045116102,
+          0.7160929411372563
+        ]
+      },
+      "band_x0": {
+        "score": 0.800643201110049,
+        "at_fault_rate": 0.02862595419847328,
+        "at_fault_vru_rate": 0.02099236641221374,
+        "progress": 0.9063066025374549,
+        "harsh_braking_rate": 0.1946564885496183,
+        "near_miss_rate": 0.3931297709923664,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8143086509158334,
+            "at_fault_rate": 0.019083969465648856
+          },
+          "assertive": {
+            "score": 0.7869777513042645,
+            "at_fault_rate": 0.03816793893129771
+          }
+        },
+        "score_ci95": [
+          0.7527025109067783,
+          0.8409678124302388
+        ]
+      }
+    },
+    "LED (mean-denoised)": {
+      "band_x1": {
+        "score": 0.6719377775814905,
+        "at_fault_rate": 0.05343511450381679,
+        "at_fault_vru_rate": 0.04198473282442748,
+        "progress": 0.8111267933691518,
+        "harsh_braking_rate": 0.6564885496183206,
+        "near_miss_rate": 0.24045801526717558,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6733001993972959,
+            "at_fault_rate": 0.05343511450381679
+          },
+          "assertive": {
+            "score": 0.6705753557656852,
+            "at_fault_rate": 0.05343511450381679
+          }
+        },
+        "score_ci95": [
+          0.6212540333807746,
+          0.718492148680025
+        ]
+      },
+      "band_x0": {
+        "score": 0.793124629679008,
+        "at_fault_rate": 0.03435114503816794,
+        "at_fault_vru_rate": 0.02862595419847328,
+        "progress": 0.9078897907843866,
+        "harsh_braking_rate": 0.21755725190839695,
+        "near_miss_rate": 0.4064885496183206,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8044424862078754,
+            "at_fault_rate": 0.030534351145038167
+          },
+          "assertive": {
+            "score": 0.7818067731501406,
+            "at_fault_rate": 0.03816793893129771
+          }
+        },
+        "score_ci95": [
+          0.7438233353688084,
+          0.8350484077529786
+        ]
+      }
+    },
+    "K-mode (top-1)": {
+      "band_x1": {
+        "score": 0.6641158492553932,
+        "at_fault_rate": 0.05343511450381679,
+        "at_fault_vru_rate": 0.03816793893129771,
+        "progress": 0.8079919970715168,
+        "harsh_braking_rate": 0.6889312977099237,
+        "near_miss_rate": 0.24618320610687022,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6680199981877198,
+            "at_fault_rate": 0.05343511450381679
+          },
+          "assertive": {
+            "score": 0.6602117003230665,
+            "at_fault_rate": 0.05343511450381679
+          }
+        },
+        "score_ci95": [
+          0.6163742010659524,
+          0.7079918517837563
+        ]
+      },
+      "band_x0": {
+        "score": 0.791017664530434,
+        "at_fault_rate": 0.04580152671755725,
+        "at_fault_vru_rate": 0.03816793893129771,
+        "progress": 0.8986600158675828,
+        "harsh_braking_rate": 0.1965648854961832,
+        "near_miss_rate": 0.38549618320610685,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.804326870947736,
+            "at_fault_rate": 0.03816793893129771
+          },
+          "assertive": {
+            "score": 0.7777084581131319,
+            "at_fault_rate": 0.05343511450381679
+          }
+        },
+        "score_ci95": [
+          0.7427332633353229,
+          0.833245249354373
+        ]
+      }
+    },
+    "K-mode set (10 modes)": {
+      "band_x1": {
+        "score": 0.5370387398937398,
+        "at_fault_rate": 0.14885496183206107,
+        "at_fault_vru_rate": 0.11259541984732824,
+        "progress": 0.7661456663944802,
+        "harsh_braking_rate": 0.8416030534351145,
+        "near_miss_rate": 0.3931297709923664,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.5409674012124636,
+            "at_fault_rate": 0.14122137404580154
+          },
+          "assertive": {
+            "score": 0.5331100785750164,
+            "at_fault_rate": 0.15648854961832062
+          }
+        },
+        "score_ci95": [
+          0.47801229126350675,
+          0.5913386521461595
+        ]
+      },
+      "band_x0": {
+        "score": 0.6257855497322357,
+        "at_fault_rate": 0.13358778625954199,
+        "at_fault_vru_rate": 0.09351145038167939,
+        "progress": 0.8100425029003117,
+        "harsh_braking_rate": 0.6335877862595419,
+        "near_miss_rate": 0.3568702290076336,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6243833178807087,
+            "at_fault_rate": 0.1297709923664122
+          },
+          "assertive": {
+            "score": 0.6271877815837628,
+            "at_fault_rate": 0.13740458015267176
+          }
+        },
+        "score_ci95": [
+          0.5636545220633588,
+          0.6887926897327323
+        ]
+      }
+    },
+    "LED set (10 samples)": {
+      "band_x1": {
+        "score": 0.6208191942164618,
+        "at_fault_rate": 0.07633587786259542,
+        "at_fault_vru_rate": 0.05534351145038168,
+        "progress": 0.7871868209319088,
+        "harsh_braking_rate": 0.7099236641221374,
+        "near_miss_rate": 0.3110687022900763,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6216738245822294,
+            "at_fault_rate": 0.06870229007633588
+          },
+          "assertive": {
+            "score": 0.6199645638506943,
+            "at_fault_rate": 0.08396946564885496
+          }
+        },
+        "score_ci95": [
+          0.5676315361134407,
+          0.6685626445375784
+        ]
+      },
+      "band_x0": {
+        "score": 0.6821112788584012,
+        "at_fault_rate": 0.07442748091603053,
+        "at_fault_vru_rate": 0.04770992366412214,
+        "progress": 0.8361075620837908,
+        "harsh_braking_rate": 0.5591603053435115,
+        "near_miss_rate": 0.33396946564885494,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.6685597314450347,
+            "at_fault_rate": 0.07251908396946564
+          },
+          "assertive": {
+            "score": 0.6956628262717677,
+            "at_fault_rate": 0.07633587786259542
+          }
+        },
+        "score_ci95": [
+          0.6290192579110462,
+          0.7334821655996372
+        ]
+      }
+    },
+    "Human driver (log replay)": {
+      "band_x1": {
+        "score": 0.9342663273960985,
+        "at_fault_rate": 0.011450381679389313,
+        "at_fault_vru_rate": 0.0,
+        "progress": 1.0,
+        "harsh_braking_rate": 0.0,
+        "near_miss_rate": 0.25572519083969464,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.9342663273960984,
+            "at_fault_rate": 0.011450381679389313
+          },
+          "assertive": {
+            "score": 0.9342663273960984,
+            "at_fault_rate": 0.011450381679389313
+          }
+        },
+        "score_ci95": [
+          0.9018226090637057,
+          0.961391702720116
+        ]
+      }
+    },
+    "Oracle (true future, no band)": {
+      "band_x1": {
+        "score": 0.8214838592597855,
+        "at_fault_rate": 0.003816793893129771,
+        "at_fault_vru_rate": 0.0,
+        "progress": 0.9053980063857884,
+        "harsh_braking_rate": 0.12786259541984732,
+        "near_miss_rate": 0.43320610687022904,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8296756223966436,
+            "at_fault_rate": 0.0
+          },
+          "assertive": {
+            "score": 0.8132920961229274,
+            "at_fault_rate": 0.007633587786259542
+          }
+        },
+        "score_ci95": [
+          0.7849697136354278,
+          0.8556044762656587
+        ]
+      }
+    },
+    "No prediction (ignore agents)": {
+      "band_x1": {
+        "score": 0.7290581899810992,
+        "at_fault_rate": 0.16412213740458015,
+        "at_fault_vru_rate": 0.09732824427480916,
+        "progress": 0.9167231120786196,
+        "harsh_braking_rate": 0.015267175572519083,
+        "near_miss_rate": 0.46946564885496184,
+        "n_episodes": 524,
+        "by_persona": {
+          "nominal": {
+            "score": 0.7919737002163831,
+            "at_fault_rate": 0.08015267175572519
+          },
+          "assertive": {
+            "score": 0.6661426797458152,
+            "at_fault_rate": 0.2480916030534351
+          }
+        },
+        "score_ci95": [
+          0.6606651324326706,
+          0.7898867393972213
+        ]
+      }
+    }
+  },
+  "amendment3_hypotheses": {
+    "S1 MF transformer set (10 modes) higher score than MF transformer (top-1)": {
+      "diff_ci95": [
+        -0.4145071763923205,
+        -0.29139139176209783
+      ],
+      "p_one_sided": 1.0,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "S2 MF transformer set (10 modes) fewer at-fault collisions than MF transformer (top-1)": {
+      "diff_ci95": [
+        -0.2283059501095329,
+        -0.08394160583941607
+      ],
+      "p_one_sided": 1.0,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "S1 AgentFormer set (10 samples) higher score than AgentFormer (most-likely)": {
+      "diff_ci95": [
+        -0.0228780643946142,
+        0.007845254609573036
+      ],
+      "p_one_sided": 0.8315,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "S2 AgentFormer set (10 samples) fewer at-fault collisions than AgentFormer (most-likely)": {
+      "diff_ci95": [
+        -0.016855516600489992,
+        0.0019999999999999983
+      ],
+      "p_one_sided": 0.927,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "S1 Trajectron++ set (10 samples) higher score than Trajectron++ (most-likely)": {
+      "diff_ci95": [
+        -0.0724383796274325,
+        -0.021627907781180792
+      ],
+      "p_one_sided": 1.0,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "S2 Trajectron++ set (10 samples) fewer at-fault collisions than Trajectron++ (most-likely)": {
+      "diff_ci95": [
+        -0.02920244740231858,
+        0.010003036437246945
+      ],
+      "p_one_sided": 0.8665,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "T1 MF transformer (top-1) higher score than Map-free transformer": {
+      "diff_ci95": [
+        -0.02568940660229598,
+        0.00486315041998265
+      ],
+      "p_one_sided": 0.909,
+      "p_holm": 1.0,
+      "supported": false
+    },
+    "T2 MF transformer (top-1) fewer at-fault collisions than Map-free transformer": {
+      "diff_ci95": [
+        -0.02068060776942355,
+        0.001960977304307549
+      ],
+      "p_one_sided": 0.951,
+      "p_holm": 1.0,
+      "supported": false
+    }
+  },
+  "when": "2026-10-28T23:08:03"
+}

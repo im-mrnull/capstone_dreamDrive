@@ -1,6 +1,6 @@
 # Closed-Loop Test v2 — cross-validated, fixed instrument, fixed planner
 
-## Status: ✅ Primary result in (2026-10-28) — amendment 3 pending
+## Status: ✅ Complete (2026-10-28) — primary result and amendment 3 in
 
 The first closed-loop test ([[closed-loop-test]], 22 scenes) could not separate the predictors.
 It also showed three problems:
@@ -177,6 +177,22 @@ and `closed_loop_cv_sensitivity.json`). The rule commit is `24684e2`.
   - the human replay scores 0.934;
   - ignoring agents scores 0.729.
 - **Development and all-105 sets:** the pick is CV in both.
+- **Amendment 3** (`closed_loop_cv_extra.json`; primary set, planner v2, band ×0):
+
+  | Model | Single trajectory: score / at-fault | 10-future set: score / at-fault |
+  |---|---|---|
+  | Multi-future transformer | 0.790 / 3.6% | 0.438 / 19.3% |
+  | AgentFormer | 0.800 / 2.9% | 0.793 / 3.4% |
+  | Trajectron++ | 0.799 / 3.4% | 0.752 / 4.4% |
+
+  - **S1 / S2:** not supported for any of the three. The multi-future transformer set is
+    significantly worse on both score and collisions, and the Trajectron++ set on score. The
+    AgentFormer set is level with its single trajectory (score CI [−0.023, 0.008]).
+  - **T1 / T2:** not supported. The multi-future transformer's top-1 is no better than the
+    single-output transformer (score CI [−0.026, 0.005]).
+  - Across all five multi-future models, no set beats its own single trajectory under
+    planner v2, and harsh braking rises with how much the set blocks: 25% (AgentFormer) up
+    to 93% (multi-future transformer).
 
 **Caveats:**
 - the agents don't react;

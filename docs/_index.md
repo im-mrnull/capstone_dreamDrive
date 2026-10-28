@@ -70,7 +70,7 @@ All on the same 2,177 canonical test windows, 3 seeds. Top tier = ST-GAT ≈ tra
 - [[conformal-prediction]] — 6 models, class-conditional uncertainty bands
 - [[gap-decomposition]] — oracle vs deployable analysis (Trajectron++)
 - [[negative-results]] — hetero T++, EWTA annealing, content scorer, multi-future sets under an obstacle planner, learned vs CV in closed loop
-- [[closed-loop-cv]] — confirmatory 5-fold closed-loop test: CV picked (all tied), prediction cuts collisions 16% → 2–3%, bands hurt
+- [[closed-loop-cv]] — confirmatory 5-fold closed-loop test: CV picked (all tied), prediction cuts collisions 16% → 2–3%, bands hurt; no multi-future set beats its single trajectory under an obstacle planner (all 5 models)
 - [[ci-provenance]] — structural anti-fabrication guards
 
 ## Wiki Notes — Not Started (12 items, priority order)
@@ -79,8 +79,8 @@ All on the same 2,177 canonical test windows, 3 seeds. Top tier = ST-GAT ≈ tra
 |----------|------|--------|
 | 🔴 1 | [[chaos-gap]] — internal note, local only | HIGHEST |
 | 🔴 2 | [[carla-harness]] — Replay IDD-3D trajectories in CARLA | HIGH |
-| 🔴 3 | [[planner]] — Frenét/MPC with conformal margins | HIGH |
-| 🟡 4 | [[closed-loop-eval]] — Prediction → planning → collision rates | MEDIUM |
+| 🔴 3 | [[planner]] — Frenét sampling planner: v2 done (tuned on dev scenes); MPC not started | HIGH |
+| 🟡 4 | [[closed-loop-eval]] — Prediction → planning → collision rates: non-reactive version done ([[closed-loop-cv]]); reactive / CARLA not started | MEDIUM |
 | 🟡 5 | [[bootstrap-ci]] — Scene-level resampling CIs | MEDIUM |
 | 🟡 6 | [[datasheet]] — Datasheets-for-Datasets provenance doc | MEDIUM |
 | 🟠 7 | [[rss-violations]] — internal note, local only | MEDIUM |
@@ -95,7 +95,7 @@ All on the same 2,177 canonical test windows, 3 seeds. Top tier = ST-GAT ≈ tra
 - **CARLA visualization:** Replay scripts written (`scripts/viz_*.py`); first render blocked on
   the DirectX End-User Runtime (`winget install --id Microsoft.DirectX --exact`)
 - **Named benchmark + packaging:** Internal harness exists, not packaged
-- **Conformal → planner:** Radii computed, no planner consumes them
+- **Conformal → planner:** Bands consumed by the closed-loop planner; at full width they hurt it (H3 in [[closed-loop-cv]], all 7 instrument variants)
 - **Two-wheeler:** Per-class conformal + unicycle ablation done, no dedicated analysis
 
 ## Latest Review

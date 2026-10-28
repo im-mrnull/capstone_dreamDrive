@@ -421,8 +421,9 @@ What this means:
 4. **Accuracy gains do not yet show up as safety gains.** The learned models are clearly more
    accurate than CV (ST-GAT vs CV: −1.03 m ADE, separated), including near the ego. On this
    open-loop proxy, that accuracy does not translate into measurably better conflict
-   detection. Showing a safety benefit needs closed-loop evaluation, with a planner in CARLA
-   and collision rates.
+   detection. Showing a safety benefit needs closed-loop evaluation. The cross-validated
+   closed-loop test below does that, with a planner and collision rates, and it doesn't show
+   a benefit either.
 
 This is an open-loop proxy: the ego path is what the human driver did.
 
@@ -975,6 +976,9 @@ runs all of it on every push and pull request.
 
   Both favour Trajectron++, so they make the other models' lead over it conservative.
   AgentFormer runs at 2 Hz, a cost it bears alone.
+- The closed-loop tests replay the recorded agents, which do not react to our car. Any
+  safety benefit that depends on interaction (agents yielding or cutting in) cannot appear
+  in them. A reactive simulation is not built yet.
 - Agent class labels are used only by the class-conditional conformal radii; no forecaster
   consumes them yet.
 - CARLA is used only for visualization: [`scripts/viz_*.py`](scripts/) replay recorded

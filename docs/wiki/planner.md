@@ -1,6 +1,6 @@
 # Frenét / MPC Planner
 
-## Status: 🟡 First version (2026-10-27): sampling planner in `scripts/closed_loop_sim.py`, see [[closed-loop-test]]
+## Status: 🟡 First version (2026-10-27): sampling planner in `scripts/closed_loop_sim.py`, see [[closed-loop-test]]. Planner v2 (2026-10-28): 1 s hard constraint, soft penalty beyond it, band ×0, tuned on the 32 dev scenes, see [[closed-loop-cv]]
 
 ## Goal
 

@@ -138,3 +138,21 @@ Claude session, continuing [[2026-10-26-claude-project-review]].
 - **Outcome: CV**, a tie fall-through. Single trajectories score 0.69–0.75 with CIs ±0.13; the K-mode set is clearly worse. The human replay has a 5.7% floor (2 footprint artifacts on test).
 - Exploratory: the band hurts all models (+0.07–0.11 without it). Without the band, prediction cuts at-fault episodes by 4–7 points vs ignoring agents, and LED/ST-GAT edge out CV by about 0.03 (hypothesis).
 - Re-run with `--episodes-out` reproduced packages and decision exactly.
+
+## 2026-10-28 — confirmatory closed-loop test v2 (5-fold CV)
+- Pre-registered in `d372165` with three amendments, all made before any result was seen ([[closed-loop-cv]]):
+  - instrument sensitivity (7 variants);
+  - multi-future sets as a secondary analysis;
+  - all multi-future models.
+- Primary set: 73 frozen-train scenes, 524 episodes per package, each scene driven by the fold model that never trained on it.
+- **Outcome: CV**, by tie fall-through. All single-trajectory models score 0.790–0.802, AgentFormer and Trajectron++ included.
+- **Robust in 7/7 variants:**
+  - prediction cuts at-fault episodes from 16.4% (ignoring agents) to 2–3% (H2);
+  - the full conformal band hurts the planner (H3).
+- H1 / H1b (learned beats CV) are unsupported in every variant.
+- **Multi-future sets under the obstacle planner (all 5 models):** no set beats its own single trajectory.
+  - The K-mode, LED, multi-future transformer and Trajectron++ sets are significantly worse; the transformer set is the worst at 0.438 / 19.3% at-fault.
+  - The AgentFormer set is level with its single trajectory.
+- Training with 10 futures doesn't improve the transformer's deployable top-1 (T1 / T2 unsupported).
+- Ops: the slow fold training on Windows was the WDDM driver spilling GPU memory into shared system RAM (~30× slowdown). It was fixed by capping the per-process memory fraction (`torch.cuda.set_per_process_memory_fraction`).
+

@@ -580,7 +580,7 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
             "min_clearance_m": float(min_clear) if np.isfinite(min_clear) else None,
             # diagnostics: near-miss while the ego moves, fallback replans, command jerk
             # (RMS change of the commanded acceleration per second), planning time
-            "near_miss_moving": bool(min_clear_moving < NEAR_MISS_M),
+            "near_miss_moving": bool(min_clear_moving < NEAR_MISS_M), "hit_agents": sorted(int(x) for x in hits),
             "n_replans": len(cmds), "n_fallback": n_fallback,
             "jerk_rms": float(np.sqrt(np.mean((np.diff(cmds) / (REPLAN * DT)) ** 2))) if len(cmds) > 1 else 0.0,
             "plan_ms": 1000.0 * plan_s / max(len(cmds), 1)}

@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) — nothing has been driven in this simulator yet
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -185,5 +185,53 @@ study. The reactive test stopped at its pilot and never used them. The reuse is 
 - Assertive branches are somewhat less plausible than the logs (section 3).
 - The ideal references know the branch model, and its prior, exactly.
 - The planners were tuned in the non-reactive simulator.
+
+## 7. Stage 1 result (2026-10-30, 32 dev scenes, 880 episodes per package per dose)
+
+Run with `counterfactual_sim.py stage1` against rule commit `d47f7cf`. Output:
+[`headroom_stage1.json`](../../outputs/benchmark_v2/headroom_stage1.json). All packages use planner v2.
+
+| Package | Primary: score | Primary: at-fault | Strong: score | Strong: at-fault | Strong: VRU at-fault |
+|---|---|---|---|---|---|
+| Human driver (log replay) | 0.862 | 9.4% | 0.786 | 17.5% | 9.3% |
+| No prediction | 0.775 | 14.1% | 0.727 | 18.8% | 10.2% |
+| CV | 0.834 | 2.8% | 0.795 | 5.1% | 3.6% |
+| Branch oracle | 0.847 | 1.8% | 0.820 | 1.9% | 0.9% |
+| Ideal single (most likely) | 0.845 | 1.8% | 0.823 | 2.0% | 0.7% |
+| Ideal single (mean) | 0.847 | 1.8% | 0.823 | 2.0% | 0.7% |
+| Ideal set | 0.845 | 2.2% | 0.823 | 1.6% | 0.9% |
+
+**G1 (Branch oracle vs CV):**
+
+| Dose | Score gain | At-fault reduction | G1 |
+|---|---|---|---|
+| Primary | +0.013 | +1.0 pt | fail |
+| Strong | +0.025 | +3.2 pt | **pass** |
+
+By the dose ladder (section 5), **the strong dose is used for every later stage.**
+
+This is the first simulator in the project where perfect information beats CV by a margin set in
+advance. In the non-reactive and reactive replays the oracle was level with CV.
+
+**Reported, not decisive (strong dose, planner v2):**
+- **Value of information:**
+  - Branch oracle − CV: +0.025 score, −3.2 pt at-fault;
+  - Branch oracle − best ideal single: **−0.003** score, −0.1 pt at-fault.
+- **Knowing the realised branch adds nothing beyond knowing the branch model.** The ideal singles
+  capture all of the oracle's gain over CV. The likely reason: branches separate from each other
+  (0.3 m) within about a second, and the planner replans every 0.2 s, so it catches up once the
+  branch is visible.
+- **Ideal set vs best ideal single:** ±0.000 score and −0.4 pt at-fault (1.6% vs 2.0%). Under
+  planner v2, the ideal distribution adds nothing measurable.
+- **Plausibility check:** the human replay's at-fault rate rises to 9.4% (primary) and 17.5%
+  (strong), from 0 in the non-reactive replay. Expected rather than a defect: the logged ego cannot
+  respond to branches it never saw (for example, it can rear-end a hesitating lead vehicle; the
+  breakdown by branch was not computed). It does show that the strong dose produces situations the logged
+  drivers did not face.
+- **The ideal predictors brake harshly less often than CV** (13–14% vs 20% of episodes at the strong
+  dose). They also beat CV on VRU at-fault (0.7–0.9% vs 3.6%).
+
+**G2** compares the Ideal set under the separately pre-registered (confidential) planner with
+these ideal singles. It is recorded with that planner.
 
 Related: [[reactive-test]], [[closed-loop-cv]], [[planner]], [[negative-results]]

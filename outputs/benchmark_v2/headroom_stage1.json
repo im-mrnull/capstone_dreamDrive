@@ -1,0 +1,362 @@
+{
+  "rule_doc": "docs/wiki/headroom-test.md",
+  "rule_commit": "d47f7cf99c9cb1f676e1df596e9e1c1a81473a7b",
+  "rule_doc_clean": true,
+  "scenes": "32 development scenes (frozen val + test)",
+  "draw_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "doses": {
+    "primary": [
+      1.5,
+      1.3
+    ],
+    "strong": [
+      3.0,
+      1.6
+    ]
+  },
+  "prior": {
+    "logged": 0.5,
+    "hesitate": 0.25,
+    "assertive": 0.25
+  },
+  "planner_v2_cfg": {
+    "hard_s": 1.0,
+    "soft_w": 5.0,
+    "fallback": "least_penetration"
+  },
+  "band": 0.0,
+  "packages": {
+    "primary": {
+      "Human driver (log replay)": {
+        "score": 0.8622474747474748,
+        "at_fault_rate": 0.09431818181818181,
+        "at_fault_vru_rate": 0.042045454545454546,
+        "progress": 1.0,
+        "harsh_braking_rate": 0.0,
+        "near_miss_rate": 0.2897727272727273,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.85,
+            "at_fault_rate": 0.10909090909090909
+          },
+          "assertive": {
+            "score": 0.8744949494949497,
+            "at_fault_rate": 0.07954545454545454
+          }
+        },
+        "near_miss_moving_rate": 0.2772727272727273,
+        "jerk_rms": 0.0,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "No prediction (ignore agents)": {
+        "score": 0.7750293288302692,
+        "at_fault_rate": 0.1409090909090909,
+        "at_fault_vru_rate": 0.07840909090909091,
+        "progress": 0.9382384490329829,
+        "harsh_braking_rate": 0.0,
+        "near_miss_rate": 0.3931818181818182,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.7751997410834889,
+            "at_fault_rate": 0.1318181818181818
+          },
+          "assertive": {
+            "score": 0.7748589165770496,
+            "at_fault_rate": 0.15
+          }
+        },
+        "near_miss_moving_rate": 0.3875,
+        "jerk_rms": 1.2203410015571823,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "CV (vel_k=5)": {
+        "score": 0.8336586675116755,
+        "at_fault_rate": 0.028409090909090908,
+        "at_fault_vru_rate": 0.02159090909090909,
+        "progress": 0.9242712748666073,
+        "harsh_braking_rate": 0.16704545454545455,
+        "near_miss_rate": 0.3375,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8232594370758527,
+            "at_fault_rate": 0.02727272727272727
+          },
+          "assertive": {
+            "score": 0.8440578979474983,
+            "at_fault_rate": 0.029545454545454545
+          }
+        },
+        "near_miss_moving_rate": 0.33181818181818185,
+        "jerk_rms": 2.944121214854276,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Branch oracle": {
+        "score": 0.8465744275185201,
+        "at_fault_rate": 0.01818181818181818,
+        "at_fault_vru_rate": 0.003409090909090909,
+        "progress": 0.9224735301505533,
+        "harsh_braking_rate": 0.09659090909090909,
+        "near_miss_rate": 0.36704545454545456,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8320646374505106,
+            "at_fault_rate": 0.022727272727272728
+          },
+          "assertive": {
+            "score": 0.8610842175865298,
+            "at_fault_rate": 0.013636363636363636
+          }
+        },
+        "near_miss_moving_rate": 0.3613636363636364,
+        "jerk_rms": 2.212199289019619,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Ideal single (most likely)": {
+        "score": 0.845123272230193,
+        "at_fault_rate": 0.01818181818181818,
+        "at_fault_vru_rate": 0.003409090909090909,
+        "progress": 0.9219128785002371,
+        "harsh_braking_rate": 0.10113636363636364,
+        "near_miss_rate": 0.3659090909090909,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8290546097222794,
+            "at_fault_rate": 0.022727272727272728
+          },
+          "assertive": {
+            "score": 0.8611919347381071,
+            "at_fault_rate": 0.013636363636363636
+          }
+        },
+        "near_miss_moving_rate": 0.36022727272727273,
+        "jerk_rms": 2.2520673539911074,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Ideal single (mean)": {
+        "score": 0.8468178315588819,
+        "at_fault_rate": 0.01818181818181818,
+        "at_fault_vru_rate": 0.003409090909090909,
+        "progress": 0.9217812671100589,
+        "harsh_braking_rate": 0.09886363636363636,
+        "near_miss_rate": 0.3625,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8320154888840825,
+            "at_fault_rate": 0.020454545454545454
+          },
+          "assertive": {
+            "score": 0.8616201742336815,
+            "at_fault_rate": 0.015909090909090907
+          }
+        },
+        "near_miss_moving_rate": 0.3568181818181818,
+        "jerk_rms": 2.257252998925616,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Ideal set": {
+        "score": 0.8447256118426132,
+        "at_fault_rate": 0.02159090909090909,
+        "at_fault_vru_rate": 0.003409090909090909,
+        "progress": 0.9215964124564174,
+        "harsh_braking_rate": 0.09318181818181819,
+        "near_miss_rate": 0.3625,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8374804156804996,
+            "at_fault_rate": 0.011363636363636364
+          },
+          "assertive": {
+            "score": 0.8519708080047268,
+            "at_fault_rate": 0.031818181818181815
+          }
+        },
+        "near_miss_moving_rate": 0.3568181818181818,
+        "jerk_rms": 2.26740523787948,
+        "branched_episode_share": 0.7386363636363636
+      }
+    },
+    "strong": {
+      "Human driver (log replay)": {
+        "score": 0.7861111111111111,
+        "at_fault_rate": 0.175,
+        "at_fault_vru_rate": 0.09318181818181819,
+        "progress": 1.0,
+        "harsh_braking_rate": 0.0,
+        "near_miss_rate": 0.35,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.7780303030303031,
+            "at_fault_rate": 0.18409090909090908
+          },
+          "assertive": {
+            "score": 0.7941919191919192,
+            "at_fault_rate": 0.16590909090909092
+          }
+        },
+        "near_miss_moving_rate": 0.3375,
+        "jerk_rms": 0.0,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "No prediction (ignore agents)": {
+        "score": 0.7273156098105729,
+        "at_fault_rate": 0.1875,
+        "at_fault_vru_rate": 0.10227272727272728,
+        "progress": 0.9382384490329829,
+        "harsh_braking_rate": 0.0,
+        "near_miss_rate": 0.4511363636363636,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.7218411126392696,
+            "at_fault_rate": 0.18863636363636363
+          },
+          "assertive": {
+            "score": 0.7327901069818761,
+            "at_fault_rate": 0.18636363636363637
+          }
+        },
+        "near_miss_moving_rate": 0.44545454545454544,
+        "jerk_rms": 1.2203410015571823,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "CV (vel_k=5)": {
+        "score": 0.7952920536141083,
+        "at_fault_rate": 0.05113636363636364,
+        "at_fault_vru_rate": 0.03636363636363636,
+        "progress": 0.9192215985426132,
+        "harsh_braking_rate": 0.20227272727272727,
+        "near_miss_rate": 0.4159090909090909,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.7915033284636012,
+            "at_fault_rate": 0.05454545454545454
+          },
+          "assertive": {
+            "score": 0.7990807787646156,
+            "at_fault_rate": 0.04772727272727273
+          }
+        },
+        "near_miss_moving_rate": 0.4090909090909091,
+        "jerk_rms": 3.16486629583869,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Branch oracle": {
+        "score": 0.8204084181222044,
+        "at_fault_rate": 0.019318181818181818,
+        "at_fault_vru_rate": 0.00909090909090909,
+        "progress": 0.9166393173933919,
+        "harsh_braking_rate": 0.13522727272727272,
+        "near_miss_rate": 0.42272727272727273,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8107276068539193,
+            "at_fault_rate": 0.020454545454545454
+          },
+          "assertive": {
+            "score": 0.8300892293904898,
+            "at_fault_rate": 0.01818181818181818
+          }
+        },
+        "near_miss_moving_rate": 0.4159090909090909,
+        "jerk_rms": 2.394880363806372,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Ideal single (most likely)": {
+        "score": 0.8225494276444225,
+        "at_fault_rate": 0.020454545454545454,
+        "at_fault_vru_rate": 0.006818181818181818,
+        "progress": 0.9175266037037296,
+        "harsh_braking_rate": 0.12840909090909092,
+        "near_miss_rate": 0.41704545454545455,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8139981599729711,
+            "at_fault_rate": 0.022727272727272728
+          },
+          "assertive": {
+            "score": 0.8311006953158742,
+            "at_fault_rate": 0.01818181818181818
+          }
+        },
+        "near_miss_moving_rate": 0.4102272727272727,
+        "jerk_rms": 2.3350519291584058,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Ideal single (mean)": {
+        "score": 0.8231626776526492,
+        "at_fault_rate": 0.020454545454545454,
+        "at_fault_vru_rate": 0.006818181818181818,
+        "progress": 0.9181759082639921,
+        "harsh_braking_rate": 0.12613636363636363,
+        "near_miss_rate": 0.41818181818181815,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8133539892558911,
+            "at_fault_rate": 0.022727272727272728
+          },
+          "assertive": {
+            "score": 0.8329713660494072,
+            "at_fault_rate": 0.01818181818181818
+          }
+        },
+        "near_miss_moving_rate": 0.4113636363636364,
+        "jerk_rms": 2.3493886546335783,
+        "branched_episode_share": 0.7386363636363636
+      },
+      "Ideal set": {
+        "score": 0.8226270984236035,
+        "at_fault_rate": 0.015909090909090907,
+        "at_fault_vru_rate": 0.00909090909090909,
+        "progress": 0.9149018742765884,
+        "harsh_braking_rate": 0.12727272727272726,
+        "near_miss_rate": 0.42159090909090907,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.817903049131378,
+            "at_fault_rate": 0.00909090909090909
+          },
+          "assertive": {
+            "score": 0.8273511477158291,
+            "at_fault_rate": 0.022727272727272728
+          }
+        },
+        "near_miss_moving_rate": 0.4147727272727273,
+        "jerk_rms": 2.509807790769691,
+        "branched_episode_share": 0.7386363636363636
+      }
+    }
+  },
+  "g1": {
+    "primary": {
+      "score_gain": 0.012915760006844579,
+      "at_fault_reduction": 0.010227272727272727,
+      "passes": false
+    },
+    "strong": {
+      "score_gain": 0.02511636450809618,
+      "at_fault_reduction": 0.03181818181818182,
+      "passes": true
+    }
+  },
+  "dose_for_later_stages": "strong",
+  "when": "2026-10-30T00:52:57"
+}

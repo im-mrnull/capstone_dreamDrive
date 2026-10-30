@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9)
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -412,5 +412,93 @@ are too cautious in this simulator.
 
 **G2-matched over all four eligible planners**, including the two confidential ones, is recorded
 with the confidential planners. The public cells alone do not meet the gate.
+
+## 10. Confirmation on the primary scenes (pre-registered 2026-10-31, before any primary scene is driven here)
+
+**Why.** Under the proposal planner, the Ideal set beat the best ideal single by +0.008 score
+(95% CI [−0.001, +0.018]) and 0.5 pt fewer at-fault episodes on the dev scenes (section 9). That
+is below the threshold and not significant. Two questions are open:
+1. Is the small advantage real?
+2. Is it more than **extra caution**? The set also beat the oracle (0.866 vs 0.857), which hints
+   that keeping clear of every branch simply makes the ego more careful.
+
+A further hypothesis is new: **contingency planning built on the proposal planner** (confidential,
+pre-registered separately).
+
+**Scenes and draws:**
+- **Evaluation:** the **73 primary scenes** (`closed_loop_cv.fold_of_scene()`, train split), never
+  driven in this simulator.
+  - 221 of 262 episodes are eligible (log-only count), in 62 scenes, with 2.32 targets each.
+  - Draws 0–9 → **4,420 episodes per cell**.
+  - This is the third closed-loop use of these scenes, after closed-loop v2 and the planner
+    study; disclosed.
+- **Tuning:** dev scenes, draws 5–9 only (no new dev draws).
+- **Strong dose** (fixed by G1).
+
+**Cells** (ideal predictors only):
+
+| # | Planner | Predictor | Role |
+|---|---|---|---|
+| 1 | Proposal (frozen setting, section 9) | Ideal single (mean); Ideal single (most likely) | strong single-future baseline |
+| 2 | Proposal + tuned safety margin | Ideal single (mean) | caution control |
+| 3 | Proposal | Ideal set (worst case over futures) | multiple futures, no branching |
+| 4 | Contingency (confidential) | Ideal single (mean) | contingency architecture control |
+| 5 | Contingency (confidential) | Ideal set | branching + multiple futures |
+| – | Proposal; contingency | Branch oracle | ceiling, reported |
+
+**Safety-margin control:**
+- `margin_m` (an extra buffer on every predicted footprint) is added to the proposal planner. At
+  0 it reproduces the frozen planner exactly.
+- Tuned for the Ideal single (mean) on dev draws 5–9 over {0, 0.25, 0.5, 0.75, 1.0} m; best score
+  wins. This gives the single trajectory its best level of caution.
+
+**Latency pre-filter:**
+- as section 8 (median ≤ 50 ms, p95 ≤ 100 ms), single process;
+- measured on primary draws 0–1 with the Ideal set and Ideal single (mean).
+
+A planner outside the budget is reported, but its cells cannot be compared.
+
+### Tests
+
+Statistics:
+- one-sided paired scene bootstrap, 2,000 replicates, draws pooled per scene;
+- score and at-fault for each test;
+- Holm over all of them (8 when every planner is eligible).
+
+| Test | Comparison | Question |
+|---|---|---|
+| **H1 (decisive)** | the best set cell (3, 5) vs the best single cell (1, 2, 4), chosen per metric on the evaluation data | does a multi-future system beat every single-future system, including the cautious one? |
+| H2 | 5 vs 4 | do multiple futures help inside the contingency planner? |
+| H3 | 5 vs 3 | does branching add to multiple futures? |
+| H4 | 3 vs 2 | is the set's advantage more than extra caution? |
+
+Picking the best single on the evaluation data favours the singles, so this choice is
+conservative.
+
+**H1 reading rule (fixed now):**
+- **"meaningful benefit":** gain ≥ 0.01 score or ≥ 1 pt at-fault, and Holm p < 0.05;
+- **"small but real benefit":** Holm p < 0.05 but below the threshold;
+- **"no demonstrated benefit":** otherwise.
+
+**Reported:**
+- per cell: score, at-fault, VRU at-fault, harsh braking, near-miss, progress, jerk, latency;
+- the interaction (5 − 4) − (3 − 1);
+- the oracle ceiling per planner.
+
+**Decision:**
+- **Meaningful or small-but-real benefit:**
+  - stage 2: the learned models, on the dev pilot;
+  - the winning planner is used for the learned singles and the learned sets alike;
+  - the margin control is included for the learned single.
+- **No demonstrated benefit:** report it, and move to path-level intent branches.
+
+**Power (stated in advance):** if the true gain is the dev estimate (+0.008), this test has
+roughly a 60–70% chance of finding it significant after Holm. If it does not, that is not proof
+of no effect.
+
+**Runners:**
+- `counterfactual_sim.py confirm-tune` (margin) → `headroom_confirm_tune.json`;
+- `counterfactual_sim.py confirm` (cells 1–3 and the proposal oracle) → `headroom_confirm.json`;
+- the confidential runner adds cells 4–5 and computes H1–H4 (`confirm_tests`).
 
 Related: [[reactive-test]], [[closed-loop-cv]], [[planner]], [[negative-results]]

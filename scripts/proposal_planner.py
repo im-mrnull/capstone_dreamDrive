@@ -30,7 +30,9 @@ import closed_loop_sim as cl
 # const      "always": constant-acceleration proposals compete with the IDM ones;
 #            "fallback": they are used only when no IDM proposal is feasible (PDM-Closed's
 #            emergency manoeuvres)
-PP_DEFAULTS = {"idm_fracs": (), "prog_w": 0.0, "const": "always"}
+# margin_m   extra buffer (m) on every predicted footprint (the caution control of
+#            docs/wiki/headroom-test.md section 10)
+PP_DEFAULTS = {"idm_fracs": (), "prog_w": 0.0, "const": "always", "margin_m": 0.0}
 IDM_EGO = (1.5, 2.0, 1.2, 2.0)          # a_max, b_comf (m/s^2), time headway T (s), standstill gap s0 (m)
 A_MIN, A_MAX = -6.0, 2.0                # command limits (planner v2's acceleration range)
 EGO_FRONT = max(cl.EGO[0]) + cl.EGO[1]  # m ahead of the sensor
@@ -73,18 +75,16 @@ def lead_tracks(sc, route, s0, preds):
     return np.concatenate(S), np.concatenate(D), np.array(L), np.array(W)
 
 
-def idm_rollouts(s0, d0, v0, goals, d_targets, tracks):
-    """Ego (s, d, v) for frames 1..H under IDM towards each goal speed, following the nearest
-    in-lane agent ahead (worst case over agents and futures); one row per (goal, d_target)."""
-    n = cl.H_FRAMES
+def idm_roll(s0, d0, v0, G, DT_, tracks, k0: int = 0, n: int = cl.H_FRAMES):
+    """Ego (s, d, v) for n frames from per-row start states at frame k0 under IDM towards goal
+    speeds G with lateral targets DT_, following the nearest in-lane agent ahead (worst case over
+    agents and futures); also the first command of each row."""
     a_max, b, T, gap0 = IDM_EGO
-    G, DT_ = np.meshgrid(goals, d_targets, indexing="ij")
-    G, DT_ = G.ravel(), DT_.ravel()
     C = len(G)
-    rate = (DT_ - d0) / cl.LAT_TIME
-    s, d, v = np.full(C, s0, float), np.full(C, d0, float), np.full(C, v0, float)
+    s, d, v = np.broadcast_to(s0, C).astype(float), np.broadcast_to(d0, C).astype(float), np.broadcast_to(v0, C).astype(float)
+    rate = (DT_ - d) / cl.LAT_TIME
     S, Dd, V, A0 = np.empty((C, n)), np.empty((C, n)), np.empty((C, n)), None
-    for k in range(n):
+    for k in range(k0, k0 + n):
         free = np.maximum(a_max * (1.0 - (v / np.maximum(G, 0.1)) ** 4), -b)  # slow down comfortably
         acc = free
         if tracks is not None:
@@ -108,13 +108,20 @@ def idm_rollouts(s0, d0, v0, goals, d_targets, tracks):
         s = s + 0.5 * (v + nv) * cl.DT
         d = np.where(np.abs(DT_ - d) > np.abs(rate * cl.DT), d + rate * cl.DT, DT_)
         v = nv
-        S[:, k], Dd[:, k], V[:, k] = s, d, v
+        S[:, k - k0], Dd[:, k - k0], V[:, k - k0] = s, d, v
+    return A0, S, Dd, V
+
+
+def idm_rollouts(s0, d0, v0, goals, d_targets, tracks):
+    """IDM proposals from the ego's state, one row per (goal, d_target): commands and (s, d, v)."""
+    G, DT_ = np.meshgrid(goals, d_targets, indexing="ij")
+    G, DT_ = G.ravel(), DT_.ravel()
+    A0, S, Dd, V = idm_roll(s0, d0, v0, G, DT_, tracks)
     return [(float(a), float(dt)) for a, dt in zip(A0, DT_)], S, Dd, V
 
 
-def plan(sc, route, s0, d0, v0, v_ref, preds):
-    """closed_loop_sim.plan with IDM proposals and a progress term (same interface)."""
-    cfg = {**PP_DEFAULTS, **cl.PLAN_CFG}
+def proposals(sc, route, s0, d0, v0, v_ref, preds, cfg):
+    """The candidate commands, their (s, d, v) rollouts and the number of constant ones."""
     cands = [(a, dt) for a in cfg["accels"] for dt in cl.LAT_TARGETS]
     rolls = [cl.rollout(s0, d0, v0, a, dt, cl.H_FRAMES) for a, dt in cands]
     n_const = len(cands)
@@ -123,19 +130,26 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
         c2, S, Dd, V = idm_rollouts(s0, d0, v0, goals, cl.LAT_TARGETS, lead_tracks(sc, route, s0, preds))
         cands += c2
         rolls += list(zip(S, Dd, V))
+    return cands, rolls, n_const
+
+
+def ego_bodies(route, S: np.ndarray, D: np.ndarray) -> np.ndarray:
+    """Ego circle centres (C, steps, 3, 2) at the planning offsets of trajectories S, D (C, H)."""
     idx = cl.PLAN_OFFSETS - 1
-    E, v_end, s_end = [], [], []
-    for s, d, v in rolls:
-        xy, tan = route.pose(s[idx], d[idx])
-        E.append(cl.circles(xy, tan, cl.EGO))
-        v_end.append(v[-1])
-        s_end.append(s[-1])
-    E = np.stack(E)                                                      # (C, steps, 3, 2)
-    hard = cl.PLAN_OFFSETS * cl.DT <= cfg["hard_s"] + 1e-9
-    worst, soft, clear = np.zeros(len(cands)), np.zeros(len(cands)), np.zeros(len(cands))
+    xy, tan = route.pose(S[:, idx], D[:, idx])
+    return cl.circles(xy, tan, cl.EGO)
+
+
+def agent_penetrations(sc, E, preds, cfg):
+    """For each predicted agent near any trajectory: (prediction tuple, penetration (C, K, steps),
+    clearance shortfall (C, K) or None). Penetration as closed_loop_sim.plan, with margin_m
+    added to every predicted footprint; the shortfall max(0, clear_m - gap) when clear_w > 0."""
+    idx = cl.PLAN_OFFSETS - 1
     clear_on = cfg["clear_w"] > 0
+    margin = cfg.get("margin_m", 0.0)
     ego_c = E.mean(axis=2)
-    for a_idx, samples, band, *_ in preds:
+    for pred in preds:
+        a_idx, samples, band = pred[:3]
         fp = cl.footprint(sc["cls"][a_idx])
         P = samples[:, idx]
         ok = np.isfinite(P[..., 0])
@@ -146,7 +160,7 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
         hd = full[:, idx + 1] - full[:, back]
         n = np.linalg.norm(hd, axis=-1, keepdims=True)
         hd = np.where(n > 0.5, hd / np.maximum(n, 1e-9), sc["head_now"][a_idx])
-        reach = cl.EGO[1] + fp[1] + band[idx] + cl.EGO_REACH + max(np.abs(fp[0])) + 0.5
+        reach = cl.EGO[1] + fp[1] + band[idx] + cl.EGO_REACH + max(np.abs(fp[0])) + 0.5 + margin
         if clear_on:
             reach = reach + cfg["clear_m"]
         cd = np.linalg.norm(ego_c[:, None] - np.where(ok[..., None], P, 1e9)[None], axis=-1)
@@ -154,12 +168,29 @@ def plan(sc, route, s0, d0, v0, v_ref, preds):
             continue
         hd = np.where(np.isfinite(hd), hd, sc["head_now"][a_idx])
         A = cl.circles(np.where(ok[..., None], P, 1e9), hd, fp)
-        dist = np.linalg.norm(E[:, None, :, :, None] - A[None, :, :, None, :, :], axis=-1)
+        dist = np.linalg.norm(E[:, None, :, :, None] - A[None, :, :, None, :, :], axis=-1)   # (C,K,steps,3,m)
+        clr = None
         if clear_on:
             gap = dist.min(axis=(3, 4)) - (cl.EGO[1] + fp[1])
-            clear += np.clip(cfg["clear_m"] - gap, 0, None).max(axis=(1, 2)) ** 2
-        need = cl.EGO[1] + fp[1] + band[idx] + cl.SAFETY_BUFFER
-        pen = ((need[None, None, :, None, None] - dist) / need[None, None, :, None, None]).max(axis=(1, 3, 4))
+            clr = np.clip(cfg["clear_m"] - gap, 0, None).max(axis=2)
+        need = cl.EGO[1] + fp[1] + band[idx] + cl.SAFETY_BUFFER + margin
+        pen = ((need[None, None, :, None, None] - dist) / need[None, None, :, None, None]).max(axis=(3, 4))
+        yield pred, pen, clr
+
+
+def plan(sc, route, s0, d0, v0, v_ref, preds):
+    """closed_loop_sim.plan with IDM proposals and a progress term (same interface)."""
+    cfg = {**PP_DEFAULTS, **cl.PLAN_CFG}
+    cands, rolls, n_const = proposals(sc, route, s0, d0, v0, v_ref, preds, cfg)
+    S = np.stack([r[0] for r in rolls])
+    E = ego_bodies(route, S, np.stack([r[1] for r in rolls]))
+    v_end, s_end = [r[2][-1] for r in rolls], [r[0][-1] for r in rolls]
+    hard = cl.PLAN_OFFSETS * cl.DT <= cfg["hard_s"] + 1e-9
+    worst, soft, clear = np.zeros(len(cands)), np.zeros(len(cands)), np.zeros(len(cands))
+    for _, pen, clr in agent_penetrations(sc, E, preds, cfg):
+        pen = pen.max(axis=1)                                            # worst future: (C, steps)
+        if clr is not None:
+            clear += clr.max(axis=1) ** 2
         worst = np.maximum(worst, pen[:, hard].max(axis=1))
         if (~hard).any():
             soft = np.maximum(soft, np.clip(pen[:, ~hard], 0, None).max(axis=1))

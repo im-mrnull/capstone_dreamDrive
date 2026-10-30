@@ -45,6 +45,8 @@ Usage:
     python scripts/counterfactual_sim.py stage1       # gate G1 (after the rule is committed)
     python scripts/counterfactual_sim.py tune         # matched-planner G2: proposal planner, draws 5-9
     python scripts/counterfactual_sim.py matched      # matched-planner G2: public cells, draws 10-19
+    python scripts/counterfactual_sim.py confirm-tune # confirmation: safety margin, dev draws 5-9
+    python scripts/counterfactual_sim.py confirm      # confirmation: public cells, 73 primary scenes
 """
 
 from __future__ import annotations
@@ -566,6 +568,136 @@ def matched_gate(cells: dict, eligible: list, seed: int = 0) -> dict:
             "passes": any(t["passes"] for t in tests)}
 
 
+# --------------------------------------------------------------------------
+# Confirmation on the primary scenes (docs/wiki/headroom-test.md section 10)
+# --------------------------------------------------------------------------
+CONFIRM_TUNE_JSON = rs.BENCH / "headroom_confirm_tune.json"
+CONFIRM_JSON = rs.BENCH / "headroom_confirm.json"
+CONFIRM_DRAWS = tuple(range(10))
+CONFIRM_LATENCY_DRAWS = (0, 1)
+MARGINS = (0.0, 0.25, 0.5, 0.75, 1.0)
+# cells: "planner | predictor"; the contingency cells come from the confidential runner
+SINGLE_CELLS = ("proposal | Ideal single (mean)", "proposal | Ideal single (most likely)",
+                "proposal+margin | Ideal single (mean)", "contingency | Ideal single (mean)")
+SET_CELLS = ("proposal | Ideal set", "contingency | Ideal set")
+PAIRS = {"H2": ("contingency | Ideal set", "contingency | Ideal single (mean)"),
+         "H3": ("contingency | Ideal set", "proposal | Ideal set"),
+         "H4": ("proposal | Ideal set", "proposal+margin | Ideal single (mean)")}
+
+
+def primary_scenes() -> list:
+    import closed_loop_cv as cv
+    return sorted(cv.primary_scenes(cv.fold_of_scene()))
+
+
+def frozen_proposal() -> dict:
+    import json
+    return json.loads(MATCHED_TUNE_JSON.read_text(encoding="utf-8"))["proposal"]["chosen"]
+
+
+def confirm_tune(workers: int) -> None:
+    """The caution control: the proposal planner's safety margin for the Ideal single (mean),
+    best score on dev draws 5-9."""
+    import json
+    from concurrent.futures import ProcessPoolExecutor
+    from datetime import datetime
+    ref, dose = preregistered(), matched_dose()
+    _, lam = rs._v2_cfg()
+    base, scenes = frozen_proposal(), rs._dev_scenes()
+    jobs = [("proposal", ("Ideal single (mean)", 0, scenes, lam, {**base, "margin_m": m}, None, dose, d, False))
+            for m in MARGINS for d in TUNE_DRAWS]
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(_matched_task, jobs))
+    rows = []
+    for m in MARGINS:
+        st = summary([e for (_, a), r in zip(jobs, res) if a[4]["margin_m"] == m for e in r[3]])
+        rows.append({"margin_m": m, "summary": st})
+        print(f"margin {m:.2f} m: score {st['score']:.3f}  at-fault {st['at_fault_rate']:.4f}  "
+              f"harsh {st['harsh_braking_rate']:.3f}  near {st['near_miss_rate']:.3f}  progress {st['progress']:.3f}")
+    best = max(rows, key=lambda r: r["summary"]["score"])["margin_m"]
+    payload = {**ref, "dose": dose, "draws": list(TUNE_DRAWS), "rows": rows, "chosen_margin_m": best,
+               "when": datetime.now().isoformat(timespec="seconds")}
+    CONFIRM_TUNE_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print("chosen margin:", best, "| saved:", CONFIRM_TUNE_JSON)
+
+
+def confirm(workers: int) -> None:
+    """The public cells on the 73 primary scenes, draws 0-9."""
+    import json
+    from concurrent.futures import ProcessPoolExecutor
+    from datetime import datetime
+    ref, dose = preregistered(), matched_dose()
+    tuned = json.loads(CONFIRM_TUNE_JSON.read_text(encoding="utf-8"))
+    assert tuned["rule_commit"] == ref["rule_commit"], "tuning ran under a different rule commit"
+    _, lam = rs._v2_cfg()
+    base, scenes = frozen_proposal(), primary_scenes()
+    cfgs = {"proposal": base, "proposal+margin": {**base, "margin_m": tuned["chosen_margin_m"]}}
+    preds = {"proposal": ("Branch oracle", "Ideal single (mean)", "Ideal single (most likely)", "Ideal set"),
+             "proposal+margin": ("Ideal single (mean)",)}
+    jobs = [(p, (n, 0, scenes, lam, cfgs[p], None, dose, d, False)) for p in cfgs for n in preds[p] for d in CONFIRM_DRAWS]
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(_matched_task, [("proposal", a) for _, a in jobs]))
+    cells = {f"{p} | {n}": v for p, row in cells_of(jobs, res).items() for n, v in row.items()}
+    lat = {p: latency(use_planner, [("proposal", (n, 0, scenes, lam, cfgs[p], None, dose, d, False))
+                                    for n in ("Ideal set", "Ideal single (mean)") for d in CONFIRM_LATENCY_DRAWS])
+           for p in cfgs}
+    payload = {**ref, "dose": dose, "scenes": "73 primary scenes", "draws": list(CONFIRM_DRAWS), "planner_cfgs": cfgs,
+               "band": lam, "cells": cells, "latency": lat, "latency_budget_ms": LATENCY_BUDGET_MS,
+               "within_budget": {p: within_budget(v) for p, v in lat.items()},
+               "when": datetime.now().isoformat(timespec="seconds")}
+    CONFIRM_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    for n, v in cells.items():
+        print(f"{n:40s} score {v['score']:.4f}  at-fault {v['at_fault_rate']:.4f}  vru {v['at_fault_vru_rate']:.4f}  "
+              f"near {v['near_miss_rate']:.3f}  harsh {v['harsh_braking_rate']:.3f}  progress {v['progress']:.3f}")
+    for p, row in lat.items():
+        for n, v in row.items():
+            print(f"{p:16s} latency {n:20s} median {v['median_ms']:.1f} ms  p95 {v['p95_ms']:.1f} ms")
+    print("saved:", CONFIRM_JSON)
+
+
+def paired_boot(x: dict, y: dict, metric: str, scenes: list, counts: np.ndarray) -> dict:
+    """One-sided paired scene bootstrap of x better than y (score up / at-fault down)."""
+    col, sign = {"score": (1, 1.0), "at_fault": (2, -1.0)}[metric]
+    xs, xn = (np.array([x["per_scene"][s][c] for s in scenes], float) for c in (col, 0))
+    ys, yn = (np.array([y["per_scene"][s][c] for s in scenes], float) for c in (col, 0))
+    reps = sign * ((counts @ xs) / (counts @ xn) - (counts @ ys) / (counts @ yn))
+    return {"gain": float(sign * (xs.sum() / xn.sum() - ys.sum() / yn.sum())),
+            "p": float((np.sum(reps <= 0) + 1) / (len(reps) + 1)),
+            "ci95": [float(np.percentile(reps, 2.5)), float(np.percentile(reps, 97.5))]}
+
+
+def confirm_tests(cells: dict, eligible_planners: set, seed: int = 0) -> dict:
+    """H1 (best set cell vs best single cell, per metric) and H2-H4, 2 metrics each, Holm over
+    all; cells of planners outside the latency budget cannot be compared. H1 reading rule:
+    meaningful (threshold and Holm p < alpha) / small but real (Holm p < alpha) / none."""
+    ok = lambda c: c in cells and c.split(" | ")[0] in eligible_planners     # noqa: E731
+    singles, sets = [c for c in SINGLE_CELLS if ok(c)], [c for c in SET_CELLS if ok(c)]
+    scenes = sorted(cells[singles[0]]["per_scene"])
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(scenes), (G2M["replicates"], len(scenes)))
+    counts = np.stack([np.bincount(r, minlength=len(scenes)) for r in idx]).astype(float)
+    key = {"score": lambda c: cells[c]["score"], "at_fault": lambda c: -cells[c]["at_fault_rate"]}
+    tests = []
+    for m in ("score", "at_fault"):
+        x, y = max(sets, key=key[m]), max(singles, key=key[m])
+        tests.append({"test": "H1", "metric": m, "x": x, "y": y, **paired_boot(cells[x], cells[y], m, scenes, counts)})
+    for h, (x, y) in PAIRS.items():
+        if ok(x) and ok(y):
+            for m in ("score", "at_fault"):
+                tests.append({"test": h, "metric": m, "x": x, "y": y, **paired_boot(cells[x], cells[y], m, scenes, counts)})
+    run, n = 0.0, len(tests)
+    for r, i in enumerate(np.argsort([t["p"] for t in tests])):
+        run = max(run, min(1.0, (n - r) * tests[i]["p"]))
+        tests[i]["p_holm"] = run
+    for t in tests:
+        t["significant"] = bool(t["p_holm"] < G2M["alpha"])
+        t["meets_threshold"] = bool(t["gain"] >= G2M[t["metric"]])
+    h1 = [t for t in tests if t["test"] == "H1"]
+    reading = ("meaningful benefit" if any(t["significant"] and t["meets_threshold"] for t in h1) else
+               "small but real benefit" if any(t["significant"] for t in h1) else "no demonstrated benefit")
+    return {"eligible_planners": sorted(eligible_planners), "tests": tests, "h1_reading": reading}
+
+
 def check(n_scenes: int = 6) -> None:
     """Dose 0 must reproduce the non-reactive episodes field for field (eligible episodes)."""
     cfg, lam = rs._v2_cfg()
@@ -609,7 +741,7 @@ def eligibility() -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("check", "eligibility", "stage1", "tune", "matched"))
+    ap.add_argument("cmd", choices=("check", "eligibility", "stage1", "tune", "matched", "confirm-tune", "confirm"))
     ap.add_argument("--workers", type=int, default=20)
     args = ap.parse_args()
     if args.cmd == "check":
@@ -620,6 +752,10 @@ def main() -> int:
         tune(args.workers)
     elif args.cmd == "matched":
         matched(args.workers)
+    elif args.cmd == "confirm-tune":
+        confirm_tune(args.workers)
+    elif args.cmd == "confirm":
+        confirm(args.workers)
     else:
         stage1(args.workers)
     return 0

@@ -69,3 +69,14 @@ def test_frenet_projection_is_exact_on_a_straight_route():
     s, d = pp.frenet(ROUTE, 10.0, np.array([[[12.3, 0.7], [40.05, -1.2], [np.nan, np.nan]]]))
     assert np.allclose(s[0, :2], [12.3, 40.05]) and np.allclose(d[0, :2], [0.7, -1.2])
     assert np.isnan(s[0, 2]) and np.isnan(d[0, 2])
+
+
+def test_safety_margin_keeps_more_room_from_a_parked_car():
+    sc = {"cls": np.array(["Car"]), "pos_now": np.array([[12.0, 2.1]]), "head_now": np.array([[1.0, 0.0]]),
+          "cmd_prev": (0.0, 0.0)}
+    preds = [(0, np.repeat(np.array([[12.0, 2.1]])[None], 30, 1), np.zeros(30))]
+    picks = {}
+    for m in (0.0, 0.75):
+        pp.use({**V2, **cl.V3_DEFAULTS, **pp.PP_DEFAULTS, "margin_m": m})
+        picks[m] = pp.plan(dict(sc), ROUTE, 0.0, 0.0, 6.0, 6.0, preds)
+    assert picks[0.0] == (0.0, 0.0) and picks[0.75][1] < 0.0          # moves away from the car

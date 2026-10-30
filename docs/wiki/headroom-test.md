@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8)
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -363,5 +363,54 @@ system, with planner effects held equal?
 - These are the same 32 dev scenes as stage 1, but with fresh draws.
 - The proposal planner and the contingency planner were designed after seeing the stage 1 result.
 - Only the dev scenes are used. A confirmatory run on the 73 primary scenes would follow stage 2.
+
+## 9. Matched-planner G2 result: public planners (2026-10-30)
+
+Run against rule commit `c30258c`.
+- **Tuning (draws 5–9):** [`headroom_matched_tune.json`](../../outputs/benchmark_v2/headroom_matched_tune.json).
+- **Evaluation (fresh draws 10–19, 1,760 episodes per cell):**
+  [`headroom_matched.json`](../../outputs/benchmark_v2/headroom_matched.json).
+
+**Proposal planner, chosen setting:**
+- constant proposals compete with the IDM ones;
+- clearance weight 2, progress weight 2.
+
+Its tuning mean was 0.862, against 0.71–0.73 for every fallback-only setting. IDM proposals alone
+are too cautious in this simulator.
+
+| Planner | Predictor | Score | At-fault | VRU at-fault | Harsh braking | Near-miss | Progress |
+|---|---|---|---|---|---|---|---|
+| v2 | Branch oracle | 0.815 | 1.93% | 0.63% | 13.6% | 45.1% | 0.922 |
+| v2 | Ideal single (mean) | 0.816 | 2.05% | 0.63% | 13.5% | 45.0% | 0.923 |
+| v2 | Ideal single (most likely) | 0.815 | 2.44% | 0.68% | 13.0% | 44.8% | 0.923 |
+| v2 | Ideal set | 0.816 | 1.76% | 0.68% | 13.5% | 44.7% | 0.918 |
+| Proposal | Branch oracle | 0.857 | 1.65% | 0.68% | 10.4% | 32.4% | 0.933 |
+| Proposal | Ideal single (mean) | 0.858 | 1.76% | 0.74% | 9.5% | 32.8% | 0.934 |
+| Proposal | Ideal single (most likely) | 0.858 | 1.65% | 0.74% | 9.6% | 33.0% | 0.932 |
+| Proposal | **Ideal set** | **0.866** | **1.14%** | 0.74% | 9.3% | 32.1% | 0.935 |
+
+**Latency** (median / p95, both within budget):
+- planner v2: 2.2 / 3.2 ms;
+- proposal planner: 9.9 / 25.9 ms.
+
+**Reading:**
+- **The planner matters most.** Moving every predictor from v2 to the proposal planner gains
+  +0.04–0.05 score:
+  - near-misses fall from 45% to 32%;
+  - harsh braking falls from 13% to 10%;
+  - progress rises.
+- **With the planner held equal, the ideal distribution adds little.**
+  - Under v2: ±0.000 score, −0.3 pt at-fault.
+  - Under the proposal planner: +0.008 score (95% CI [−0.001, +0.018]) and −0.5 pt at-fault
+    (CI [−0.1, +1.3]), against the best ideal single.
+  - Both are below the pre-registered threshold, and neither is significant after Holm.
+- **The oracle gains nothing over the ideal singles under either planner** (−0.001). Knowing the
+  realised branch is worth no more than knowing the branch model.
+- **The set nudges ahead of the oracle under the proposal planner** (0.866 vs 0.857). A planner
+  that clears every possible branch drives a little more cautiously than one that trusts a single
+  future.
+
+**G2-matched over all four eligible planners**, including the two confidential ones, is recorded
+with the confidential planners. The public cells alone do not meet the gate.
 
 Related: [[reactive-test]], [[closed-loop-cv]], [[planner]], [[negative-results]]

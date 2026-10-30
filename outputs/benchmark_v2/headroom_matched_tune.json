@@ -1,0 +1,1291 @@
+{
+  "rule_doc": "docs/wiki/headroom-test.md",
+  "rule_commit": "c30258ccdbfe89f3aff5a6773ac745bab955888a",
+  "rule_clean": true,
+  "dose": "strong",
+  "draws": [
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "tune_on": [
+    "Branch oracle",
+    "Ideal single (mean)",
+    "Ideal set"
+  ],
+  "proposal": {
+    "grid": [
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "always",
+          "clear_w": 0.0,
+          "prog_w": 0.0
+        },
+        "mean_score": 0.8269812452559776,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.8269919524293933,
+            "at_fault_rate": 0.019318181818181818,
+            "at_fault_vru_rate": 0.004545454545454545,
+            "progress": 0.9246610884774011,
+            "harsh_braking_rate": 0.1159090909090909,
+            "near_miss_rate": 0.41704545454545455,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8285730137698202,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.8254108910889665,
+                "at_fault_rate": 0.025
+              }
+            },
+            "near_miss_moving_rate": 0.4068181818181818,
+            "jerk_rms": 1.8960215785293568,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.8257409256814678,
+            "at_fault_rate": 0.022727272727272728,
+            "at_fault_vru_rate": 0.011363636363636364,
+            "progress": 0.9235638818762184,
+            "harsh_braking_rate": 0.11477272727272728,
+            "near_miss_rate": 0.42159090909090907,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8279710722167584,
+                "at_fault_rate": 0.01818181818181818
+              },
+              "assertive": {
+                "score": 0.8235107791461775,
+                "at_fault_rate": 0.02727272727272727
+              }
+            },
+            "near_miss_moving_rate": 0.4113636363636364,
+            "jerk_rms": 1.9125063476408566,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.8282108576570714,
+            "at_fault_rate": 0.014772727272727272,
+            "at_fault_vru_rate": 0.005681818181818182,
+            "progress": 0.9183688099867539,
+            "harsh_braking_rate": 0.11818181818181818,
+            "near_miss_rate": 0.4113636363636364,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8284256093398028,
+                "at_fault_rate": 0.006818181818181818
+              },
+              "assertive": {
+                "score": 0.8279961059743401,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.4011363636363636,
+            "jerk_rms": 2.022184108513628,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "always",
+          "clear_w": 0.0,
+          "prog_w": 2.0
+        },
+        "mean_score": 0.8361958064670922,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.8345243068870329,
+            "at_fault_rate": 0.020454545454545454,
+            "at_fault_vru_rate": 0.003409090909090909,
+            "progress": 0.935191163140474,
+            "harsh_braking_rate": 0.11022727272727273,
+            "near_miss_rate": 0.40795454545454546,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8354130894854389,
+                "at_fault_rate": 0.01818181818181818
+              },
+              "assertive": {
+                "score": 0.8336355242886268,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.3977272727272727,
+            "jerk_rms": 1.908666497550375,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.8337893371417183,
+            "at_fault_rate": 0.01818181818181818,
+            "at_fault_vru_rate": 0.010227272727272727,
+            "progress": 0.9340412600666789,
+            "harsh_braking_rate": 0.12045454545454545,
+            "near_miss_rate": 0.41818181818181815,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8339681549093259,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.8336105193741108,
+                "at_fault_rate": 0.020454545454545454
+              }
+            },
+            "near_miss_moving_rate": 0.40795454545454546,
+            "jerk_rms": 1.971819587756915,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.8402737753725255,
+            "at_fault_rate": 0.015909090909090907,
+            "at_fault_vru_rate": 0.004545454545454545,
+            "progress": 0.935803503238412,
+            "harsh_braking_rate": 0.11022727272727273,
+            "near_miss_rate": 0.40454545454545454,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8476409362382097,
+                "at_fault_rate": 0.006818181818181818
+              },
+              "assertive": {
+                "score": 0.8329066145068411,
+                "at_fault_rate": 0.025
+              }
+            },
+            "near_miss_moving_rate": 0.39431818181818185,
+            "jerk_rms": 1.9545866720524998,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "always",
+          "clear_w": 0.0,
+          "prog_w": 5.0
+        },
+        "mean_score": 0.8351722676410288,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.8382313809436754,
+            "at_fault_rate": 0.0125,
+            "at_fault_vru_rate": 0.004545454545454545,
+            "progress": 0.9455385429591204,
+            "harsh_braking_rate": 0.13068181818181818,
+            "near_miss_rate": 0.4238636363636364,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.850508642357796,
+                "at_fault_rate": 0.00909090909090909
+              },
+              "assertive": {
+                "score": 0.8259541195295549,
+                "at_fault_rate": 0.015909090909090907
+              }
+            },
+            "near_miss_moving_rate": 0.42045454545454547,
+            "jerk_rms": 2.047293215500831,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.8291273543726592,
+            "at_fault_rate": 0.019318181818181818,
+            "at_fault_vru_rate": 0.006818181818181818,
+            "progress": 0.9438231665655025,
+            "harsh_braking_rate": 0.14204545454545456,
+            "near_miss_rate": 0.43068181818181817,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8360153029880926,
+                "at_fault_rate": 0.020454545454545454
+              },
+              "assertive": {
+                "score": 0.8222394057572258,
+                "at_fault_rate": 0.01818181818181818
+              }
+            },
+            "near_miss_moving_rate": 0.42613636363636365,
+            "jerk_rms": 2.159030581016632,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.8381580676067517,
+            "at_fault_rate": 0.017045454545454544,
+            "at_fault_vru_rate": 0.004545454545454545,
+            "progress": 0.9439915643440938,
+            "harsh_braking_rate": 0.1215909090909091,
+            "near_miss_rate": 0.4159090909090909,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8439953635207548,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.8323207716927484,
+                "at_fault_rate": 0.020454545454545454
+              }
+            },
+            "near_miss_moving_rate": 0.4125,
+            "jerk_rms": 2.037889642437825,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "always",
+          "clear_w": 2.0,
+          "prog_w": 0.0
+        },
+        "mean_score": 0.8503189085141294,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.8491062543871631,
+            "at_fault_rate": 0.020454545454545454,
+            "at_fault_vru_rate": 0.006818181818181818,
+            "progress": 0.9277384095685534,
+            "harsh_braking_rate": 0.09431818181818181,
+            "near_miss_rate": 0.3465909090909091,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8499106241766213,
+                "at_fault_rate": 0.01818181818181818
+              },
+              "assertive": {
+                "score": 0.848301884597705,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.3375,
+            "jerk_rms": 1.835820084550419,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.8456690463035803,
+            "at_fault_rate": 0.019318181818181818,
+            "at_fault_vru_rate": 0.005681818181818182,
+            "progress": 0.9250188122532186,
+            "harsh_braking_rate": 0.10681818181818181,
+            "near_miss_rate": 0.3431818181818182,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8456698751831445,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.8456682174240162,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.3340909090909091,
+            "jerk_rms": 1.954063527169998,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.8561814248516447,
+            "at_fault_rate": 0.014772727272727272,
+            "at_fault_vru_rate": 0.006818181818181818,
+            "progress": 0.9245803330932799,
+            "harsh_braking_rate": 0.09090909090909091,
+            "near_miss_rate": 0.33181818181818185,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8657722659656499,
+                "at_fault_rate": 0.0022727272727272726
+              },
+              "assertive": {
+                "score": 0.8465905837376394,
+                "at_fault_rate": 0.02727272727272727
+              }
+            },
+            "near_miss_moving_rate": 0.32386363636363635,
+            "jerk_rms": 1.8886741959848685,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "always",
+          "clear_w": 2.0,
+          "prog_w": 2.0
+        },
+        "mean_score": 0.8616139463924054,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.8583605351604714,
+            "at_fault_rate": 0.017045454545454544,
+            "at_fault_vru_rate": 0.005681818181818182,
+            "progress": 0.935539156183214,
+            "harsh_braking_rate": 0.09659090909090909,
+            "near_miss_rate": 0.32840909090909093,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8629299799737716,
+                "at_fault_rate": 0.011363636363636364
+              },
+              "assertive": {
+                "score": 0.8537910903471712,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.32045454545454544,
+            "jerk_rms": 1.8602025866421492,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.8578949431488997,
+            "at_fault_rate": 0.015909090909090907,
+            "at_fault_vru_rate": 0.004545454545454545,
+            "progress": 0.934971404399673,
+            "harsh_braking_rate": 0.1,
+            "near_miss_rate": 0.3306818181818182,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8576135041015349,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.8581763821962646,
+                "at_fault_rate": 0.01818181818181818
+              }
+            },
+            "near_miss_moving_rate": 0.32386363636363635,
+            "jerk_rms": 1.920084771626375,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.8685863608678449,
+            "at_fault_rate": 0.0125,
+            "at_fault_vru_rate": 0.005681818181818182,
+            "progress": 0.9366530452745304,
+            "harsh_braking_rate": 0.08863636363636364,
+            "near_miss_rate": 0.31363636363636366,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8772799088004383,
+                "at_fault_rate": 0.0022727272727272726
+              },
+              "assertive": {
+                "score": 0.8598928129352517,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.3068181818181818,
+            "jerk_rms": 1.8965783694729301,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "always",
+          "clear_w": 2.0,
+          "prog_w": 5.0
+        },
+        "mean_score": 0.8609146439183211,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.8616536308011196,
+            "at_fault_rate": 0.019318181818181818,
+            "at_fault_vru_rate": 0.004545454545454545,
+            "progress": 0.9425269935860172,
+            "harsh_braking_rate": 0.10340909090909091,
+            "near_miss_rate": 0.3181818181818182,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8725851760032547,
+                "at_fault_rate": 0.011363636363636364
+              },
+              "assertive": {
+                "score": 0.8507220855989844,
+                "at_fault_rate": 0.02727272727272727
+              }
+            },
+            "near_miss_moving_rate": 0.3170454545454545,
+            "jerk_rms": 1.9396076173003052,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.853356041534537,
+            "at_fault_rate": 0.025,
+            "at_fault_vru_rate": 0.007954545454545454,
+            "progress": 0.9423115453547374,
+            "harsh_braking_rate": 0.11704545454545455,
+            "near_miss_rate": 0.32840909090909093,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8559335906544324,
+                "at_fault_rate": 0.020454545454545454
+              },
+              "assertive": {
+                "score": 0.8507784924146415,
+                "at_fault_rate": 0.029545454545454545
+              }
+            },
+            "near_miss_moving_rate": 0.325,
+            "jerk_rms": 2.031359565173177,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.8677342594193065,
+            "at_fault_rate": 0.017045454545454544,
+            "at_fault_vru_rate": 0.003409090909090909,
+            "progress": 0.9446642150081077,
+            "harsh_braking_rate": 0.09204545454545454,
+            "near_miss_rate": 0.3170454545454545,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.8781489532609141,
+                "at_fault_rate": 0.00909090909090909
+              },
+              "assertive": {
+                "score": 0.8573195655776987,
+                "at_fault_rate": 0.025
+              }
+            },
+            "near_miss_moving_rate": 0.3159090909090909,
+            "jerk_rms": 1.9399328717234314,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "fallback",
+          "clear_w": 0.0,
+          "prog_w": 0.0
+        },
+        "mean_score": 0.7090231087342461,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.7097902520220967,
+            "at_fault_rate": 0.025,
+            "at_fault_vru_rate": 0.014772727272727272,
+            "progress": 0.834362155514228,
+            "harsh_braking_rate": 0.3795454545454545,
+            "near_miss_rate": 0.45795454545454545,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6924718979681608,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.7271086060760326,
+                "at_fault_rate": 0.03409090909090909
+              }
+            },
+            "near_miss_moving_rate": 0.44772727272727275,
+            "jerk_rms": 4.789802496485929,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.707787213403553,
+            "at_fault_rate": 0.025,
+            "at_fault_vru_rate": 0.013636363636363636,
+            "progress": 0.8338852190933088,
+            "harsh_braking_rate": 0.4,
+            "near_miss_rate": 0.44886363636363635,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6911582057712217,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.7244162210358842,
+                "at_fault_rate": 0.03409090909090909
+              }
+            },
+            "near_miss_moving_rate": 0.4375,
+            "jerk_rms": 4.930000655917706,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.7094918607770885,
+            "at_fault_rate": 0.022727272727272728,
+            "at_fault_vru_rate": 0.013636363636363636,
+            "progress": 0.8308518763265216,
+            "harsh_braking_rate": 0.3806818181818182,
+            "near_miss_rate": 0.45340909090909093,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6933089180885382,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.7256748034656386,
+                "at_fault_rate": 0.031818181818181815
+              }
+            },
+            "near_miss_moving_rate": 0.4420454545454545,
+            "jerk_rms": 4.871818029896562,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "fallback",
+          "clear_w": 0.0,
+          "prog_w": 2.0
+        },
+        "mean_score": 0.7106090364456866,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.709744221835469,
+            "at_fault_rate": 0.028409090909090908,
+            "at_fault_vru_rate": 0.014772727272727272,
+            "progress": 0.8372355765282161,
+            "harsh_braking_rate": 0.3795454545454545,
+            "near_miss_rate": 0.4556818181818182,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.695117457680034,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.7243709859909042,
+                "at_fault_rate": 0.04090909090909091
+              }
+            },
+            "near_miss_moving_rate": 0.44545454545454544,
+            "jerk_rms": 4.805589252495535,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.7123563637200244,
+            "at_fault_rate": 0.025,
+            "at_fault_vru_rate": 0.013636363636363636,
+            "progress": 0.8371573595227398,
+            "harsh_braking_rate": 0.3965909090909091,
+            "near_miss_rate": 0.43977272727272726,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6984222963836136,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.7262904310564352,
+                "at_fault_rate": 0.03409090909090909
+              }
+            },
+            "near_miss_moving_rate": 0.42954545454545456,
+            "jerk_rms": 4.957244177830776,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.7097265237815662,
+            "at_fault_rate": 0.022727272727272728,
+            "at_fault_vru_rate": 0.013636363636363636,
+            "progress": 0.8330392955868914,
+            "harsh_braking_rate": 0.38636363636363635,
+            "near_miss_rate": 0.4511363636363636,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6949217215746746,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.7245313259884579,
+                "at_fault_rate": 0.031818181818181815
+              }
+            },
+            "near_miss_moving_rate": 0.43863636363636366,
+            "jerk_rms": 4.900979462717012,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "fallback",
+          "clear_w": 0.0,
+          "prog_w": 5.0
+        },
+        "mean_score": 0.7123284332664319,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.71025322964835,
+            "at_fault_rate": 0.03068181818181818,
+            "at_fault_vru_rate": 0.017045454545454544,
+            "progress": 0.8392409757281301,
+            "harsh_braking_rate": 0.3784090909090909,
+            "near_miss_rate": 0.4590909090909091,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6955276217761736,
+                "at_fault_rate": 0.020454545454545454
+              },
+              "assertive": {
+                "score": 0.7249788375205265,
+                "at_fault_rate": 0.04090909090909091
+              }
+            },
+            "near_miss_moving_rate": 0.44772727272727275,
+            "jerk_rms": 4.806809343954027,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.7145743422700439,
+            "at_fault_rate": 0.023863636363636365,
+            "at_fault_vru_rate": 0.0125,
+            "progress": 0.8399137504256581,
+            "harsh_braking_rate": 0.39204545454545453,
+            "near_miss_rate": 0.4431818181818182,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6980438382594498,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.731104846280638,
+                "at_fault_rate": 0.031818181818181815
+              }
+            },
+            "near_miss_moving_rate": 0.4329545454545455,
+            "jerk_rms": 4.930782318069199,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.7121577278809018,
+            "at_fault_rate": 0.025,
+            "at_fault_vru_rate": 0.015909090909090907,
+            "progress": 0.8355347635705549,
+            "harsh_braking_rate": 0.37727272727272726,
+            "near_miss_rate": 0.4511363636363636,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.6951152899175383,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.7292001658442655,
+                "at_fault_rate": 0.03409090909090909
+              }
+            },
+            "near_miss_moving_rate": 0.43977272727272726,
+            "jerk_rms": 4.8579646891056365,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "fallback",
+          "clear_w": 2.0,
+          "prog_w": 0.0
+        },
+        "mean_score": 0.7222242194688651,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.7226060118690723,
+            "at_fault_rate": 0.020454545454545454,
+            "at_fault_vru_rate": 0.0125,
+            "progress": 0.8307360988045289,
+            "harsh_braking_rate": 0.3693181818181818,
+            "near_miss_rate": 0.4147727272727273,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7091214447115067,
+                "at_fault_rate": 0.011363636363636364
+              },
+              "assertive": {
+                "score": 0.7360905790266375,
+                "at_fault_rate": 0.029545454545454545
+              }
+            },
+            "near_miss_moving_rate": 0.4034090909090909,
+            "jerk_rms": 4.8390130914688765,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.7192162474459555,
+            "at_fault_rate": 0.019318181818181818,
+            "at_fault_vru_rate": 0.00909090909090909,
+            "progress": 0.8317656412343165,
+            "harsh_braking_rate": 0.3795454545454545,
+            "near_miss_rate": 0.4238636363636364,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7055046517246483,
+                "at_fault_rate": 0.011363636363636364
+              },
+              "assertive": {
+                "score": 0.7329278431672627,
+                "at_fault_rate": 0.02727272727272727
+              }
+            },
+            "near_miss_moving_rate": 0.4125,
+            "jerk_rms": 4.8497894128126955,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.7248503990915672,
+            "at_fault_rate": 0.013636363636363636,
+            "at_fault_vru_rate": 0.00909090909090909,
+            "progress": 0.8267254184751677,
+            "harsh_braking_rate": 0.37386363636363634,
+            "near_miss_rate": 0.4056818181818182,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7097442573850922,
+                "at_fault_rate": 0.004545454545454545
+              },
+              "assertive": {
+                "score": 0.7399565407980421,
+                "at_fault_rate": 0.022727272727272728
+              }
+            },
+            "near_miss_moving_rate": 0.39545454545454545,
+            "jerk_rms": 4.894018679321353,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "fallback",
+          "clear_w": 2.0,
+          "prog_w": 2.0
+        },
+        "mean_score": 0.7232790992001625,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.7245452582445272,
+            "at_fault_rate": 0.02159090909090909,
+            "at_fault_vru_rate": 0.011363636363636364,
+            "progress": 0.8345247492413529,
+            "harsh_braking_rate": 0.3659090909090909,
+            "near_miss_rate": 0.4125,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7123039834225232,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.7367865330665312,
+                "at_fault_rate": 0.029545454545454545
+              }
+            },
+            "near_miss_moving_rate": 0.4022727272727273,
+            "jerk_rms": 4.8506044719299535,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.7197457474316845,
+            "at_fault_rate": 0.02159090909090909,
+            "at_fault_vru_rate": 0.011363636363636364,
+            "progress": 0.8347652825801309,
+            "harsh_braking_rate": 0.38181818181818183,
+            "near_miss_rate": 0.42159090909090907,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7056348730156369,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.7338566218477321,
+                "at_fault_rate": 0.029545454545454545
+              }
+            },
+            "near_miss_moving_rate": 0.4113636363636364,
+            "jerk_rms": 4.923979611732031,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.7255462919242759,
+            "at_fault_rate": 0.01818181818181818,
+            "at_fault_vru_rate": 0.013636363636363636,
+            "progress": 0.8304201166683007,
+            "harsh_braking_rate": 0.3659090909090909,
+            "near_miss_rate": 0.4113636363636364,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7126906495944496,
+                "at_fault_rate": 0.011363636363636364
+              },
+              "assertive": {
+                "score": 0.7384019342541019,
+                "at_fault_rate": 0.025
+              }
+            },
+            "near_miss_moving_rate": 0.4011363636363636,
+            "jerk_rms": 4.837413468746224,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      },
+      {
+        "cfg": {
+          "hard_s": 1.0,
+          "soft_w": 5.0,
+          "fallback": "least_penetration",
+          "accels": [
+            -6.0,
+            -4.0,
+            -3.0,
+            -2.5,
+            -2.0,
+            -1.5,
+            -1.0,
+            -0.5,
+            0.0,
+            0.5,
+            1.0,
+            2.0
+          ],
+          "clear_m": 1.0,
+          "jerk_w": 0.2,
+          "lat_w": 0.0,
+          "idm_fracs": [
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1.0
+          ],
+          "const": "fallback",
+          "clear_w": 2.0,
+          "prog_w": 5.0
+        },
+        "mean_score": 0.7257238456640582,
+        "packages": {
+          "Branch oracle": {
+            "score": 0.7278598414198457,
+            "at_fault_rate": 0.022727272727272728,
+            "at_fault_vru_rate": 0.011363636363636364,
+            "progress": 0.8380442896822631,
+            "harsh_braking_rate": 0.35568181818181815,
+            "near_miss_rate": 0.4125,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.715955216320173,
+                "at_fault_rate": 0.013636363636363636
+              },
+              "assertive": {
+                "score": 0.7397644665195183,
+                "at_fault_rate": 0.031818181818181815
+              }
+            },
+            "near_miss_moving_rate": 0.4022727272727273,
+            "jerk_rms": 4.773023727209919,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal single (mean)": {
+            "score": 0.7234242920456672,
+            "at_fault_rate": 0.023863636363636365,
+            "at_fault_vru_rate": 0.0125,
+            "progress": 0.8373913566378971,
+            "harsh_braking_rate": 0.3693181818181818,
+            "near_miss_rate": 0.4193181818181818,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.710043450793668,
+                "at_fault_rate": 0.015909090909090907
+              },
+              "assertive": {
+                "score": 0.7368051332976665,
+                "at_fault_rate": 0.031818181818181815
+              }
+            },
+            "near_miss_moving_rate": 0.4090909090909091,
+            "jerk_rms": 4.889583029526416,
+            "branched_episode_share": 0.7511363636363636
+          },
+          "Ideal set": {
+            "score": 0.7258874035266619,
+            "at_fault_rate": 0.022727272727272728,
+            "at_fault_vru_rate": 0.014772727272727272,
+            "progress": 0.8334599011922373,
+            "harsh_braking_rate": 0.35909090909090907,
+            "near_miss_rate": 0.4125,
+            "n_episodes": 880,
+            "by_persona": {
+              "nominal": {
+                "score": 0.7105606801575409,
+                "at_fault_rate": 0.01818181818181818
+              },
+              "assertive": {
+                "score": 0.741214126895783,
+                "at_fault_rate": 0.02727272727272727
+              }
+            },
+            "near_miss_moving_rate": 0.4022727272727273,
+            "jerk_rms": 4.819986902457933,
+            "branched_episode_share": 0.7511363636363636
+          }
+        }
+      }
+    ],
+    "chosen": {
+      "hard_s": 1.0,
+      "soft_w": 5.0,
+      "fallback": "least_penetration",
+      "accels": [
+        -6.0,
+        -4.0,
+        -3.0,
+        -2.5,
+        -2.0,
+        -1.5,
+        -1.0,
+        -0.5,
+        0.0,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "clear_m": 1.0,
+      "jerk_w": 0.2,
+      "lat_w": 0.0,
+      "idm_fracs": [
+        0.2,
+        0.4,
+        0.6,
+        0.8,
+        1.0
+      ],
+      "const": "always",
+      "clear_w": 2.0,
+      "prog_w": 2.0
+    }
+  },
+  "when": "2026-10-30T17:13:24"
+}

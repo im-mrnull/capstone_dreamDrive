@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10)
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -502,3 +502,47 @@ of no effect.
 - the confidential runner adds cells 4–5 and computes H1–H4 (`confirm_tests`).
 
 Related: [[reactive-test]], [[closed-loop-cv]], [[planner]], [[negative-results]]
+
+## 11. Confirmation result: public cells (2026-10-31)
+
+Run against rule commit `9d2ab26`.
+- **Margin tuning (dev draws 5–9):** [`headroom_confirm_tune.json`](../../outputs/benchmark_v2/headroom_confirm_tune.json).
+  Score by margin: 0 m 0.858, 0.25 m 0.861, **0.5 m 0.868 (chosen)**, 0.75 m 0.862, 1.0 m 0.851.
+- **Evaluation (73 primary scenes, 62 with eligible episodes, draws 0–9, 4,420 episodes per cell):**
+  [`headroom_confirm.json`](../../outputs/benchmark_v2/headroom_confirm.json).
+
+| Planner | Predictor | Score | At-fault | VRU at-fault | Harsh braking | Near-miss | Progress | Jerk (RMS) |
+|---|---|---|---|---|---|---|---|---|
+| Proposal | Branch oracle | 0.840 | 1.47% | 0.25% | 9.5% | 40.5% | 0.924 | 1.88 |
+| Proposal | Ideal single (mean) | 0.838 | 1.38% | 0.27% | 10.5% | 40.5% | 0.923 | 1.96 |
+| Proposal | Ideal single (most likely) | 0.840 | 1.38% | 0.25% | 10.4% | 40.3% | 0.924 | 1.95 |
+| Proposal | Ideal set | 0.841 | 0.97% | 0.27% | 10.6% | 39.0% | 0.921 | 2.02 |
+| Proposal + 0.5 m margin | Ideal single (mean) | **0.854** | **0.97%** | 0.27% | 18.0% | 23.0% | 0.909 | 2.82 |
+
+**Latency** (median / p95, all within budget): proposal 7.2–7.4 / 14.9–15.2 ms; with margin
+7.4–7.5 / 15.5 ms.
+
+**Comparisons among the public cells** (paired scene bootstrap, 2,000 replicates, unadjusted;
+gain is set minus single, at-fault in points, positive = set better):
+
+| Ideal set vs | Score gain (95% CI) | At-fault gain (95% CI) |
+|---|---|---|
+| Ideal single (mean) | +0.003 [−0.002, +0.008] | +0.4 pt [−0.3, +1.4] |
+| Ideal single (most likely) | +0.002 [−0.004, +0.007] | +0.4 pt [−0.4, +1.5] |
+| **Proposal + margin, Ideal single (mean) (H4)** | **−0.013 [−0.024, −0.002]** | ±0.0 pt [−0.5, +0.6] |
+| Branch oracle | +0.001 [−0.004, +0.006] | +0.5 pt [−0.2, +1.6] |
+
+**Reading:**
+- **The dev advantage shrank on fresh scenes.** Against the plain ideal singles the set gains
+  +0.002–0.003 score (dev: +0.008) and 0.4 pt at-fault; no interval excludes zero.
+- **A tuned safety margin does at least as well as the set (H4).** The cautious single matches the
+  set on at-fault (0.97% each) and *beats* it on score by 0.013; the interval excludes zero in the
+  margin's favour. Its price is more harsh braking (18% vs 11%) and slightly less progress, which
+  the score weights below the near-miss reduction (39% → 23%).
+- **So what the set added under this planner is explained by caution.** A single trajectory with a
+  well-chosen buffer reproduces it, more cheaply.
+- *Exploratory (not pre-registered):* the margin alone adds +0.016 score over the plain single
+  (95% CI [+0.004, +0.028]).
+
+**H1–H3 and the Holm-adjusted family** use the confidential contingency planner and are recorded
+with it.

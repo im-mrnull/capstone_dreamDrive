@@ -1,0 +1,142 @@
+{
+  "rule_doc": "docs/wiki/headroom-test.md",
+  "rule_commit": "9d2ab267189e5353b1908b79757a768ab4fdd815",
+  "rule_clean": true,
+  "dose": "strong",
+  "draws": [
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "rows": [
+    {
+      "margin_m": 0.0,
+      "summary": {
+        "score": 0.8578949431488997,
+        "at_fault_rate": 0.015909090909090907,
+        "at_fault_vru_rate": 0.004545454545454545,
+        "progress": 0.934971404399673,
+        "harsh_braking_rate": 0.1,
+        "near_miss_rate": 0.3306818181818182,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8576135041015349,
+            "at_fault_rate": 0.013636363636363636
+          },
+          "assertive": {
+            "score": 0.8581763821962646,
+            "at_fault_rate": 0.01818181818181818
+          }
+        },
+        "near_miss_moving_rate": 0.32386363636363635,
+        "jerk_rms": 1.920084771626375,
+        "branched_episode_share": 0.7511363636363636
+      }
+    },
+    {
+      "margin_m": 0.25,
+      "summary": {
+        "score": 0.8613249155827802,
+        "at_fault_rate": 0.019318181818181818,
+        "at_fault_vru_rate": 0.00909090909090909,
+        "progress": 0.9192451648671729,
+        "harsh_braking_rate": 0.14886363636363636,
+        "near_miss_rate": 0.23068181818181818,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8699241180880847,
+            "at_fault_rate": 0.00909090909090909
+          },
+          "assertive": {
+            "score": 0.8527257130774757,
+            "at_fault_rate": 0.029545454545454545
+          }
+        },
+        "near_miss_moving_rate": 0.22272727272727272,
+        "jerk_rms": 2.3784486800363127,
+        "branched_episode_share": 0.7511363636363636
+      }
+    },
+    {
+      "margin_m": 0.5,
+      "summary": {
+        "score": 0.8684952280421225,
+        "at_fault_rate": 0.015909090909090907,
+        "at_fault_vru_rate": 0.006818181818181818,
+        "progress": 0.9142892013576627,
+        "harsh_braking_rate": 0.18409090909090908,
+        "near_miss_rate": 0.15681818181818183,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8739629324169315,
+            "at_fault_rate": 0.013636363636363636
+          },
+          "assertive": {
+            "score": 0.8630275236673137,
+            "at_fault_rate": 0.01818181818181818
+          }
+        },
+        "near_miss_moving_rate": 0.14545454545454545,
+        "jerk_rms": 2.694160172965997,
+        "branched_episode_share": 0.7511363636363636
+      }
+    },
+    {
+      "margin_m": 0.75,
+      "summary": {
+        "score": 0.8621954783080693,
+        "at_fault_rate": 0.019318181818181818,
+        "at_fault_vru_rate": 0.005681818181818182,
+        "progress": 0.9108516428633144,
+        "harsh_braking_rate": 0.21136363636363636,
+        "near_miss_rate": 0.14545454545454545,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8663626714153382,
+            "at_fault_rate": 0.013636363636363636
+          },
+          "assertive": {
+            "score": 0.8580282852008007,
+            "at_fault_rate": 0.025
+          }
+        },
+        "near_miss_moving_rate": 0.1340909090909091,
+        "jerk_rms": 3.102305370982149,
+        "branched_episode_share": 0.7511363636363636
+      }
+    },
+    {
+      "margin_m": 1.0,
+      "summary": {
+        "score": 0.8506088180912009,
+        "at_fault_rate": 0.025,
+        "at_fault_vru_rate": 0.006818181818181818,
+        "progress": 0.9081916819808519,
+        "harsh_braking_rate": 0.26477272727272727,
+        "near_miss_rate": 0.12954545454545455,
+        "n_episodes": 880,
+        "by_persona": {
+          "nominal": {
+            "score": 0.8630807077583946,
+            "at_fault_rate": 0.015909090909090907
+          },
+          "assertive": {
+            "score": 0.8381369284240073,
+            "at_fault_rate": 0.03409090909090909
+          }
+        },
+        "near_miss_moving_rate": 0.12045454545454545,
+        "jerk_rms": 3.582633826792451,
+        "branched_episode_share": 0.7511363636363636
+      }
+    }
+  ],
+  "chosen_margin_m": 0.5,
+  "when": "2026-10-30T19:25:22"
+}

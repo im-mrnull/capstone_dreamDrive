@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7)
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -233,5 +233,135 @@ advance. In the non-reactive and reactive replays the oracle was level with CV.
 
 **G2** compares the Ideal set under the separately pre-registered (confidential) planner with
 these ideal singles. It is recorded with that planner.
+
+## 8. Matched-planner G2 (pre-registered 2026-10-30, before any draw 5–19 is driven)
+
+**Why.** G2 (section 5) compared the Ideal set under one planner with the ideal singles under
+another (planner v2). So a gain could come from the planner rather than from the distribution.
+
+This section repeats the question with **every predictor driven under every planner**. Singles and
+sets get the same planner improvements wherever they apply. The section 5 G2 outcome stands as
+reported; this is a new, separately pre-registered test.
+
+**Simulator:** as sections 2–5, at the strong dose (fixed by G1), on the 32 dev scenes.
+
+**Draws** (new; draws 0–4 are not reused):
+- **5–9: planner tuning only;**
+- **10–19: evaluation only.** That gives 1,760 episodes per cell (88 episodes × 2 personas × 10
+  draws).
+
+**Predictors:** Branch oracle (the ceiling), Ideal single (mean), Ideal single (most likely), Ideal
+set.
+
+**Planners:**
+
+| Planner | How it uses a set | Where it is specified |
+|---|---|---|
+| v2 (section 4) | every future is an obstacle (worst case) | [[planner]] |
+| Proposal planner (new) | worst case over futures, for collision checks and the IDM leader | below |
+| Probability-aware planner | uses the future weights | confidential, pre-registered separately |
+| Contingency planner | uses the future weights | confidential, pre-registered separately |
+
+So the grid has 16 cells: 4 planners × 4 predictors.
+
+### Proposal planner ([`scripts/proposal_planner.py`](../../scripts/proposal_planner.py))
+
+PDM-Closed style (Dauner et al., CoRL 2023).
+
+**Proposals:**
+- the constant-acceleration × lateral-target candidates (fine accelerations, as in planner v3);
+- **IDM car-following proposals** towards 0.2, 0.4, 0.6, 0.8 and 1.0 × the reference speed, for
+  each of the 5 lateral targets. The ego follows the nearest predicted agent ahead in its lane
+  (worst case over futures).
+  - IDM parameters: a_max 1.5, b 2.0, time headway 1.2 s, standstill gap 2 m.
+  - The free-road term never brakes harder than b.
+  - The first IDM command is executed (clipped to [−6, 2] m/s²).
+
+**Scoring:**
+- planner v3's feasibility, soft penalty, clearance (1 m) and jerk (0.2) terms;
+- a progress term: prog_w × (1 − progress ÷ the best feasible proposal's progress).
+
+**Option `const`:**
+- "always": constant proposals compete with the IDM ones;
+- "fallback": constant proposals are used only when no IDM proposal is feasible, like
+  PDM-Closed's emergency manoeuvres.
+
+**Checks:**
+- With no IDM proposals and no progress term it reproduces planner v2 (48/48 dev episodes for
+  each of 3 packages).
+- Unit tests: behind a braking lead car between parked cars, planner v2 commands −6 m/s² and
+  closes the gap. The proposal planner (fallback mode) stays above −4 m/s² and keeps a positive
+  gap.
+- Its design was developed on synthetic scenes only. No branched episode was driven with it
+  before this commit.
+
+### Tuning (equal treatment)
+
+Each new planner gets **12 settings** on draws 5–9:
+- **Proposal planner:** const {always, fallback} × clearance weight {0, 2} × prog_w {0, 2, 5}.
+- **Contingency planner:** 12 settings, listed in its confidential pre-registration.
+
+**Selection:** the highest mean score over {Branch oracle, Ideal single (mean), Ideal set}, so
+neither predictor type is favoured. The chosen setting is frozen before draws 10–19.
+
+Planner v2 and the probability-aware planner keep their existing frozen settings.
+
+### Latency pre-filter
+
+Per-replan planning time in a single process, on draws 10–11 with the Ideal set and the Ideal
+single (mean). A planner is eligible only if, for both predictors:
+- **median ≤ 50 ms;**
+- **p95 ≤ 100 ms.**
+
+That leaves room for the slowest learned predictor (AgentFormer, 102 ms median) inside the 0.2 s
+replan cycle. Stage 2 rechecks latency with the learned 10-mode sets.
+
+### Decisive test: G2-matched
+
+1. **Comparator:** the best single cell over all eligible planners, using the Ideal singles only
+   (the oracle is excluded). Take the highest score for the score test and the lowest at-fault
+   rate for the at-fault test.
+2. **Test:** for each eligible planner, compare its Ideal set with that comparator, one-sided:
+   - score gain ≥ **0.01**; or
+   - at-fault reduction ≥ **1 point**.
+3. **Statistics:** a paired scene bootstrap (2,000 replicates, draws pooled per scene). Holm
+   adjustment over the 2 × (number of eligible planners) tests.
+4. **G2-matched passes** if at least one test reaches its threshold with a Holm-adjusted
+   p < 0.05.
+
+This tests the system-level question: does the best multi-future system beat the best single-trajectory
+system, with planner effects held equal?
+
+**Reported, not decisive (every cell):**
+- score, at-fault (and VRU at-fault), harsh braking, progress, near-miss, jerk, latency (median /
+  p95);
+- each as a difference vs the Ideal single (mean) under the **same** planner, and vs the Ideal
+  single under v2.
+
+**Attribution:**
+- **Value of the distribution per planner:** Ideal set(P) − best Ideal single(P).
+- **Ceiling per planner:** Branch oracle(P) − best Ideal single(P).
+- **For the contingency planner specifically**, against the ideal single under the same planner
+  and the best single overall:
+  - Does it reduce harsh braking?
+  - Does it improve progress?
+  - Does it reduce at-fault collisions?
+  - Does it meet the threshold?
+  - Does it fit the latency budget?
+
+**Decision:**
+- **Pass:** stage 2 (learned models, section 5). The winning planner drives the learned singles
+  *and* the learned sets.
+- **Fail:**
+  - report: "with ideal predictions and matched planners, a multi-future distribution adds no
+    measurable driving benefit in this simulator";
+  - the learned models are not driven;
+  - the next design is path-level intent branches (turn vs straight; a pedestrian who starts to
+    cross or doesn't). These keep the futures ambiguous for longer than timing branches do.
+
+**Caveats:**
+- These are the same 32 dev scenes as stage 1, but with fresh draws.
+- The proposal planner and the contingency planner were designed after seeing the stage 1 result.
+- Only the dev scenes are used. A confirmatory run on the 73 primary scenes would follow stage 2.
 
 Related: [[reactive-test]], [[closed-loop-cv]], [[planner]], [[negative-results]]

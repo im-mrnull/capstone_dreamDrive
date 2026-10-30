@@ -43,6 +43,8 @@ Usage:
     python scripts/counterfactual_sim.py check        # dose 0 reproduces closed_loop_sim
     python scripts/counterfactual_sim.py eligibility  # targets per dev episode (logs only)
     python scripts/counterfactual_sim.py stage1       # gate G1 (after the rule is committed)
+    python scripts/counterfactual_sim.py tune         # matched-planner G2: proposal planner, draws 5-9
+    python scripts/counterfactual_sim.py matched      # matched-planner G2: public cells, draws 10-19
 """
 
 from __future__ import annotations
@@ -351,6 +353,219 @@ def stage1(workers: int) -> None:
     print("dose for later stages:", chosen, "| saved:", STAGE1_JSON)
 
 
+# --------------------------------------------------------------------------
+# Matched-planner G2 (docs/wiki/headroom-test.md section 8)
+# --------------------------------------------------------------------------
+MATCHED_TUNE_JSON = rs.BENCH / "headroom_matched_tune.json"
+MATCHED_JSON = rs.BENCH / "headroom_matched.json"
+TUNE_DRAWS = (5, 6, 7, 8, 9)
+EVAL_DRAWS = tuple(range(10, 20))
+LATENCY_DRAWS = (10, 11)
+MATCHED = ("Branch oracle", "Ideal single (mean)", "Ideal single (most likely)", "Ideal set")
+TUNE_ON = ("Branch oracle", "Ideal single (mean)", "Ideal set")    # neither predictor type favoured
+G2M = {"score": 0.01, "at_fault": 0.01, "alpha": 0.05, "replicates": 2000}
+LATENCY_BUDGET_MS = {"median": 50.0, "p95": 100.0}
+PLAN_V2 = cl.plan
+
+
+def matched_dose() -> str:
+    import json
+    dose = json.loads(STAGE1_JSON.read_text(encoding="utf-8"))["dose_for_later_stages"]
+    assert dose is not None, "G1 failed at both doses: the test stops"
+    return dose
+
+
+def proposal_grid() -> list[dict]:
+    """12 settings of the proposal planner: competing or fallback-only constant proposals x
+    clearance weight x progress weight; fine accelerations, jerk 0.2 and IDM targets fixed."""
+    from itertools import product
+    from closed_loop_v3 import FINE_ACCELS
+    base, _ = rs._v2_cfg()
+    return [{**base, "accels": FINE_ACCELS, "clear_m": 1.0, "jerk_w": 0.2, "lat_w": 0.0,
+             "idm_fracs": (0.2, 0.4, 0.6, 0.8, 1.0), "const": c, "clear_w": cw, "prog_w": pw}
+            for c, cw, pw in product(("always", "fallback"), (0.0, 2.0), (0.0, 2.0, 5.0))]
+
+
+def use_planner(planner: str, cfg: dict) -> None:
+    """Install planner "v2" or "proposal" in this process (pool workers are reused)."""
+    import proposal_planner as pp
+    if planner == "proposal":
+        pp.use(dict(cfg))
+    else:
+        cl.plan = PLAN_V2
+
+
+def _matched_task(job) -> tuple:
+    """Pool task: (planner, run_package_cf args)."""
+    planner, args = job
+    use_planner(planner, args[4])
+    return run_package_cf(args)
+
+
+def per_scene(eps: list) -> dict:
+    """{scene: [episodes, score sum, at-fault sum]}: sufficient for the paired scene bootstrap."""
+    out = {}
+    for e in eps:
+        r = out.setdefault(e["scene"], [0, 0.0, 0])
+        r[0] += 1
+        r[1] += e["score"]
+        r[2] += int(e["at_fault"])
+    return out
+
+
+def cells_of(jobs, res) -> dict:
+    """{planner: {predictor: summary + per_scene}} pooled over draws."""
+    eps = {}
+    for (planner, args), r in zip(jobs, res):
+        eps.setdefault(planner, {}).setdefault(args[0], []).extend(r[3])
+    return {p: {n: {**summary(e), "per_scene": per_scene(e)} for n, e in row.items()} for p, row in eps.items()}
+
+
+def latency(task_setup, jobs) -> dict:
+    """Per-replan planning time (ms), single process: median and p95 per predictor."""
+    import time
+    times = {}
+    for planner, args in jobs:
+        task_setup(planner, args[4])
+        inner, bucket = cl.plan, times.setdefault(args[0], [])
+
+        def timed(*a, _inner=inner, _bucket=bucket):
+            t = time.perf_counter()
+            out = _inner(*a)
+            _bucket.append(1000.0 * (time.perf_counter() - t))
+            return out
+        cl.plan = timed
+        run_package_cf(args)
+        cl.plan = inner
+    return {n: {"median_ms": float(np.median(v)), "p95_ms": float(np.percentile(v, 95)), "n_replans": len(v)}
+            for n, v in times.items()}
+
+
+def latency_jobs(planner, scenes, lam, cfg, dose, weighted) -> list:
+    return [(planner, (n, 0, scenes, lam, cfg, None, dose, d, weighted))
+            for n in ("Ideal set", "Ideal single (mean)") for d in LATENCY_DRAWS]
+
+
+def within_budget(lat: dict) -> bool:
+    return all(v["median_ms"] <= LATENCY_BUDGET_MS["median"] and v["p95_ms"] <= LATENCY_BUDGET_MS["p95"]
+               for v in lat.values())
+
+
+def preregistered() -> dict:
+    ref = {"rule_doc": RULE_DOC, "rule_commit": _git("log", "-1", "--format=%H", "--", RULE_DOC),
+           "rule_clean": _git("status", "--porcelain", "--", RULE_DOC, "scripts/counterfactual_sim.py",
+                              "scripts/proposal_planner.py") == ""}
+    assert ref["rule_commit"] and ref["rule_clean"], "commit the pre-registration first"
+    return ref
+
+
+def tune_rows(grid, res) -> list:
+    """Per setting: TUNE_ON summaries and their mean score (res in grid x TUNE_ON x draws order)."""
+    rows, k = [], len(TUNE_ON) * len(TUNE_DRAWS)
+    for i, cfg in enumerate(grid):
+        part = res[i * k:(i + 1) * k]
+        st = {n: summary([e for r in part if r[0] == n for e in r[3]]) for n in TUNE_ON}
+        rows.append({"cfg": cfg, "mean_score": float(np.mean([v["score"] for v in st.values()])), "packages": st})
+    return rows
+
+
+def tune(workers: int) -> None:
+    """Pick the proposal planner's setting on draws 5-9: highest mean score over TUNE_ON."""
+    import json
+    from concurrent.futures import ProcessPoolExecutor
+    from datetime import datetime
+    ref, dose = preregistered(), matched_dose()
+    _, lam = rs._v2_cfg()
+    scenes, grid = rs._dev_scenes(), proposal_grid()
+    jobs = [("proposal", (n, 0, scenes, lam, cfg, None, dose, d, False))
+            for cfg in grid for n in TUNE_ON for d in TUNE_DRAWS]
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(_matched_task, jobs))
+    rows = tune_rows(grid, res)
+    best = max(range(len(rows)), key=lambda i: rows[i]["mean_score"])
+    payload = {**ref, "dose": dose, "draws": list(TUNE_DRAWS), "tune_on": list(TUNE_ON),
+               "proposal": {"grid": rows, "chosen": rows[best]["cfg"]},
+               "when": datetime.now().isoformat(timespec="seconds")}
+    MATCHED_TUNE_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    for r in rows:
+        c = r["cfg"]
+        print(f"const {c['const']:8s} clear {c['clear_w']:.0f} prog {c['prog_w']:.0f}: mean {r['mean_score']:.3f}  "
+              + "  ".join(f"{n}: {v['score']:.3f}/{v['at_fault_rate']:.3f}" for n, v in r["packages"].items()))
+    print("chosen:", {k: rows[best]["cfg"][k] for k in ("const", "clear_w", "prog_w")}, "| saved:", MATCHED_TUNE_JSON)
+
+
+def matched(workers: int) -> None:
+    """The public cells (planner v2, proposal planner) x MATCHED predictors on draws 10-19."""
+    import json
+    from concurrent.futures import ProcessPoolExecutor
+    from datetime import datetime
+    ref, dose = preregistered(), matched_dose()
+    tuned = json.loads(MATCHED_TUNE_JSON.read_text(encoding="utf-8"))
+    assert tuned["rule_commit"] == ref["rule_commit"], "tuning ran under a different rule commit"
+    v2, lam = rs._v2_cfg()
+    cfgs = {"v2": v2, "proposal": tuned["proposal"]["chosen"]}
+    scenes = rs._dev_scenes()
+    jobs = [(p, (n, 0, scenes, lam, cfgs[p], None, dose, d, False)) for p in cfgs for n in MATCHED for d in EVAL_DRAWS]
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        res = list(ex.map(_matched_task, jobs))
+    cells = cells_of(jobs, res)
+    lat = {p: latency(use_planner, latency_jobs(p, scenes, lam, cfgs[p], dose, False)) for p in cfgs}
+    payload = {**ref, "dose": dose, "draws": list(EVAL_DRAWS), "planner_cfgs": cfgs, "band": lam,
+               "cells": cells, "latency": lat, "latency_budget_ms": LATENCY_BUDGET_MS,
+               "within_budget": {p: within_budget(v) for p, v in lat.items()},
+               "when": datetime.now().isoformat(timespec="seconds")}
+    MATCHED_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print_cells(cells, lat)
+    print("saved:", MATCHED_JSON)
+
+
+def print_cells(cells: dict, lat: dict) -> None:
+    for p, row in cells.items():
+        for n, v in row.items():
+            print(f"{p:12s} {n:28s} score {v['score']:.3f}  at-fault {v['at_fault_rate']:.4f}  vru "
+                  f"{v['at_fault_vru_rate']:.4f}  near {v['near_miss_rate']:.3f}  harsh {v['harsh_braking_rate']:.3f}  "
+                  f"progress {v['progress']:.3f}  jerk {v['jerk_rms']:.2f}")
+        for n, v in lat.get(p, {}).items():
+            print(f"{p:12s} latency {n:20s} median {v['median_ms']:.1f} ms  p95 {v['p95_ms']:.1f} ms")
+
+
+def matched_gate(cells: dict, eligible: list, seed: int = 0) -> dict:
+    """G2-matched: some eligible planner's Ideal set beats the best single cell over all
+    eligible planners (best score / lowest at-fault; the oracle is not a single predictor here)
+    by the threshold, with a Holm-adjusted one-sided paired scene-bootstrap p < alpha over the
+    2 x len(eligible) tests (draws pooled per scene)."""
+    singles = [(p, n) for p in eligible for n in ("Ideal single (mean)", "Ideal single (most likely)")]
+    best = {"score": max(singles, key=lambda c: cells[c[0]][c[1]]["score"]),
+            "at_fault": min(singles, key=lambda c: cells[c[0]][c[1]]["at_fault_rate"])}
+    scenes = sorted(cells[eligible[0]]["Ideal set"]["per_scene"])
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(scenes), (G2M["replicates"], len(scenes)))
+    counts = np.stack([np.bincount(r, minlength=len(scenes)) for r in idx]).astype(float)   # (B, scenes)
+
+    def sums(p, n, col):
+        ps = cells[p][n]["per_scene"]
+        return np.array([ps[s][col] for s in scenes], float), np.array([ps[s][0] for s in scenes], float)
+    tests = []
+    for p in eligible:
+        for metric, col, sign in (("score", 1, 1.0), ("at_fault", 2, -1.0)):
+            bp, bn = best[metric]
+            xs, xn = sums(p, "Ideal set", col)
+            ys, yn = sums(bp, bn, col)
+            gain = sign * (xs.sum() / xn.sum() - ys.sum() / yn.sum())                   # > 0: the set is better
+            reps = sign * ((counts @ xs) / (counts @ xn) - (counts @ ys) / (counts @ yn))
+            tests.append({"planner": p, "metric": metric, "vs": [bp, bn], "gain": float(gain),
+                          "p": float((np.sum(reps <= 0) + 1) / (len(reps) + 1)),
+                          "ci95": [float(np.percentile(reps, 2.5)), float(np.percentile(reps, 97.5))]})
+    run, m = 0.0, len(tests)
+    for r, i in enumerate(np.argsort([t["p"] for t in tests])):
+        run = max(run, min(1.0, (m - r) * tests[i]["p"]))
+        tests[i]["p_holm"] = run
+    for t in tests:
+        t["passes"] = bool(t["gain"] >= G2M[t["metric"]] and t["p_holm"] < G2M["alpha"])
+    return {"best_single": {k: list(v) for k, v in best.items()}, "eligible": list(eligible), "tests": tests,
+            "passes": any(t["passes"] for t in tests)}
+
+
 def check(n_scenes: int = 6) -> None:
     """Dose 0 must reproduce the non-reactive episodes field for field (eligible episodes)."""
     cfg, lam = rs._v2_cfg()
@@ -394,13 +609,17 @@ def eligibility() -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("check", "eligibility", "stage1"))
+    ap.add_argument("cmd", choices=("check", "eligibility", "stage1", "tune", "matched"))
     ap.add_argument("--workers", type=int, default=20)
     args = ap.parse_args()
     if args.cmd == "check":
         check()
     elif args.cmd == "eligibility":
         eligibility()
+    elif args.cmd == "tune":
+        tune(args.workers)
+    elif args.cmd == "matched":
+        matched(args.workers)
     else:
         stage1(args.workers)
     return 0

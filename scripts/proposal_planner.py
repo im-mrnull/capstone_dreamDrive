@@ -32,7 +32,10 @@ import closed_loop_sim as cl
 #            emergency manoeuvres)
 # margin_m   extra buffer (m) on every predicted footprint (the caution control of
 #            docs/wiki/headroom-test.md section 10)
-PP_DEFAULTS = {"idm_fracs": (), "prog_w": 0.0, "const": "always", "margin_m": 0.0}
+# hold_s     seconds the executed command is held (the commitment interval of section 14): IDM
+#            proposals are evaluated as executed, their first command constant for hold_s and IDM
+#            from there (0: IDM from the first frame, the frozen planner)
+PP_DEFAULTS = {"idm_fracs": (), "prog_w": 0.0, "const": "always", "margin_m": 0.0, "hold_s": 0.0}
 IDM_EGO = (1.5, 2.0, 1.2, 2.0)          # a_max, b_comf (m/s^2), time headway T (s), standstill gap s0 (m)
 A_MIN, A_MAX = -6.0, 2.0                # command limits (planner v2's acceleration range)
 EGO_FRONT = max(cl.EGO[0]) + cl.EGO[1]  # m ahead of the sensor
@@ -112,11 +115,18 @@ def idm_roll(s0, d0, v0, G, DT_, tracks, k0: int = 0, n: int = cl.H_FRAMES):
     return A0, S, Dd, V
 
 
-def idm_rollouts(s0, d0, v0, goals, d_targets, tracks):
-    """IDM proposals from the ego's state, one row per (goal, d_target): commands and (s, d, v)."""
+def idm_rollouts(s0, d0, v0, goals, d_targets, tracks, hold: int = 0):
+    """IDM proposals from the ego's state, one row per (goal, d_target): commands and (s, d, v).
+    hold > 0: the first command is held for hold frames (closed_loop_sim.rollout, as executed),
+    then IDM from the state it reaches."""
     G, DT_ = np.meshgrid(goals, d_targets, indexing="ij")
     G, DT_ = G.ravel(), DT_.ravel()
-    A0, S, Dd, V = idm_roll(s0, d0, v0, G, DT_, tracks)
+    A0, S, Dd, V = idm_roll(s0, d0, v0, G, DT_, tracks, 0, cl.H_FRAMES if hold <= 0 else 1)
+    if hold > 0:
+        held = [cl.rollout(s0, d0, v0, float(a), float(dt), hold) for a, dt in zip(A0, DT_)]
+        Sh, Dh, Vh = (np.stack([h[i] for h in held]) for i in range(3))
+        _, S2, D2, V2 = idm_roll(Sh[:, -1], Dh[:, -1], Vh[:, -1], G, DT_, tracks, hold, cl.H_FRAMES - hold)
+        S, Dd, V = np.concatenate([Sh, S2], 1), np.concatenate([Dh, D2], 1), np.concatenate([Vh, V2], 1)
     return [(float(a), float(dt)) for a, dt in zip(A0, DT_)], S, Dd, V
 
 
@@ -127,7 +137,8 @@ def proposals(sc, route, s0, d0, v0, v_ref, preds, cfg):
     n_const = len(cands)
     if cfg["idm_fracs"]:
         goals = np.array([f * v_ref for f in cfg["idm_fracs"]])
-        c2, S, Dd, V = idm_rollouts(s0, d0, v0, goals, cl.LAT_TARGETS, lead_tracks(sc, route, s0, preds))
+        c2, S, Dd, V = idm_rollouts(s0, d0, v0, goals, cl.LAT_TARGETS, lead_tracks(sc, route, s0, preds),
+                                    int(round(cfg.get("hold_s", 0.0) / cl.DT)))
         cands += c2
         rolls += list(zip(S, Dd, V))
     return cands, rolls, n_const

@@ -1,0 +1,411 @@
+{
+  "label": "engineering, before the pre-registration",
+  "simulator_sha": "15517c47f8109d5e56f91e56c7959da7228858c9",
+  "dirty": true,
+  "dose": "strong",
+  "scenes": "32 development scenes",
+  "draws": [
+    95,
+    96
+  ],
+  "workers": 28,
+  "pool_wall_s": 114.63614999991842,
+  "throughput": {
+    "proposal | commit 0.2 s": {
+      "episodes": 1760,
+      "cpu_s": 1075.046875,
+      "peak_mb": 108.31640625,
+      "replans_ok": true,
+      "episodes_per_cpu_s": 1.6371379154978707
+    },
+    "proposal | commit 0.5 s": {
+      "episodes": 1408,
+      "cpu_s": 564.984375,
+      "peak_mb": 106.9765625,
+      "replans_ok": true,
+      "episodes_per_cpu_s": 2.492104317044166
+    },
+    "proposal | commit 1 s": {
+      "episodes": 1408,
+      "cpu_s": 432.078125,
+      "peak_mb": 107.90625,
+      "replans_ok": true,
+      "episodes_per_cpu_s": 3.258669945394713
+    },
+    "proposal | frozen": {
+      "episodes": 352,
+      "cpu_s": 217.359375,
+      "peak_mb": 104.66796875,
+      "replans_ok": true,
+      "episodes_per_cpu_s": 1.6194378549349435
+    }
+  },
+  "oracle_invariant_across_delay": {
+    "commit 0.2 s": true,
+    "commit 0.5 s": true,
+    "commit 1 s": true
+  },
+  "identity_vs_part_1b": {
+    "episodes": 16,
+    "identical": true
+  },
+  "baseline_cell_vs_frozen": {
+    "episodes": 352,
+    "identical_share": 0.8693181818181818,
+    "frozen": {
+      "score": 0.8637058279293047,
+      "at_fault_rate": 0.008522727272727272,
+      "at_fault_vru_rate": 0.005681818181818182,
+      "progress": 0.9284829606031691,
+      "harsh_braking_rate": 0.09090909090909091,
+      "near_miss_rate": 0.32670454545454547,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8505462049316079,
+          "at_fault_rate": 0.011363636363636364
+        },
+        "assertive": {
+          "score": 0.8768654509270015,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.3181818181818182,
+      "jerk_rms": 1.839718490278281,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "regime_baseline": {
+      "score": 0.8713242218239798,
+      "at_fault_rate": 0.002840909090909091,
+      "at_fault_vru_rate": 0.002840909090909091,
+      "progress": 0.9299655968694118,
+      "harsh_braking_rate": 0.07670454545454546,
+      "near_miss_rate": 0.32386363636363635,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8638027726992393,
+          "at_fault_rate": 0.0
+        },
+        "assertive": {
+          "score": 0.8788456709487202,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.3181818181818182,
+      "jerk_rms": 1.8366183276108798,
+      "branched_episode_share": 0.6988636363636364
+    }
+  },
+  "cells": {
+    "delay 2 s, commit 0.2 s | proposal | Ideal single (mean)": {
+      "score": 0.8322559417642869,
+      "at_fault_rate": 0.03409090909090909,
+      "at_fault_vru_rate": 0.022727272727272728,
+      "progress": 0.9292402710002285,
+      "harsh_braking_rate": 0.12215909090909091,
+      "near_miss_rate": 0.3721590909090909,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8064298495592103,
+          "at_fault_rate": 0.05113636363636364
+        },
+        "assertive": {
+          "score": 0.8580820339693637,
+          "at_fault_rate": 0.017045454545454544
+        }
+      },
+      "near_miss_moving_rate": 0.36079545454545453,
+      "jerk_rms": 2.132099969870929,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 0.2 s | proposal | Ideal set": {
+      "score": 0.8531628309874706,
+      "at_fault_rate": 0.011363636363636364,
+      "at_fault_vru_rate": 0.008522727272727272,
+      "progress": 0.925465904086797,
+      "harsh_braking_rate": 0.11647727272727272,
+      "near_miss_rate": 0.3409090909090909,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.835781621669367,
+          "at_fault_rate": 0.017045454545454544
+        },
+        "assertive": {
+          "score": 0.8705440403055745,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.32954545454545453,
+      "jerk_rms": 2.29372295559747,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 0 s, commit 0.2 s | proposal | Branch oracle": {
+      "score": 0.8646517238741961,
+      "at_fault_rate": 0.011363636363636364,
+      "at_fault_vru_rate": 0.005681818181818182,
+      "progress": 0.9297192336633068,
+      "harsh_braking_rate": 0.08522727272727272,
+      "near_miss_rate": 0.3210227272727273,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8546681954403682,
+          "at_fault_rate": 0.011363636363636364
+        },
+        "assertive": {
+          "score": 0.8746352523080237,
+          "at_fault_rate": 0.011363636363636364
+        }
+      },
+      "near_miss_moving_rate": 0.3153409090909091,
+      "jerk_rms": 1.8539842572843719,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 0.2 s | proposal | Branch oracle": {
+      "score": 0.8646517238741961,
+      "at_fault_rate": 0.011363636363636364,
+      "at_fault_vru_rate": 0.005681818181818182,
+      "progress": 0.9297192336633068,
+      "harsh_braking_rate": 0.08522727272727272,
+      "near_miss_rate": 0.3210227272727273,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8546681954403682,
+          "at_fault_rate": 0.011363636363636364
+        },
+        "assertive": {
+          "score": 0.8746352523080237,
+          "at_fault_rate": 0.011363636363636364
+        }
+      },
+      "near_miss_moving_rate": 0.3153409090909091,
+      "jerk_rms": 1.8539842572843719,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 0.5 s | proposal | Ideal single (mean)": {
+      "score": 0.8336905118434033,
+      "at_fault_rate": 0.036931818181818184,
+      "at_fault_vru_rate": 0.014204545454545454,
+      "progress": 0.9359772499890006,
+      "harsh_braking_rate": 0.10795454545454546,
+      "near_miss_rate": 0.375,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8091436030438078,
+          "at_fault_rate": 0.056818181818181816
+        },
+        "assertive": {
+          "score": 0.8582374206429987,
+          "at_fault_rate": 0.017045454545454544
+        }
+      },
+      "near_miss_moving_rate": 0.36079545454545453,
+      "jerk_rms": 1.2081688597850415,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 0.5 s | proposal | Ideal set": {
+      "score": 0.8636868644165681,
+      "at_fault_rate": 0.017045454545454544,
+      "at_fault_vru_rate": 0.014204545454545454,
+      "progress": 0.9345530326961441,
+      "harsh_braking_rate": 0.07670454545454546,
+      "near_miss_rate": 0.3409090909090909,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8459205334749239,
+          "at_fault_rate": 0.022727272727272728
+        },
+        "assertive": {
+          "score": 0.881453195358212,
+          "at_fault_rate": 0.011363636363636364
+        }
+      },
+      "near_miss_moving_rate": 0.33238636363636365,
+      "jerk_rms": 1.304666715727404,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 0 s, commit 0.5 s | proposal | Branch oracle": {
+      "score": 0.8690967447212288,
+      "at_fault_rate": 0.014204545454545454,
+      "at_fault_vru_rate": 0.005681818181818182,
+      "progress": 0.9353608512235971,
+      "harsh_braking_rate": 0.07670454545454546,
+      "near_miss_rate": 0.3210227272727273,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8513649189746427,
+          "at_fault_rate": 0.022727272727272728
+        },
+        "assertive": {
+          "score": 0.8868285704678152,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.3125,
+      "jerk_rms": 1.1516780020631545,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 0.5 s | proposal | Branch oracle": {
+      "score": 0.8690967447212288,
+      "at_fault_rate": 0.014204545454545454,
+      "at_fault_vru_rate": 0.005681818181818182,
+      "progress": 0.9353608512235971,
+      "harsh_braking_rate": 0.07670454545454546,
+      "near_miss_rate": 0.3210227272727273,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8513649189746427,
+          "at_fault_rate": 0.022727272727272728
+        },
+        "assertive": {
+          "score": 0.8868285704678152,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.3125,
+      "jerk_rms": 1.1516780020631545,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 1 s | proposal | Ideal single (mean)": {
+      "score": 0.831467529234513,
+      "at_fault_rate": 0.06534090909090909,
+      "at_fault_vru_rate": 0.03409090909090909,
+      "progress": 0.9471970417208687,
+      "harsh_braking_rate": 0.05113636363636364,
+      "near_miss_rate": 0.3721590909090909,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8042588723999057,
+          "at_fault_rate": 0.08522727272727272
+        },
+        "assertive": {
+          "score": 0.8586761860691206,
+          "at_fault_rate": 0.045454545454545456
+        }
+      },
+      "near_miss_moving_rate": 0.36363636363636365,
+      "jerk_rms": 0.7490360770717622,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 1 s | proposal | Ideal set": {
+      "score": 0.8419898672426925,
+      "at_fault_rate": 0.05397727272727273,
+      "at_fault_vru_rate": 0.03409090909090909,
+      "progress": 0.9326865375058545,
+      "harsh_braking_rate": 0.06534090909090909,
+      "near_miss_rate": 0.34375,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8219962061261927,
+          "at_fault_rate": 0.06818181818181818
+        },
+        "assertive": {
+          "score": 0.8619835283591928,
+          "at_fault_rate": 0.03977272727272727
+        }
+      },
+      "near_miss_moving_rate": 0.3352272727272727,
+      "jerk_rms": 0.9136062290255812,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 0 s, commit 1 s | proposal | Branch oracle": {
+      "score": 0.8726501512352364,
+      "at_fault_rate": 0.03409090909090909,
+      "at_fault_vru_rate": 0.014204545454545454,
+      "progress": 0.9436348765270656,
+      "harsh_braking_rate": 0.03125,
+      "near_miss_rate": 0.3039772727272727,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8477673350025821,
+          "at_fault_rate": 0.045454545454545456
+        },
+        "assertive": {
+          "score": 0.8975329674678908,
+          "at_fault_rate": 0.022727272727272728
+        }
+      },
+      "near_miss_moving_rate": 0.29829545454545453,
+      "jerk_rms": 0.678909537579617,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 2 s, commit 1 s | proposal | Branch oracle": {
+      "score": 0.8726501512352364,
+      "at_fault_rate": 0.03409090909090909,
+      "at_fault_vru_rate": 0.014204545454545454,
+      "progress": 0.9436348765270656,
+      "harsh_braking_rate": 0.03125,
+      "near_miss_rate": 0.3039772727272727,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8477673350025821,
+          "at_fault_rate": 0.045454545454545456
+        },
+        "assertive": {
+          "score": 0.8975329674678908,
+          "at_fault_rate": 0.022727272727272728
+        }
+      },
+      "near_miss_moving_rate": 0.29829545454545453,
+      "jerk_rms": 0.678909537579617,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "frozen | proposal | Ideal single (mean)": {
+      "score": 0.8637058279293047,
+      "at_fault_rate": 0.008522727272727272,
+      "at_fault_vru_rate": 0.005681818181818182,
+      "progress": 0.9284829606031691,
+      "harsh_braking_rate": 0.09090909090909091,
+      "near_miss_rate": 0.32670454545454547,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8505462049316079,
+          "at_fault_rate": 0.011363636363636364
+        },
+        "assertive": {
+          "score": 0.8768654509270015,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.3181818181818182,
+      "jerk_rms": 1.839718490278281,
+      "branched_episode_share": 0.6988636363636364
+    },
+    "delay 0 s, commit 0.2 s | proposal | Ideal single (mean)": {
+      "score": 0.8713242218239798,
+      "at_fault_rate": 0.002840909090909091,
+      "at_fault_vru_rate": 0.002840909090909091,
+      "progress": 0.9299655968694118,
+      "harsh_braking_rate": 0.07670454545454546,
+      "near_miss_rate": 0.32386363636363635,
+      "n_episodes": 352,
+      "by_persona": {
+        "nominal": {
+          "score": 0.8638027726992393,
+          "at_fault_rate": 0.0
+        },
+        "assertive": {
+          "score": 0.8788456709487202,
+          "at_fault_rate": 0.005681818181818182
+        }
+      },
+      "near_miss_moving_rate": 0.3181818181818182,
+      "jerk_rms": 1.8366183276108798,
+      "branched_episode_share": 0.6988636363636364
+    }
+  },
+  "when": "2026-10-31T12:00:03"
+}

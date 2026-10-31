@@ -1,0 +1,322 @@
+{
+  "label": "engineering, before the pre-registration",
+  "simulator_sha": "15517c47f8109d5e56f91e56c7959da7228858c9",
+  "dirty": true,
+  "dose": "strong",
+  "scenes": "32 development scenes",
+  "draws": [
+    95,
+    96
+  ],
+  "workers": 28,
+  "identical_share": "share of episodes equal to the frozen simulator on every logged field",
+  "prediction_level": {
+    "Branch oracle": {
+      "target_replans": 19173,
+      "ambiguous": 4245,
+      "changed_with_one_branch": 0,
+      "changed_share_ambiguous": 0.0,
+      "p95_shift_ambiguous_m": 0.0,
+      "max_shift_m": 0.0,
+      "max_shift_first_1s_m": 0.0
+    },
+    "Ideal single (mean)": {
+      "target_replans": 19173,
+      "ambiguous": 4245,
+      "changed_with_one_branch": 0,
+      "changed_share_ambiguous": 0.4138987043580683,
+      "p95_shift_ambiguous_m": 0.2659502290572576,
+      "max_shift_m": 35.00942496606654,
+      "max_shift_first_1s_m": 1.1998073426097593,
+      "jump": "a shift larger than the Ideal set's largest shift of any branch future",
+      "jump_share_ambiguous": 0.00800942285041225,
+      "jumps_without_a_finite_futures_change": 0,
+      "finite_futures_change_share_ambiguous": 0.026148409893992933,
+      "max_shift_without_a_finite_futures_change_m": 1.4531166995050688
+    },
+    "Ideal single (most likely)": {
+      "target_replans": 19173,
+      "ambiguous": 4245,
+      "changed_with_one_branch": 0,
+      "changed_share_ambiguous": 0.1806831566548881,
+      "p95_shift_ambiguous_m": 0.27718776871747475,
+      "max_shift_m": 2.1796750492576034,
+      "max_shift_first_1s_m": 1.7997110139146395,
+      "changed_when_most_likely_is_realised": 0
+    },
+    "Ideal set": {
+      "target_replans": 19173,
+      "ambiguous": 4245,
+      "changed_with_one_branch": 0,
+      "changed_share_ambiguous": 0.4138987043580683,
+      "p95_shift_ambiguous_m": 0.44963124954731265,
+      "max_shift_m": 2.1796750492576034,
+      "max_shift_first_1s_m": 1.7997110139146395
+    }
+  },
+  "closed_loop": {
+    "Branch oracle": {
+      "frozen (no regime)": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8574604662026656,
+        "harsh_braking_rate": 0.09943181818181818,
+        "near_miss_rate": 0.33238636363636365
+      },
+      "regime path": {
+        "identical_share": 0.5625,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8646517238741961,
+        "harsh_braking_rate": 0.08522727272727272,
+        "near_miss_rate": 0.3210227272727273
+      },
+      "none": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8574604662026656,
+        "harsh_braking_rate": 0.09943181818181818,
+        "near_miss_rate": 0.33238636363636365
+      },
+      "hold": {
+        "identical_share": 0.9119318181818182,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8623168130758131,
+        "harsh_braking_rate": 0.08806818181818182,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "exact": {
+        "identical_share": 0.5710227272727273,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8616833601463718,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "exact+hold": {
+        "identical_share": 0.5625,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8646517238741961,
+        "harsh_braking_rate": 0.08522727272727272,
+        "near_miss_rate": 0.3210227272727273
+      },
+      "anchor": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8574604662026656,
+        "harsh_braking_rate": 0.09943181818181818,
+        "near_miss_rate": 0.33238636363636365
+      },
+      "anchor+hold": {
+        "identical_share": 0.9119318181818182,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8623168130758131,
+        "harsh_braking_rate": 0.08806818181818182,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "anchor+exact": {
+        "identical_share": 0.5710227272727273,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8616833601463718,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "anchor+exact+hold": {
+        "identical_share": 0.5625,
+        "episodes": 352,
+        "at_fault_episodes": 4,
+        "score": 0.8646517238741961,
+        "harsh_braking_rate": 0.08522727272727272,
+        "near_miss_rate": 0.3210227272727273
+      }
+    },
+    "Ideal single (mean)": {
+      "frozen (no regime)": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8637058279293047,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "regime path": {
+        "identical_share": 0.5085227272727273,
+        "episodes": 352,
+        "at_fault_episodes": 1,
+        "score": 0.8713242218239798,
+        "harsh_braking_rate": 0.07670454545454546,
+        "near_miss_rate": 0.32386363636363635
+      },
+      "none": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8637058279293047,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "hold": {
+        "identical_share": 0.9005681818181818,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.8691890338145547,
+        "harsh_braking_rate": 0.08238636363636363,
+        "near_miss_rate": 0.32386363636363635
+      },
+      "exact": {
+        "identical_share": 0.5482954545454546,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8634821237833922,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32954545454545453
+      },
+      "exact+hold": {
+        "identical_share": 0.5426136363636364,
+        "episodes": 352,
+        "at_fault_episodes": 1,
+        "score": 0.8707377108905544,
+        "harsh_braking_rate": 0.07954545454545454,
+        "near_miss_rate": 0.32386363636363635
+      },
+      "anchor": {
+        "identical_share": 0.9460227272727273,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8636610257314171,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "anchor+hold": {
+        "identical_share": 0.8522727272727273,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.8697755284551029,
+        "harsh_braking_rate": 0.07954545454545454,
+        "near_miss_rate": 0.32386363636363635
+      },
+      "anchor+exact": {
+        "identical_share": 0.5142045454545454,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8634373215855043,
+        "harsh_braking_rate": 0.09090909090909091,
+        "near_miss_rate": 0.32954545454545453
+      },
+      "anchor+exact+hold": {
+        "identical_share": 0.5085227272727273,
+        "episodes": 352,
+        "at_fault_episodes": 1,
+        "score": 0.8713242218239798,
+        "harsh_braking_rate": 0.07670454545454546,
+        "near_miss_rate": 0.32386363636363635
+      }
+    },
+    "Ideal set": {
+      "frozen (no regime)": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.8647781549052836,
+        "harsh_braking_rate": 0.09943181818181818,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "regime path": {
+        "identical_share": 0.3778409090909091,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8616612622797213,
+        "harsh_braking_rate": 0.10511363636363637,
+        "near_miss_rate": 0.32386363636363635
+      },
+      "none": {
+        "identical_share": 1.0,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.8647781549052836,
+        "harsh_braking_rate": 0.09943181818181818,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "hold": {
+        "identical_share": 0.8806818181818182,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8619066157161493,
+        "harsh_braking_rate": 0.10227272727272728,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "exact": {
+        "identical_share": 0.3977272727272727,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.86452419626372,
+        "harsh_braking_rate": 0.10227272727272728,
+        "near_miss_rate": 0.32954545454545453
+      },
+      "exact+hold": {
+        "identical_share": 0.39488636363636365,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8612942350909788,
+        "harsh_braking_rate": 0.10795454545454546,
+        "near_miss_rate": 0.32386363636363635
+      },
+      "anchor": {
+        "identical_share": 0.9204545454545454,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.8657164667678459,
+        "harsh_braking_rate": 0.09659090909090909,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "anchor+hold": {
+        "identical_share": 0.8096590909090909,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8614195458259307,
+        "harsh_braking_rate": 0.10227272727272728,
+        "near_miss_rate": 0.32670454545454547
+      },
+      "anchor+exact": {
+        "identical_share": 0.3806818181818182,
+        "episodes": 352,
+        "at_fault_episodes": 2,
+        "score": 0.8648190370468128,
+        "harsh_braking_rate": 0.09943181818181818,
+        "near_miss_rate": 0.32954545454545453
+      },
+      "anchor+exact+hold": {
+        "identical_share": 0.3778409090909091,
+        "episodes": 352,
+        "at_fault_episodes": 3,
+        "score": 0.8616612622797213,
+        "harsh_braking_rate": 0.10511363636363637,
+        "near_miss_rate": 0.32386363636363635
+      }
+    }
+  },
+  "checks": {
+    "Branch oracle": {
+      "all off == frozen": true,
+      "all on == regime path": true
+    },
+    "Ideal single (mean)": {
+      "all off == frozen": true,
+      "all on == regime path": true
+    },
+    "Ideal set": {
+      "all off == frozen": true,
+      "all on == regime path": true
+    },
+    "anchoring leaves the oracle's episodes unchanged": true,
+    "the oracle's prediction never changes": true
+  },
+  "when": "2026-10-31T13:50:25"
+}

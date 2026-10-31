@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set · lateral-intent benchmark stopped at its validity gate; Part 1b pre-registered (section 12), public cells run (section 13)
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set · lateral-intent benchmark stopped at its validity gate; Part 1b pre-registered (section 12), public cells run (section 13) · regime map pre-registered (section 14)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -695,3 +695,380 @@ near-misses and at-fault episodes with about twice as much harsh braking.
 
 **Part 1b reading:** the comparison with the confidential contingency planner, and the
 reading under the section 12.3 rule, are recorded with the confidential planner.
+
+## 14. Regime map: recognition delay × commitment interval (pre-registered 2026-10-31, before any dev draw 60–64 or primary draw 30–59 is driven)
+
+### 14.1 Why, and the question
+
+**Where things stand.**
+- **No demonstrated advantage.** Under timing uncertainty, multi-future prediction has not
+  demonstrated a statistically and practically meaningful advantage over the strongest
+  single-future setups (sections 7–13). The lateral-intent benchmark stopped at its validity
+  gate (section 12).
+- **Measured:** the ceiling is flat. The Branch oracle minus the best ideal single is about 0
+  under every planner (sections 7, 9, 11).
+- **Hypothesis (not an established cause):**
+  - the futures separate within about 0.6–1 s;
+  - the ego replans every 0.2 s;
+  - so it catches up once the future is visible, and knowing the futures in advance is worth
+    little.
+
+**Question.** Under what relationship between how late the ego learns which future is
+happening and how long it must commit to an action does multi-future prediction give a
+measurable closed-loop safety benefit?
+
+**Final bounded experiment.** This is the last multi-future experiment. No branch types, model
+families or worlds are added. Whatever the outcome, the project then moves to the chaos gap.
+
+### 14.2 The map (timing world, strong dose, branches unchanged)
+
+**Rows: recognition delay Δ ∈ {0, 1, 2} s.** Information only: the physical world, and so its
+danger, is identical across rows.
+
+**Information model.** The ideal predictors receive:
+1. every road user's true current position and logged heading;
+2. the branch posterior from the position history **up to t − Δ only** (the 0.3 m rule of
+   section 2 unchanged);
+3. the branch model.
+
+**Anchoring.** Each branch's future starts at the current position and advances at that branch's
+own timing increments. In log time: τ_real[t] + τ_b[t+k] − τ_b[t]. This is the identity for
+the realised branch, so the oracle is unchanged and invariant across Δ.
+
+**Excluded:** the realised timing rate, which is the intent cue in this world. No predictor
+input comes from frames after t − Δ, except the anchor position.
+
+**Columns: commitment interval R ∈ {0.2, 0.5, 1.0} s.** The ego replans every R.
+- **0.2 s is our existing system baseline (5 Hz).** Production systems replan at about 10 Hz,
+  which would sit further toward the fast end. So the conclusions apply to this setup, not to a
+  10 Hz production system.
+- **Hold-aware evaluation.** Proposals are evaluated as executed. A constant proposal is the
+  executed command. An IDM proposal holds its first command for R, then follows IDM
+  (`proposal_planner.py`, `hold_s` = R). The confidential planner runs under the same commitment
+  rule.
+- **Exact commitment.** Between replans the ego follows the commanded rollout exactly as
+  evaluated (`closed_loop_sim.COMMIT_EXACT`). The frozen simulator executes one-frame rollouts,
+  which recompute the lateral rate every frame and drift from the evaluated lateral path. At 1 s
+  the drift is large (`tests/test_regime.py`). At 0.2 s it barely moves the metrics but still
+  alters many episodes slightly (14.8).
+
+### 14.3 Cells (per regime; common random numbers)
+
+**Margin grid:** {0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0} m. The margin is tuned for every planner and
+predictor in every regime, on dev:
+- the rule is the lowest at-fault rate, then the highest score. It is applied to every planner
+  and predictor pair separately, single-future and multi-future alike;
+- **this is a change of method from section 10**, which tuned the margin on score. At-fault is
+  this experiment's primary metric, and a margin chosen on score can be worse on it. Section 10's
+  results are not re-selected under the new rule;
+- where the grid's top wins, the grid is extended by 2.5 and 3.0 m.
+
+| Planner | Single-future cells | Multi-future cells |
+|---|---|---|
+| Proposal (section 9) | Ideal single (mean), margin 0; Ideal single (mean), tuned; Ideal single (most likely), tuned | Ideal set, margin 0; Ideal set, tuned |
+| Contingency (confidential, section 10 setting) | Ideal single (mean), margin 0 and tuned | Ideal set, margin 0 and tuned |
+| Ceiling | Branch oracle, both planners: once per commitment interval at Δ 0, and at the corner (Δ 2 s, R 1 s) | |
+
+**Best single and best set per regime.** The best of the 5 single cells and the best of the 4 set
+cells, fixed on dev by at-fault rate with score as the tie-break. A tuned margin of 0 shares its
+episodes with the margin-0 cell.
+
+### 14.4 Draws (gate A: draw provenance)
+
+`counterfactual_sim.py draw-provenance` writes
+[`draw_provenance.json`](../../outputs/benchmark_v2/draw_provenance.json). For every result it
+gives:
+- scene ids and draws, taken from the file itself, or from its runner where the file records
+  none;
+- rule commit, configuration hash and file hash.
+
+The confidential results are covered in the same way, recorded with the confidential planner.
+
+| Result file | Status | World | Scenes | Draws |
+|---|---|---|---|---|
+| `headroom_stage1.json` | run | timing, primary and strong doses | dev | 0–4 |
+| `headroom_matched_tune.json`, `headroom_confirm_tune.json` | run | timing, strong | dev | 5–9 |
+| `headroom_matched.json` | run | timing, strong | dev | 10–19 |
+| `headroom_confirm.json` | run | timing, strong | primary | 0–9 |
+| `headroom_confirm_1b.json` | run | timing, strong | primary | 20–29 |
+| `lateral_validity.json` | run | lateral | dev | none (forced branches) |
+| `lateral_gpu_benchmark.json` | run | lateral | dev (8 scenes) | 99 |
+| `lateral_stage1.json`, `lateral_tune.json` | pre-registered, never run | lateral | dev | 0–4, 5–9 |
+| `lateral_confirm.json` | pre-registered, never run | lateral | primary | 10–19 |
+
+**Checks:**
+- the timing-world confirmation used primary draws 0–9;
+- no result has driven primary draws 10–19 (they are avoided here);
+- the draws below are unused everywhere.
+
+**This experiment's draws:**
+- **dev tuning and selection:** dev scenes, draws **60–64** (880 episodes per cell);
+- **evaluation:** 73 primary scenes, draws **30–39** (4,420 episodes per cell), or 30–49 / 30–59
+  under the sample-size rule (14.6);
+- **engineering, before this rule:** dev draws 90–98. These are never dev tuning or evaluation
+  data:
+  - resolution gate 90–94 (`regime_resolution.json`);
+  - pilot and anchoring check 95–96 (`regime_pilot.json`, `regime_anchor_check.json`);
+  - smoke test of the runners 97–98, on 2 dev scenes (outputs not kept).
+
+  Each file is labelled engineering. The table above lists them, and no earlier result used
+  draws 90–98.
+
+The runners re-check that their draws are free before driving.
+
+**Disclosed:** this is the fifth use of the primary scenes. Fresh draws are not fresh scenes.
+
+### 14.5 Tests (at-fault primary, in percentage points; positive = multi-future better)
+
+G_ij = best-single at-fault rate − best-set at-fault rate in regime ij (cells fixed on dev).
+
+| Test | Statistic | Method |
+|---|---|---|
+| **P1, additive trend** | Σ c_ij G_ij, c_ij = row rank + column rank − 2 | one-sided scene sign-flip, 200,000 flips; scene-cluster bootstrap CI |
+| **P2, adverse corner** (Δ 2 s, R 1 s) | best set vs best single, chosen on the evaluation data over all the corner's cells | `max_vs_max` (least-favourable union bound, section 12) |
+| P3, interaction (secondary) | (G_ss − G_sf) − (G_fs − G_ff); first letter resolution, second reaction, s = slowest, f = fastest | sign-flip as P1; one-sided, unadjusted |
+
+**Families.**
+- **Primary:** P1 and P2 on at-fault, Holm over 2.
+- **Secondary:** P1 and P2 on score, Holm over 2. P3 on both metrics, unadjusted.
+
+**Reported in full, descriptively:**
+- the whole 9-cell map: each regime's G with its CI, and its `max_vs_max` (Holm over 9);
+- headroom: the column's best oracle at-fault rate − the best single;
+- the share of the headroom the set captures;
+- row and column effects;
+- VRU at-fault, harsh braking, near-miss, progress and jerk;
+- within-planner comparisons.
+
+### 14.6 Calibration of the whole pipeline and the sample-size rule
+
+**Each synthetic dataset runs the complete procedure:**
+1. synthetic dev data;
+2. dev selection of every regime's best single and best set;
+3. synthetic primary data;
+4. P1, P2 and P3, with Holm;
+5. the reading rule.
+
+**Construction:** as section 12. Each scene's mean plus one of that scene's real between-cell
+deviations, with a random sign (an exact null).
+
+**The calibration runs the runners' own code:**
+- the dev selection `regime_select`, which the tuning runner uses (lowest at-fault rate, then
+  highest score);
+- the tests `regime_tests`;
+- the reading `regime_reading`.
+
+**Not simulated: the margin grid.**
+- Each synthetic cell stands for a cell at its tuned margin.
+- The margin is chosen on dev only, and dev and evaluation share no scenes and no draws. Under a
+  null, every margin has the same truth on the evaluation data, so the choice cannot change the
+  evaluation data, and simulating it would change nothing.
+- The selection-noise null covers the same mechanism for the cell choice.
+
+**P2 does not use the dev selection.** It compares every corner set with every corner single on
+the evaluation data (the union bound).
+
+**Criteria:**
+- **nulls:** 5,000 datasets each, with 95% Clopper–Pearson intervals. The upper bound must be
+  ≤ 0.06;
+- **power:** 1,000 datasets per draw count.
+
+**Pass 1** (`regime_calibration.json`) was built from the section 9 and 11 cells. It was run
+before this rule.
+
+| Null scenario | P1 | P2 | P3 | "Regime-dependent" reading |
+|---|---|---|---|---|
+| all equal, equal variances | 2.4% [2.0, 2.9] | 0.00% [0, 0.07] | 4.9% [4.3, 5.5] | 0.00% [0, 0.07] |
+| all equal, unequal variances (corner ×2, one single and one set ×3) | 2.5% [2.1, 2.9] | 0.00% [0, 0.07] | 5.2% [4.6, 5.9] | 0.00% [0, 0.07] |
+| selection noise (dev 3× noisier) | 2.8% [2.4, 3.3] | 0.02% [0, 0.11] | 4.9% [4.3, 5.5] | 0.00% [0, 0.07] |
+| composite: other singles +0.2 pt | 2.9% [2.4, 3.4] | 0.02% [0, 0.11] | 5.1% [4.5, 5.7] | 0.00% [0, 0.07] |
+| constant set advantage 1 pt, no trend | 3.0% [2.5, 3.5] | (power: 0.42%) | 4.9% [4.4, 5.6] | 0.26% [0.14, 0.44] |
+
+Every upper bound is ≤ 0.06. P1 runs at about α/2 because of Holm with a near-1 P2. P2 is very
+conservative: the union bound covers 5 singles.
+
+| Power, 1 pt at the corner | 10 draws: P1 / P2 / both | 20 draws | 30 draws | P3 (10 / 20 / 30) |
+|---|---|---|---|---|
+| additive trend, equal variances | 81% / 80% / 68% | 94% / 99.5% / 93% | 97% / 100% / 97% | – |
+| additive trend, unequal variances | 30% / 0.8% / 0.7% | 41% / 2.2% / 1.8% | 53% / 4.6% / 4.4% | – |
+| interaction (both slow), equal variances | 82% / 78% / 68% | 93% / 99% / 92% | 98% / 100% / 98% | 58% / 76% / 82% |
+
+**Reading of the power table.** Power depends strongly on how unequal the cells' noise is.
+- When one corner cell is three times noisier than the others, P2 cannot show a 1-point
+  advantage even at 30 draws. Its own noise leaves it unclear whether the set beats it.
+- Pass 2 decides with the map's own dev noise.
+
+**Pass 2 (after dev tuning, no primary data).**
+- **Dev:** the regime map's own dev cells per regime.
+- **Primary:** the pass 1 primary structure, with each regime's base rate and deviation spread
+  scaled as on dev.
+
+**Sample-size rule:**
+- the evaluation uses the smallest of 10 / 20 / 30 draws with ≥ 80% power for P1 and for P2 (additive
+  trend, 1 pt);
+- it is fixed in a committed addendum (`regime_sample_size.json`) before any primary run;
+- if 30 draws do not reach 80%, the run uses 30, and a primary null reads "inconclusive";
+- if pass 2 looks like the unequal-noise scenario, the "regime-dependent benefit" reading is out
+  of reach even at 30 draws. The addendum says so before the run;
+- the draw count is never changed after any primary outcome has been seen;
+- the sample size is never increased for P3.
+
+**If a test fails the null criterion in pass 2:** this is disclosed in the addendum, and the
+test cannot support a positive reading. It is read as not significant.
+
+**GPU.** The sign-flip products are 2.1× faster on CUDA and identical. They are 8% of a dataset's
+time, so the whole pipeline would gain at most 1.04×, below the 2× rule. The calibration stays
+on CPU.
+
+### 14.7 Reading rule (at-fault)
+
+| Outcome | Reading |
+|---|---|
+| P1 and P2 significant (Holm) | **"regime-dependent benefit"**, plus one of: "the factors interact (secondary)" if P3 p < 0.05; "additive" if P3 is adequately powered (≥ 80% in pass 2) and not significant; otherwise "interaction inconclusive" |
+| only P2 | "benefit in the adverse corner, no demonstrated trend" |
+| only P1 | "trend without a demonstrated benefit" |
+| neither | "no regime-dependent benefit" only if power was reached **and** corner headroom (best oracle − best single) is ≥ 1 pt. Otherwise "inconclusive" (power) or "no headroom" (oracle) |
+
+**Every reading reports the whole map.** A significant corner result does not imply that the
+corner is the only regime where the set helps.
+
+### 14.8 Gates and checks run before this rule (engineering)
+
+**Gate B, intent leakage** (`tests/test_regime.py`). Paired worlds have identical histories up to
+t − Δ but different current positions and timing rates in (t − Δ, t]. They give:
+- identical posterior weights;
+- futures that differ only by the anchor shift, with identical increments.
+
+Worlds with the same current position reached at different rates give identical predictor
+output. They also give identical lead tracks and penetrations in the planner.
+
+**Code audit:** every planner read of `pos_now` / `head_now` is the current state (collision
+geometry and the predicted track's starting point). Speeds and headings come from the predicted
+increments.
+
+**Side effect of anchoring:** in the frozen world, a live alternative branch could start up to
+0.3 m from the current position, and the planner's lead speed absorbed that offset. Anchoring
+removes it.
+
+**Resolution gate** (log-only, `regime_resolution.json`). Dev scenes, draws 90–94; the Ideal
+set's own output.
+
+| Δ | Median resolution | Shift vs Δ 0 (min / median) | 0.2 s replans with ≥ 2 futures | Resolved in the window |
+|---|---|---|---|---|
+| 0 s | 0.6 s | – | 21% | 97% |
+| 1 s | 1.6 s | 1.0 / 1.0 s | 40% | 96% |
+| 2 s | 2.6 s | 2.0 / 2.0 s | 59% | 93% |
+
+Gate (median ≥ Δ-0 median + Δ − 0.1 s): **passes** at every level.
+
+**Anchoring at Δ 0 is not a no-op** (`regime_anchor_check.json`: dev draws 95–96; 19,173
+target replans, of which 4,245 have two or more live branches).
+- **The realised branch is unchanged.**
+  - The Branch oracle's prediction never changes.
+  - Its 352 episodes are identical with and without anchoring.
+- **Only live alternative futures move.**
+  - Per target, the largest shift over the 6 s prediction has a median of 0.36 m (p95 0.93 m,
+    max 2.6 m; `regime_resolution.json`). The 0.3 m rule bounds only the current position, and
+    a log-time offset grows where the logged speed changes.
+  - Before a branch starts, every branch shares the realised timing, and nothing moves.
+- **The single-future predictions change too, but only while two or more branches are live:**
+  - **the most likely:** only when its branch is not the realised one (18% of ambiguous replans;
+    never otherwise);
+  - **the mean:** 41% of ambiguous replans, p95 0.27 m. In 0.80% the mean jumps by more than any
+    branch future moves (2.18 m; max 35 m). Every such jump happens because one branch's future
+    runs past the end of the log and drops out of the average; without that, the mean moves at
+    most 1.45 m. The same dropout happens in the frozen world, and anchoring moves where it
+    happens. Within the first second the change is at most 1.2 m.
+- **Collision geometry is unchanged.** Only the ideal predictors read branch futures. The world's
+  motion, the collision checks and the at-fault rule never do.
+
+**Pilot** (`regime_pilot.json`, dev draws 95–96; the confidential planner's pilot is recorded with
+the confidential planner):
+
+| Commitment | Proposal planner |
+|---|---|
+| 0.2 s | 1.64 episodes per CPU-second |
+| 0.5 s | 2.49 |
+| 1 s | 3.26 |
+| Peak memory per worker | ≈ 108 MB |
+
+- **Projected compute, both planners:** about 2.2 h of tuning and 3.3 h of evaluation at 10
+  draws (6.5 h at 20, 9.8 h at 30), on 28 workers.
+- **Oracle:** identical at Δ 0 and 2 s in every column, for both planners.
+- **Replans:** every episode replanned exactly every R.
+
+**Identity.** With every regime flag off, the episodes reproduce the frozen simulator:
+- `check`: 36/36 timing, 40/40 lateral;
+- `proposal_planner.py check`: 48/48;
+- Part 1b's public episodes (primary draws 20–21, 6 scenes): 16/16.
+
+**The baseline cell is not section 13's world.** At Δ 0, R 0.2 s, three changes act together:
+anchoring, exact commitment and the hold-aware proposals. The table shows each one switched on
+alone, over 352 dev engineering episodes (draws 95–96, margin 0). Each entry is the share of
+episodes identical to the frozen simulator on every logged field, then the score and the at-fault
+episodes.
+
+| Switched on | Branch oracle | Ideal single (mean) | Ideal set |
+|---|---|---|---|
+| nothing (frozen) | 100%, 0.858, 4 | 100%, 0.864, 3 | 100%, 0.865, 2 |
+| anchoring only | 100%, 0.858, 4 | 95%, 0.864, 3 | 92%, 0.866, 2 |
+| hold-aware proposals only | 91%, 0.862, 4 | 90%, 0.869, 2 | 88%, 0.862, 3 |
+| exact commitment only | 57%, 0.862, 4 | 55%, 0.864, 3 | 40%, 0.865, 2 |
+| all three (the baseline cell) | 56%, 0.865, 4 | 51%, 0.871, 1 | 38%, 0.862, 3 |
+
+- **The differences from the old world cannot be attributed to anchoring alone.** Exact
+  commitment and the hold-aware proposals are also substantial changes.
+- **Exact commitment** changes the most episodes, each by little. On its own it moves the mean
+  single's score by −0.0002 and leaves its at-fault count unchanged.
+- **The hold-aware proposals** cause most of the metric changes.
+- **Anchoring** is the smallest of the three.
+- **Checks** (`regime_anchor_check.json`):
+  - with all three off, the episodes equal the frozen simulator;
+  - with all three on, they equal the map's own regime path.
+- The pilot's earlier figure, 86.9% identical, compared only score and at-fault.
+- Each cell has 1 to 4 at-fault episodes, so these figures are descriptive only.
+
+**Consequence:** this map's absolute results are not directly comparable with sections 11 and
+13 (Part 1b). Every test compares cells within the map, which all share the same world.
+
+### 14.9 Disclosures
+
+- The fifth use of the 73 primary scenes; fresh draws.
+- The 0.2 s column is a 5 Hz baseline, not a 10 Hz production system.
+- The rows vary information, not behaviour. The recognition delay models intent that is read
+  late; the road users' behaviour is unchanged.
+- **Simulator limits as before:**
+  - timing branches only;
+  - the branches don't react to the ego;
+  - the other agents don't react at all;
+  - the ideal predictors know the branch model and its prior exactly.
+- The confidential planner's setting is frozen at section 10, not retuned per regime.
+- Margins are tuned on at-fault rate first, not on score as in section 10 (14.3).
+- The baseline cell differs from sections 11–13's world (14.8). Absolute rates are not compared
+  across them.
+- Dev selection uses 880 episodes per cell, so the choice is noisy. Calibration includes that
+  noise.
+- P2 is conservative (null rejection ≈ 0%), and its power depends on how unequal the cells' noise
+  is (14.6).
+
+### 14.10 Runners
+
+| Step | Runner (`counterfactual_sim.py`) | Output |
+|---|---|---|
+| Gate A | `draw-provenance` | `draw_provenance.json` |
+| Resolution gate | `regime-resolution` | `regime_resolution.json` |
+| Pilot | `regime-pilot` | `regime_pilot.json` |
+| Anchoring check | `regime-anchor-check` | `regime_anchor_check.json` |
+| Calibration pass 1 | `regime-calibration` | `regime_calibration.json` |
+| Dev tuning (public cells) | `regime-tune` | `regime_tune.json` |
+| Evaluation (public cells) | `regime-map` | `regime_map.json` |
+
+The confidential runner adds its cells, the dev selection, calibration pass 2 with the addendum,
+and the tests and reading.
+
+**Order:**
+1. This rule is committed before dev tuning.
+2. Then dev tuning and calibration pass 2.
+3. The draw-count addendum is committed before any primary run.
+
+Related: [[negative-results]], [[planner]]

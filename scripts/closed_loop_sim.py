@@ -55,6 +55,9 @@ RULE_DOC = "docs/wiki/closed-loop-test.md"
 
 DT = 0.1
 REPLAN = 2                          # frames between replans (0.2 s)
+COMMIT_EXACT = False                # True: between replans the ego follows the commanded rollout exactly as the
+                                    # planner evaluated it (fixed lateral rate); False: one-frame rollouts, whose
+                                    # lateral rate is recomputed every frame (the frozen behaviour)
 # planning horizon 3 s: checked every 0.1 s for the first second, then every 0.2 s
 PLAN_OFFSETS = np.array(list(range(1, 11)) + list(range(12, 31, 2)))
 H_FRAMES = int(PLAN_OFFSETS[-1])
@@ -541,7 +544,13 @@ def run_episode(sc, t_start, persona_min_v, predictor, lam=1.0) -> dict:
                 n_fallback = None if fb is None or n_fallback is None else n_fallback + fb
                 cmds.append(a_cmd)
                 harsh |= a_cmd <= HARSH_DECEL
-            (s,), (d,), (v,) = rollout(s, d, v, a_cmd, d_target, 1)
+                if COMMIT_EXACT:
+                    committed = rollout(s, d, v, a_cmd, d_target, REPLAN)
+            if COMMIT_EXACT:
+                k = (f - t_start) % REPLAN
+                s, d, v = committed[0][k], committed[1][k], committed[2][k]
+            else:
+                (s,), (d,), (v,) = rollout(s, d, v, a_cmd, d_target, 1)
         # ground truth at frame f+1
         g = f + 1
         xy, tan = route.pose(np.array(s), np.array(d))

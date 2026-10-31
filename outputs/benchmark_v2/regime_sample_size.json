@@ -1,0 +1,21 @@
+{
+  "rule": "smallest of 10 / 20 / 30 draws with >= 80% power for P1 and P2 (calibration pass 2)",
+  "draws": 30,
+  "power_reached": false,
+  "power": {
+    "P1": 0.471,
+    "P2": 0.017,
+    "P1_and_P2": 0.014,
+    "P3": 0.057
+  },
+  "p3_power": 0.25,
+  "p3_power_ok": false,
+  "all_nulls_pass": true,
+  "calibrated": {
+    "P1": true,
+    "P2": true,
+    "P3": true,
+    "reading": true
+  },
+  "when": "2026-10-31T17:10:48"
+}

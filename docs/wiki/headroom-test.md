@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set · lateral-intent benchmark stopped at its validity gate; Part 1b pre-registered (section 12)
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set · lateral-intent benchmark stopped at its validity gate; Part 1b pre-registered (section 12), public cells run (section 13)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -678,3 +678,20 @@ pre-registered comparison. Does it hold on fresh draws?
 **Runners:**
 - `counterfactual_sim.py confirm-1b` (public cells);
 - the confidential runner adds the contingency cell and applies `tests_1b`.
+
+## 13. Part 1b result: public cells (2026-10-31)
+
+Run against rule commit `12c857a`: timing world, strong dose, 73 primary scenes, fresh draws
+20–29, 4,420 episodes per cell
+([`headroom_confirm_1b.json`](../../outputs/benchmark_v2/headroom_confirm_1b.json)).
+
+| Planner | Predictor | Score | At-fault | VRU at-fault | Harsh braking | Near-miss | Progress |
+|---|---|---|---|---|---|---|---|
+| Proposal | Ideal single (mean) | 0.837 | 1.43% (63) | 0.32% | 10.6% | 40.5% | 0.923 |
+| Proposal + 0.5 m margin | Ideal single (mean) | 0.851 | 1.13% (50) | 0.20% | 18.4% | 23.3% | 0.908 |
+
+**Replication on fresh draws.** The section 11 pattern repeats: the margin buys fewer
+near-misses and at-fault episodes with about twice as much harsh braking.
+
+**Part 1b reading:** the comparison with the confidential contingency planner, and the
+reading under the section 12.3 rule, are recorded with the confidential planner.

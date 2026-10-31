@@ -1,0 +1,617 @@
+{
+  "source": "headroom_confirm.json",
+  "n_datasets": 1000,
+  "scenes": 62,
+  "episodes_per_scene_median": 80.0,
+  "p_value_method": "scene sign-flip randomisation",
+  "scenarios": {
+    "null, noisy set": {
+      "noisy_cell": "proposal | Ideal set",
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {},
+      "rate_raw": {
+        "H1 score": 0.02,
+        "H1 at_fault": 0.003,
+        "H2 score": 0.04,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.06,
+        "H4 at_fault": 0.052,
+        "H5 score": 0.053,
+        "H5 at_fault": 0.042
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.001,
+        "H2 score": 0.004,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.0,
+        "H4 score": 0.007,
+        "H4 at_fault": 0.002,
+        "H5 score": 0.005,
+        "H5 at_fault": 0.004
+      },
+      "familywise_rate_holm": 0.026,
+      "h1_significant_set_winner": {
+        "proposal | Ideal set": 0.001
+      },
+      "h1_significant_single_loser": {
+        "contingency | Ideal single (mean)": 0.001
+      }
+    },
+    "null, noisy single": {
+      "noisy_cell": "proposal+margin | Ideal single (mean)",
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {},
+      "rate_raw": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.04,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.053,
+        "H4 at_fault": 0.059,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.004,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.0,
+        "H4 score": 0.01,
+        "H4 at_fault": 0.009,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.031,
+      "h1_significant_set_winner": {},
+      "h1_significant_single_loser": {}
+    },
+    "null, asymmetric (real deviation shapes), noisy set": {
+      "noisy_cell": "proposal | Ideal set",
+      "effect": 0.0,
+      "symmetric": false,
+      "shift": {},
+      "rate_raw": {
+        "H1 score": 0.011,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.036,
+        "H2 at_fault": 0.052,
+        "H3 score": 0.046,
+        "H3 at_fault": 0.052,
+        "H4 score": 0.057,
+        "H4 at_fault": 0.021,
+        "H5 score": 0.039,
+        "H5 at_fault": 0.078
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.008,
+        "H2 at_fault": 0.004,
+        "H3 score": 0.002,
+        "H3 at_fault": 0.003,
+        "H4 score": 0.004,
+        "H4 at_fault": 0.0,
+        "H5 score": 0.001,
+        "H5 at_fault": 0.014
+      },
+      "familywise_rate_holm": 0.032,
+      "h1_significant_set_winner": {},
+      "h1_significant_single_loser": {}
+    },
+    "composite null, other singles -0.002 score": {
+      "noisy_cell": null,
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.002,
+          0.0
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.002,
+          0.0
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.002,
+          0.0
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.007,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.305,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.086,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.0,
+        "H4 score": 0.009,
+        "H4 at_fault": 0.007,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.105,
+      "h1_significant_set_winner": {},
+      "h1_significant_single_loser": {}
+    },
+    "composite null, other singles -0.005 score": {
+      "noisy_cell": null,
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.005,
+          0.0
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.005,
+          0.0
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.005,
+          0.0
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.036,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.805,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.005,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.57,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.001,
+        "H4 score": 0.01,
+        "H4 at_fault": 0.007,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.577,
+      "h1_significant_set_winner": {
+        "contingency (no branching) | Ideal set": 0.002,
+        "proposal | Ideal set": 0.001,
+        "contingency | Ideal set": 0.002
+      },
+      "h1_significant_single_loser": {
+        "proposal+margin | Ideal single (mean)": 0.003,
+        "contingency | Ideal single (mean)": 0.001,
+        "proposal | Ideal single (mean)": 0.001
+      }
+    },
+    "composite null, other singles -0.01 score": {
+      "noisy_cell": null,
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.01,
+          0.0
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.01,
+          0.0
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.01,
+          0.0
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.038,
+        "H1 at_fault": 0.0,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.006,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.982,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.001,
+        "H4 score": 0.01,
+        "H4 at_fault": 0.007,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.982,
+      "h1_significant_set_winner": {
+        "contingency | Ideal set": 0.003,
+        "contingency (no branching) | Ideal set": 0.002,
+        "proposal | Ideal set": 0.001
+      },
+      "h1_significant_single_loser": {
+        "proposal+margin | Ideal single (mean)": 0.006
+      }
+    },
+    "composite null, other singles -0.03 score": {
+      "noisy_cell": null,
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.03,
+          0.0
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.03,
+          0.0
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.03,
+          0.0
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.038,
+        "H1 at_fault": 0.0,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.006,
+        "H1 at_fault": 0.0,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.001,
+        "H4 score": 0.01,
+        "H4 at_fault": 0.007,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 1.0,
+      "h1_significant_set_winner": {
+        "contingency | Ideal set": 0.003,
+        "contingency (no branching) | Ideal set": 0.002,
+        "proposal | Ideal set": 0.001
+      },
+      "h1_significant_single_loser": {
+        "proposal+margin | Ideal single (mean)": 0.006
+      }
+    },
+    "composite null, other singles +0.2 pt at-fault": {
+      "noisy_cell": null,
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.0,
+          0.002
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.0,
+          0.002
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.0,
+          0.002
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.001,
+        "H2 score": 0.04,
+        "H2 at_fault": 0.233,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.004,
+        "H2 at_fault": 0.101,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.001,
+        "H4 score": 0.009,
+        "H4 at_fault": 0.007,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.122,
+      "h1_significant_set_winner": {},
+      "h1_significant_single_loser": {}
+    },
+    "composite null, other singles +0.4 pt at-fault": {
+      "noisy_cell": null,
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.0,
+          0.004
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.0,
+          0.004
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.0,
+          0.004
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.009,
+        "H2 score": 0.04,
+        "H2 at_fault": 0.469,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.006,
+        "H2 at_fault": 0.293,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.001,
+        "H4 score": 0.01,
+        "H4 at_fault": 0.007,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.307,
+      "h1_significant_set_winner": {},
+      "h1_significant_single_loser": {}
+    },
+    "composite null, -0.005 score, noisy best single": {
+      "noisy_cell": "proposal+margin | Ideal single (mean)",
+      "effect": 0.0,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.005,
+          0.0
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.005,
+          0.0
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.005,
+          0.0
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.005,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.805,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.045,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.053,
+        "H4 at_fault": 0.059,
+        "H5 score": 0.054,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.0,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.57,
+        "H2 at_fault": 0.002,
+        "H3 score": 0.003,
+        "H3 at_fault": 0.001,
+        "H4 score": 0.011,
+        "H4 at_fault": 0.01,
+        "H5 score": 0.006,
+        "H5 at_fault": 0.002
+      },
+      "familywise_rate_holm": 0.575,
+      "h1_significant_set_winner": {},
+      "h1_significant_single_loser": {}
+    },
+    "power, +0.01 score on the contingency set": {
+      "noisy_cell": "proposal | Ideal set",
+      "effect": 0.01,
+      "symmetric": true,
+      "shift": {},
+      "rate_raw": {
+        "H1 score": 0.718,
+        "H1 at_fault": 0.003,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.999,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.06,
+        "H4 at_fault": 0.052,
+        "H5 score": 0.706,
+        "H5 at_fault": 0.042
+      },
+      "rate_holm": {
+        "H1 score": 0.188,
+        "H1 at_fault": 0.001,
+        "H2 score": 0.982,
+        "H2 at_fault": 0.003,
+        "H3 score": 0.984,
+        "H3 at_fault": 0.003,
+        "H4 score": 0.007,
+        "H4 at_fault": 0.003,
+        "H5 score": 0.428,
+        "H5 at_fault": 0.005
+      },
+      "familywise_rate_holm": 0.998,
+      "h1_significant_set_winner": {
+        "contingency | Ideal set": 0.188,
+        "proposal | Ideal set": 0.001
+      },
+      "h1_significant_single_loser": {
+        "proposal+margin | Ideal single (mean)": 0.045,
+        "proposal | Ideal single (mean)": 0.044,
+        "proposal | Ideal single (most likely)": 0.046,
+        "contingency | Ideal single (mean)": 0.054
+      }
+    },
+    "power, +0.01 score, no noisy cell": {
+      "noisy_cell": null,
+      "effect": 0.01,
+      "symmetric": true,
+      "shift": {},
+      "rate_raw": {
+        "H1 score": 0.99,
+        "H1 at_fault": 0.0,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.999,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.952,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.951,
+        "H1 at_fault": 0.0,
+        "H2 score": 0.983,
+        "H2 at_fault": 0.004,
+        "H3 score": 0.986,
+        "H3 at_fault": 0.005,
+        "H4 score": 0.011,
+        "H4 at_fault": 0.01,
+        "H5 score": 0.863,
+        "H5 at_fault": 0.003
+      },
+      "familywise_rate_holm": 0.998,
+      "h1_significant_set_winner": {
+        "contingency | Ideal set": 0.951
+      },
+      "h1_significant_single_loser": {
+        "proposal | Ideal single (mean)": 0.235,
+        "proposal | Ideal single (most likely)": 0.225,
+        "proposal+margin | Ideal single (mean)": 0.214,
+        "contingency | Ideal single (mean)": 0.277
+      }
+    },
+    "power, +0.01 score, other singles -0.005": {
+      "noisy_cell": null,
+      "effect": 0.01,
+      "symmetric": true,
+      "shift": {
+        "proposal | Ideal single (mean)": [
+          -0.005,
+          0.0
+        ],
+        "proposal | Ideal single (most likely)": [
+          -0.005,
+          0.0
+        ],
+        "contingency | Ideal single (mean)": [
+          -0.005,
+          0.0
+        ]
+      },
+      "rate_raw": {
+        "H1 score": 0.998,
+        "H1 at_fault": 0.0,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.041,
+        "H3 score": 0.999,
+        "H3 at_fault": 0.039,
+        "H4 score": 0.051,
+        "H4 at_fault": 0.054,
+        "H5 score": 0.952,
+        "H5 at_fault": 0.035
+      },
+      "rate_holm": {
+        "H1 score": 0.985,
+        "H1 at_fault": 0.0,
+        "H2 score": 1.0,
+        "H2 at_fault": 0.004,
+        "H3 score": 0.986,
+        "H3 at_fault": 0.005,
+        "H4 score": 0.011,
+        "H4 at_fault": 0.01,
+        "H5 score": 0.863,
+        "H5 at_fault": 0.003
+      },
+      "familywise_rate_holm": 1.0,
+      "h1_significant_set_winner": {
+        "contingency | Ideal set": 0.985
+      },
+      "h1_significant_single_loser": {
+        "proposal+margin | Ideal single (mean)": 0.974,
+        "proposal | Ideal single (most likely)": 0.002,
+        "proposal | Ideal single (mean)": 0.004,
+        "contingency | Ideal single (mean)": 0.005
+      }
+    }
+  },
+  "criteria": {
+    "h1_false_positive_max": 0.038,
+    "false_positive_le_0.06": true,
+    "per_test_false_positive_max": {
+      "H1 score": 0.038,
+      "H1 at_fault": 0.009,
+      "H2 score": 0.04,
+      "H2 at_fault": 0.052,
+      "H3 score": 0.046,
+      "H3 at_fault": 0.052,
+      "H4 score": 0.06,
+      "H4 at_fault": 0.059,
+      "H5 score": 0.054,
+      "H5 at_fault": 0.078
+    },
+    "tests_above_0.06": [
+      "H5 at_fault"
+    ],
+    "familywise_max_full_nulls": 0.032,
+    "max_significant_share_of_any_set_winner": 0.003,
+    "no_systematic_winner": true,
+    "power_score_holm": 0.188,
+    "power_ge_0.80": false,
+    "power_score_holm_other_scenarios": {
+      "power, +0.01 score on the contingency set": 0.188,
+      "power, +0.01 score, no noisy cell": 0.951,
+      "power, +0.01 score, other singles -0.005": 0.985
+    }
+  }
+}

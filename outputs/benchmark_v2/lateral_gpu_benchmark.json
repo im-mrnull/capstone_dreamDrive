@@ -1,0 +1,17 @@
+{
+  "episodes": 52,
+  "numpy_s": 9.977687999955378,
+  "cuda_s": 28.07095449999906,
+  "speedup": 0.35544526994818476,
+  "episodes_per_hour_numpy_1proc": 18761.861465385286,
+  "episodes_per_hour_cuda_1proc": 6668.814913294318,
+  "peak_gpu_mb": 1.40576171875,
+  "process_cpu_pct_numpy": 99.59722132065507,
+  "process_cpu_pct_cuda": 78.2058372828068,
+  "identical_commands_and_scores": true,
+  "n_replans": 1300,
+  "mismatched_replans": 0,
+  "adopt": false,
+  "gpu": "NVIDIA RTX 4500 Ada Generation",
+  "torch": "2.6.0+cu124"
+}

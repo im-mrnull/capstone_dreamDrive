@@ -1,0 +1,799 @@
+{
+  "gates": {
+    "eligible_episodes": 80,
+    "implausible_excess": 0.1,
+    "separation_4s_m": 1.5,
+    "decision_sensitive": 0.2
+  },
+  "simulator_sha": "ea1131f7a3b0f6fbb6930ee32cebb3b460f15ecc",
+  "dirty": true,
+  "when": "2026-10-31T08:40:48",
+  "path-primary": {
+    "eligible_episodes": 105,
+    "episodes_lost_to_overlap_rule": 1,
+    "candidates": {
+      "oncoming": 16,
+      "target": 247,
+      "excluded (overlap)": 66
+    },
+    "excluded_overlap_share": 0.2108626198083067,
+    "excluded_by_group_context": {
+      "two_wheeler / same": 22,
+      "vehicle / same": 30,
+      "two_wheeler / crossing": 4,
+      "vehicle / crossing": 4,
+      "ped / same": 6
+    },
+    "candidates_by_group_context": {
+      "two_wheeler / same": 140,
+      "vehicle / same": 128,
+      "ped / crossing": 3,
+      "two_wheeler / crossing": 11,
+      "vehicle / crossing": 12,
+      "ped / same": 19
+    },
+    "density_included_vs_excluded": [
+      17.77327935222672,
+      21.545454545454547
+    ],
+    "overlap_with": {
+      "Car": 14,
+      "ScooterRider": 12,
+      "MotorcyleRider": 8,
+      "TourCar": 8,
+      "Truck": 8,
+      "Animal": 4,
+      "Pedestrian": 11,
+      "Bus": 1
+    },
+    "targets_by_group_context_alternatives": {
+      "two_wheeler / same / 1 real alternatives": 57,
+      "vehicle / same / 1 real alternatives": 36,
+      "vehicle / same / 2 real alternatives": 49,
+      "ped / crossing / 1 real alternatives": 2,
+      "two_wheeler / same / 2 real alternatives": 33,
+      "two_wheeler / crossing / 2 real alternatives": 5,
+      "two_wheeler / same / 0 real alternatives": 28,
+      "two_wheeler / crossing / 1 real alternatives": 1,
+      "vehicle / same / 0 real alternatives": 13,
+      "vehicle / crossing / 2 real alternatives": 5,
+      "vehicle / crossing / 0 real alternatives": 2,
+      "two_wheeler / crossing / 0 real alternatives": 1,
+      "vehicle / crossing / 1 real alternatives": 1,
+      "ped / same / 0 real alternatives": 9,
+      "ped / crossing / 0 real alternatives": 1,
+      "ped / same / 1 real alternatives": 3,
+      "ped / same / 2 real alternatives": 1
+    },
+    "targets_without_real_alternative": 0.21862348178137653,
+    "plausibility": {
+      "hold lane (same)": {
+        "implausible_excess": {
+          "rate": 0.017094017094017096,
+          "n": 117
+        },
+        "heading_jump_excess": {
+          "rate": 0.035211267605633804,
+          "n": 142
+        },
+        "reversal_excess": {
+          "rate": 0.014084507042253521,
+          "n": 142
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 142
+        },
+        "any_excess": {
+          "rate": 0.04929577464788732,
+          "n": 142
+        },
+        "branch_any_flag": {
+          "rate": 0.3380281690140845,
+          "n": 142
+        },
+        "log_any_flag": {
+          "rate": 0.7816901408450704,
+          "n": 142
+        },
+        "added_points (branch rate - log rate)": -0.4436619718309859
+      },
+      "wait (crossing)": {
+        "implausible_excess": {
+          "rate": 0.0,
+          "n": 7
+        },
+        "heading_jump_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "reversal_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "any_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "branch_any_flag": {
+          "rate": 1.0,
+          "n": 11
+        },
+        "log_any_flag": {
+          "rate": 1.0,
+          "n": 11
+        },
+        "added_points (branch rate - log rate)": 0.0
+      },
+      "stay out (all)": {
+        "implausible_excess": {
+          "rate": 0.016129032258064516,
+          "n": 124
+        },
+        "heading_jump_excess": {
+          "rate": 0.032679738562091505,
+          "n": 153
+        },
+        "reversal_excess": {
+          "rate": 0.013071895424836602,
+          "n": 153
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 153
+        },
+        "any_excess": {
+          "rate": 0.0457516339869281,
+          "n": 153
+        },
+        "branch_any_flag": {
+          "rate": 0.38562091503267976,
+          "n": 153
+        },
+        "log_any_flag": {
+          "rate": 0.7973856209150327,
+          "n": 153
+        },
+        "added_points (branch rate - log rate)": -0.411764705882353
+      },
+      "cut in (same)": {
+        "implausible_excess": {
+          "rate": 0.03225806451612903,
+          "n": 93
+        },
+        "heading_jump_excess": {
+          "rate": 0.06666666666666667,
+          "n": 120
+        },
+        "reversal_excess": {
+          "rate": 0.008333333333333333,
+          "n": 120
+        },
+        "lateral_limit_excess": {
+          "rate": 0.025,
+          "n": 120
+        },
+        "any_excess": {
+          "rate": 0.11666666666666667,
+          "n": 120
+        },
+        "branch_any_flag": {
+          "rate": 0.24166666666666667,
+          "n": 120
+        },
+        "log_any_flag": {
+          "rate": 0.7083333333333334,
+          "n": 120
+        },
+        "added_points (branch rate - log rate)": -0.4666666666666667
+      },
+      "cross (crossing)": {
+        "implausible_excess": {
+          "rate": 0.0,
+          "n": 9
+        },
+        "heading_jump_excess": {
+          "rate": 0.3076923076923077,
+          "n": 13
+        },
+        "reversal_excess": {
+          "rate": 0.0,
+          "n": 13
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 13
+        },
+        "any_excess": {
+          "rate": 0.3076923076923077,
+          "n": 13
+        },
+        "branch_any_flag": {
+          "rate": 0.8461538461538461,
+          "n": 13
+        },
+        "log_any_flag": {
+          "rate": 1.0,
+          "n": 13
+        },
+        "added_points (branch rate - log rate)": -0.15384615384615385
+      },
+      "enter (all)": {
+        "implausible_excess": {
+          "rate": 0.029411764705882353,
+          "n": 102
+        },
+        "heading_jump_excess": {
+          "rate": 0.09022556390977443,
+          "n": 133
+        },
+        "reversal_excess": {
+          "rate": 0.007518796992481203,
+          "n": 133
+        },
+        "lateral_limit_excess": {
+          "rate": 0.022556390977443608,
+          "n": 133
+        },
+        "any_excess": {
+          "rate": 0.13533834586466165,
+          "n": 133
+        },
+        "branch_any_flag": {
+          "rate": 0.3007518796992481,
+          "n": 133
+        },
+        "log_any_flag": {
+          "rate": 0.7368421052631579,
+          "n": 133
+        },
+        "added_points (branch rate - log rate)": -0.43609022556390975
+      }
+    },
+    "occupancy": {
+      "hold lane (same)": {
+        "occupied": 0.02132552791135271,
+        "traversed by others": 0.6809533765419193,
+        "own track only": 0.21283713150742212,
+        "unknown": 0.08488396403930587,
+        "frames": 4783
+      },
+      "wait (crossing)": {
+        "occupied": 0.014534883720930232,
+        "traversed by others": 0.5116279069767442,
+        "own track only": 0.21511627906976744,
+        "unknown": 0.25872093023255816,
+        "frames": 344
+      },
+      "stay out (all)": {
+        "occupied": 0.020869904427540473,
+        "traversed by others": 0.6695923542032378,
+        "own track only": 0.21299005266237567,
+        "unknown": 0.0965476887068461,
+        "frames": 5127
+      },
+      "cut in (same)": {
+        "occupied": 0.008855154965211892,
+        "traversed by others": 0.7876871178578958,
+        "own track only": 0.12186379928315412,
+        "unknown": 0.08159392789373814,
+        "frames": 4743
+      },
+      "cross (crossing)": {
+        "occupied": 0.05518763796909492,
+        "traversed by others": 0.5298013245033113,
+        "own track only": 0.24724061810154527,
+        "unknown": 0.16777041942604856,
+        "frames": 453
+      },
+      "enter (all)": {
+        "occupied": 0.012894534257120862,
+        "traversed by others": 0.7652040030792918,
+        "own track only": 0.13279445727482678,
+        "unknown": 0.08910700538876058,
+        "frames": 5196
+      }
+    },
+    "observability": {
+      "hold lane (same)": {
+        "n": 142,
+        "median_split_s": 1.3,
+        "ambiguous_ge_1s": 0.6056338028169014,
+        "ambiguous_ge_2s": 0.34507042253521125,
+        "ambiguous_ge_3s": 0.22535211267605634
+      },
+      "wait (crossing)": {
+        "n": 11,
+        "median_split_s": 0.2,
+        "ambiguous_ge_1s": 0.09090909090909091,
+        "ambiguous_ge_2s": 0.09090909090909091,
+        "ambiguous_ge_3s": 0.0
+      },
+      "stay out (all)": {
+        "n": 153,
+        "median_split_s": 1.3,
+        "ambiguous_ge_1s": 0.5686274509803921,
+        "ambiguous_ge_2s": 0.32679738562091504,
+        "ambiguous_ge_3s": 0.20915032679738563
+      },
+      "cut in (same)": {
+        "n": 120,
+        "median_split_s": 0.6000000000000001,
+        "ambiguous_ge_1s": 0.075,
+        "ambiguous_ge_2s": 0.025,
+        "ambiguous_ge_3s": 0.008333333333333333
+      },
+      "cross (crossing)": {
+        "n": 13,
+        "median_split_s": 0.2,
+        "ambiguous_ge_1s": 0.0,
+        "ambiguous_ge_2s": 0.0,
+        "ambiguous_ge_3s": 0.0
+      },
+      "enter (all)": {
+        "n": 133,
+        "median_split_s": 0.6000000000000001,
+        "ambiguous_ge_1s": 0.06766917293233082,
+        "ambiguous_ge_2s": 0.022556390977443608,
+        "ambiguous_ge_3s": 0.007518796992481203
+      }
+    },
+    "separation": {
+      "2s after branch start": {
+        "median_of_target_max_m": 1.4265395411650859,
+        "median_over_all_pairs_m": 1.0510238052694572,
+        "n_targets": 182
+      },
+      "2s": {
+        "median_of_target_max_m": 1.1424121426533382,
+        "median_over_all_pairs_m": 0.7791186695795993,
+        "median_of_target_min_m": 0.260466059499995,
+        "n_targets": 184
+      },
+      "4s after branch start": {
+        "median_of_target_max_m": 1.932029152937573,
+        "median_over_all_pairs_m": 1.410653187926929,
+        "n_targets": 147
+      },
+      "4s": {
+        "median_of_target_max_m": 1.778177771589512,
+        "median_over_all_pairs_m": 1.1602431809139764,
+        "median_of_target_min_m": 0.5599452696201497,
+        "n_targets": 163
+      }
+    },
+    "imtr": {
+      "timestep_rate": 0.022993455046503616,
+      "episode_rate_first3s": 0.12380952380952381,
+      "target_rate_first3s": 0.05668016194331984,
+      "mean_far_1m_rate": 0.05147240336684611
+    },
+    "decision_sensitive": {
+      "first_second": {
+        "accel": 0.009523809523809525,
+        "lateral": 0.1523809523809524,
+        "position": 0.009523809523809525,
+        "manoeuvre": 0.14285714285714285,
+        "any": 0.1619047619047619,
+        "with_alternative": 0.17
+      },
+      "any_window": {
+        "accel": 0.11428571428571428,
+        "lateral": 0.26666666666666666,
+        "position": 0.13333333333333333,
+        "manoeuvre": 0.2761904761904762,
+        "any": 0.29523809523809524,
+        "with_alternative": 0.31
+      },
+      "n": 105,
+      "n_with_alternative": 100
+    },
+    "go": {
+      "eligible": true,
+      "plausibility (any criterion, every context branch type)": false,
+      "plausibility (any criterion, context branch types with n >= 20)": false,
+      "separation (median over all pairs)": false,
+      "separation (median of each target's largest pair)": true,
+      "decision_sensitive (first second, pre-registered)": false,
+      "decision_sensitive (any window, disclosed deviation)": true
+    }
+  },
+  "path-strong": {
+    "eligible_episodes": 105,
+    "episodes_lost_to_overlap_rule": 1,
+    "candidates": {
+      "oncoming": 16,
+      "target": 247,
+      "excluded (overlap)": 70
+    },
+    "excluded_overlap_share": 0.22082018927444794,
+    "excluded_by_group_context": {
+      "two_wheeler / same": 21,
+      "vehicle / same": 34,
+      "two_wheeler / crossing": 4,
+      "vehicle / crossing": 5,
+      "ped / same": 6
+    },
+    "candidates_by_group_context": {
+      "two_wheeler / same": 141,
+      "vehicle / same": 130,
+      "ped / crossing": 3,
+      "two_wheeler / crossing": 12,
+      "vehicle / crossing": 12,
+      "ped / same": 19
+    },
+    "density_included_vs_excluded": [
+      17.7165991902834,
+      21.071428571428573
+    ],
+    "overlap_with": {
+      "Car": 16,
+      "ScooterRider": 10,
+      "MotorcyleRider": 9,
+      "TourCar": 8,
+      "Truck": 11,
+      "Animal": 4,
+      "Pedestrian": 11,
+      "Bus": 1
+    },
+    "targets_by_group_context_alternatives": {
+      "two_wheeler / same / 1 real alternatives": 56,
+      "vehicle / same / 1 real alternatives": 39,
+      "vehicle / same / 2 real alternatives": 43,
+      "ped / crossing / 1 real alternatives": 2,
+      "two_wheeler / same / 2 real alternatives": 34,
+      "two_wheeler / crossing / 2 real alternatives": 6,
+      "two_wheeler / same / 0 real alternatives": 30,
+      "two_wheeler / crossing / 1 real alternatives": 1,
+      "vehicle / same / 0 real alternatives": 14,
+      "vehicle / crossing / 2 real alternatives": 4,
+      "vehicle / crossing / 0 real alternatives": 2,
+      "two_wheeler / crossing / 0 real alternatives": 1,
+      "vehicle / crossing / 1 real alternatives": 1,
+      "ped / same / 0 real alternatives": 9,
+      "ped / crossing / 0 real alternatives": 1,
+      "ped / same / 1 real alternatives": 3,
+      "ped / same / 2 real alternatives": 1
+    },
+    "targets_without_real_alternative": 0.23076923076923078,
+    "plausibility": {
+      "hold lane (same)": {
+        "implausible_excess": {
+          "rate": 0.0,
+          "n": 110
+        },
+        "heading_jump_excess": {
+          "rate": 0.03731343283582089,
+          "n": 134
+        },
+        "reversal_excess": {
+          "rate": 0.014925373134328358,
+          "n": 134
+        },
+        "lateral_limit_excess": {
+          "rate": 0.007462686567164179,
+          "n": 134
+        },
+        "any_excess": {
+          "rate": 0.04477611940298507,
+          "n": 134
+        },
+        "branch_any_flag": {
+          "rate": 0.31343283582089554,
+          "n": 134
+        },
+        "log_any_flag": {
+          "rate": 0.753731343283582,
+          "n": 134
+        },
+        "added_points (branch rate - log rate)": -0.4402985074626865
+      },
+      "wait (crossing)": {
+        "implausible_excess": {
+          "rate": 0.0,
+          "n": 7
+        },
+        "heading_jump_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "reversal_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "any_excess": {
+          "rate": 0.0,
+          "n": 11
+        },
+        "branch_any_flag": {
+          "rate": 1.0,
+          "n": 11
+        },
+        "log_any_flag": {
+          "rate": 1.0,
+          "n": 11
+        },
+        "added_points (branch rate - log rate)": 0.0
+      },
+      "stay out (all)": {
+        "implausible_excess": {
+          "rate": 0.0,
+          "n": 117
+        },
+        "heading_jump_excess": {
+          "rate": 0.034482758620689655,
+          "n": 145
+        },
+        "reversal_excess": {
+          "rate": 0.013793103448275862,
+          "n": 145
+        },
+        "lateral_limit_excess": {
+          "rate": 0.006896551724137931,
+          "n": 145
+        },
+        "any_excess": {
+          "rate": 0.041379310344827586,
+          "n": 145
+        },
+        "branch_any_flag": {
+          "rate": 0.36551724137931035,
+          "n": 145
+        },
+        "log_any_flag": {
+          "rate": 0.7724137931034483,
+          "n": 145
+        },
+        "added_points (branch rate - log rate)": -0.4068965517241379
+      },
+      "cut in (same)": {
+        "implausible_excess": {
+          "rate": 0.02127659574468085,
+          "n": 94
+        },
+        "heading_jump_excess": {
+          "rate": 0.058333333333333334,
+          "n": 120
+        },
+        "reversal_excess": {
+          "rate": 0.008333333333333333,
+          "n": 120
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 120
+        },
+        "any_excess": {
+          "rate": 0.075,
+          "n": 120
+        },
+        "branch_any_flag": {
+          "rate": 0.2,
+          "n": 120
+        },
+        "log_any_flag": {
+          "rate": 0.675,
+          "n": 120
+        },
+        "added_points (branch rate - log rate)": -0.47500000000000003
+      },
+      "cross (crossing)": {
+        "implausible_excess": {
+          "rate": 0.0,
+          "n": 9
+        },
+        "heading_jump_excess": {
+          "rate": 0.3076923076923077,
+          "n": 13
+        },
+        "reversal_excess": {
+          "rate": 0.0,
+          "n": 13
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 13
+        },
+        "any_excess": {
+          "rate": 0.3076923076923077,
+          "n": 13
+        },
+        "branch_any_flag": {
+          "rate": 0.8461538461538461,
+          "n": 13
+        },
+        "log_any_flag": {
+          "rate": 1.0,
+          "n": 13
+        },
+        "added_points (branch rate - log rate)": -0.15384615384615385
+      },
+      "enter (all)": {
+        "implausible_excess": {
+          "rate": 0.019417475728155338,
+          "n": 103
+        },
+        "heading_jump_excess": {
+          "rate": 0.08270676691729323,
+          "n": 133
+        },
+        "reversal_excess": {
+          "rate": 0.007518796992481203,
+          "n": 133
+        },
+        "lateral_limit_excess": {
+          "rate": 0.0,
+          "n": 133
+        },
+        "any_excess": {
+          "rate": 0.09774436090225563,
+          "n": 133
+        },
+        "branch_any_flag": {
+          "rate": 0.2631578947368421,
+          "n": 133
+        },
+        "log_any_flag": {
+          "rate": 0.706766917293233,
+          "n": 133
+        },
+        "added_points (branch rate - log rate)": -0.44360902255639095
+      }
+    },
+    "occupancy": {
+      "hold lane (same)": {
+        "occupied": 0.029418319589926453,
+        "traversed by others": 0.6558948072208602,
+        "own track only": 0.2217517272119456,
+        "unknown": 0.09293514597726767,
+        "frames": 4487
+      },
+      "wait (crossing)": {
+        "occupied": 0.029411764705882353,
+        "traversed by others": 0.565359477124183,
+        "own track only": 0.19934640522875818,
+        "unknown": 0.20588235294117646,
+        "frames": 306
+      },
+      "stay out (all)": {
+        "occupied": 0.02941790110577926,
+        "traversed by others": 0.6501147506780722,
+        "own track only": 0.22032130189860213,
+        "unknown": 0.10014604631754642,
+        "frames": 4793
+      },
+      "cut in (same)": {
+        "occupied": 0.008617065994115174,
+        "traversed by others": 0.7994955863808323,
+        "own track only": 0.10655737704918032,
+        "unknown": 0.08532997057587222,
+        "frames": 4758
+      },
+      "cross (crossing)": {
+        "occupied": 0.03854875283446712,
+        "traversed by others": 0.5986394557823129,
+        "own track only": 0.13151927437641722,
+        "unknown": 0.23129251700680273,
+        "frames": 441
+      },
+      "enter (all)": {
+        "occupied": 0.011155991536834007,
+        "traversed by others": 0.7824581650317368,
+        "own track only": 0.1086747451432968,
+        "unknown": 0.09771109828813233,
+        "frames": 5199
+      }
+    },
+    "observability": {
+      "hold lane (same)": {
+        "n": 134,
+        "median_split_s": 1.3,
+        "ambiguous_ge_1s": 0.5970149253731343,
+        "ambiguous_ge_2s": 0.3358208955223881,
+        "ambiguous_ge_3s": 0.208955223880597
+      },
+      "wait (crossing)": {
+        "n": 11,
+        "median_split_s": 0.2,
+        "ambiguous_ge_1s": 0.09090909090909091,
+        "ambiguous_ge_2s": 0.09090909090909091,
+        "ambiguous_ge_3s": 0.09090909090909091
+      },
+      "stay out (all)": {
+        "n": 145,
+        "median_split_s": 1.2000000000000002,
+        "ambiguous_ge_1s": 0.5586206896551724,
+        "ambiguous_ge_2s": 0.31724137931034485,
+        "ambiguous_ge_3s": 0.2
+      },
+      "cut in (same)": {
+        "n": 120,
+        "median_split_s": 0.5,
+        "ambiguous_ge_1s": 0.058333333333333334,
+        "ambiguous_ge_2s": 0.025,
+        "ambiguous_ge_3s": 0.008333333333333333
+      },
+      "cross (crossing)": {
+        "n": 13,
+        "median_split_s": 0.2,
+        "ambiguous_ge_1s": 0.0,
+        "ambiguous_ge_2s": 0.0,
+        "ambiguous_ge_3s": 0.0
+      },
+      "enter (all)": {
+        "n": 133,
+        "median_split_s": 0.5,
+        "ambiguous_ge_1s": 0.05263157894736842,
+        "ambiguous_ge_2s": 0.022556390977443608,
+        "ambiguous_ge_3s": 0.007518796992481203
+      }
+    },
+    "separation": {
+      "2s after branch start": {
+        "median_of_target_max_m": 1.6456377222113283,
+        "median_over_all_pairs_m": 1.1024762104001897,
+        "n_targets": 179
+      },
+      "2s": {
+        "median_of_target_max_m": 1.1486640878107592,
+        "median_over_all_pairs_m": 0.7894354659765143,
+        "median_of_target_min_m": 0.2825448311275799,
+        "n_targets": 181
+      },
+      "4s after branch start": {
+        "median_of_target_max_m": 1.9919766965410695,
+        "median_over_all_pairs_m": 1.4364632631866168,
+        "n_targets": 144
+      },
+      "4s": {
+        "median_of_target_max_m": 1.8350539443986542,
+        "median_over_all_pairs_m": 1.2564134636336592,
+        "median_of_target_min_m": 0.5948885258878813,
+        "n_targets": 160
+      }
+    },
+    "imtr": {
+      "timestep_rate": 0.02477769144435811,
+      "episode_rate_first3s": 0.12380952380952381,
+      "target_rate_first3s": 0.05668016194331984,
+      "mean_far_1m_rate": 0.0524316178335986
+    },
+    "decision_sensitive": {
+      "first_second": {
+        "accel": 0.02857142857142857,
+        "lateral": 0.17142857142857143,
+        "position": 0.01904761904761905,
+        "manoeuvre": 0.1619047619047619,
+        "any": 0.18095238095238095,
+        "with_alternative": 0.19
+      },
+      "any_window": {
+        "accel": 0.14285714285714285,
+        "lateral": 0.2761904761904762,
+        "position": 0.1619047619047619,
+        "manoeuvre": 0.2857142857142857,
+        "any": 0.3047619047619048,
+        "with_alternative": 0.32
+      },
+      "n": 105,
+      "n_with_alternative": 100
+    },
+    "go": {
+      "eligible": true,
+      "plausibility (any criterion, every context branch type)": false,
+      "plausibility (any criterion, context branch types with n >= 20)": true,
+      "separation (median over all pairs)": false,
+      "separation (median of each target's largest pair)": true,
+      "decision_sensitive (first second, pre-registered)": false,
+      "decision_sensitive (any window, disclosed deviation)": true
+    }
+  }
+}

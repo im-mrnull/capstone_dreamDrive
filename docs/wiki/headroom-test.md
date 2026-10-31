@@ -1,6 +1,6 @@
 # Headroom-First Test — can knowing the future help, and can several futures help?
 
-## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set
+## Status: 📌 Pre-registered (2026-10-29) · stage 1 run (2026-10-30): G1 passes at the strong dose (section 7) · matched-planner G2 pre-registered (section 8), public cells run (section 9) · primary-scene confirmation pre-registered (section 10), public cells run (section 11): a tuned safety margin matches the ideal set · lateral-intent benchmark stopped at its validity gate; Part 1b pre-registered (section 12)
 
 This rule is committed **before** any package is driven with branched agents. Only the
 following ran first:
@@ -546,3 +546,135 @@ gain is set minus single, at-fault in points, positive = set better):
 
 **H1–H3 and the Holm-adjusted family** use the confidential contingency planner and are recorded
 with it.
+
+## 12. Lateral Intent Counterfactual Benchmark: stopped at its validity gate (2026-10-31); Part 1b pre-registered
+
+### 12.1 Why, and what it is
+
+- **Background:** under timing branches (sections 2–11), one trajectory plus a tuned safety
+  margin matched the ideal set (section 11). There the futures differ only in *when* a road
+  user moves.
+- **This benchmark:** it changes *where* road users go relative to the ego lane, so that an
+  average of futures can be a path no real future takes.
+- **Scope:** it tests **lateral** intent only. **Route** intent (turn vs straight) would be a
+  separate extension, with route alternatives from other agents' logged paths under geometric
+  alignment rules. It is not pursued here.
+
+**The world** ([`scripts/counterfactual_sim.py`](../../scripts/counterfactual_sim.py), `PathWorld`):
+
+| Element | Definition |
+|---|---|
+| Candidates | as section 2, with the corridor widened by 2 m |
+| Context | heading vs the ego route at the branch start: same direction (< 45°), crossing (45–135°), oncoming (> 135°, not branched) |
+| Branches (prior 0.5 / 0.25 / 0.25) | logged; **hold lane** / **wait**: never closer than the corridor edge + 0.3 m; **cut in** (to the ego centreline) / **cross** (to the far edge) |
+| Lateral limits (own lateral speed, acceleration) | pedestrians 1.0 m/s, 1.0 m/s²; two-wheelers 1.5, 2.0; vehicles 1.0, 1.5. Strong dose: 1.5×. |
+| No reversals | hold/wait brakes at the limit and holds where it stops. Cut in/cross is not available to an agent moving away from the centreline. |
+| Overlap rule | a candidate whose branch overlaps a logged agent for > 0.5 s where its log does not is not branched (identical in every package) |
+
+**Identity:** with all limits at 0, every episode equals the plain simulator (40/40). The
+timing world is unchanged (36/36).
+
+### 12.2 The validity report: the go/no-go gate (dev scenes only, no G1 quantity computed)
+
+The gates were fixed in the approved plan before any of this ran. The report is
+[`lateral_validity.json`](../../outputs/benchmark_v2/lateral_validity.json). Values are
+primary / strong dose.
+
+| Gate | Needed | Result |
+|---|---|---|
+| Eligible dev episodes | ≥ 80 | 105 / 105 ✅ |
+| **Decision-sensitive episodes**: between two real alternatives, the oracle-driven proposal planner's first second differs (> 1 m/s² mean acceleration, > 0.5 m lateral target, > 1 m position, or manoeuvre class) | ≥ 20% | **16.2% / 18.1% ❌** |
+| **Separation at +4 s**, median over all pairs of real alternatives | ≥ 1.5 m | **1.16 / 1.26 m ❌** (1.41 / 1.44 m measured from the branch start) |
+| Plausibility: each branch type adds ≤ 10% implausibility over its own log | ≤ 10% | depends on the reading (below) |
+
+**Verdict: no-go.** As pre-registered, the lateral confirmation is **not run**. Decision
+sensitivity and separation fail under every reading of the plan.
+- One bounded design revision was made on dev data, with its two changes stated before the
+  rerun:
+  - hold-lane branches keep the log's step length;
+  - branches start 1 s instead of 2 s before the corridor approach.
+- It did not change the verdict.
+
+**Plausibility depends on the reading:**
+- **Branches newly flagged where their log is not** (scorecard limits, heading jumps > 45° per
+  0.2 s, lateral reversals, lateral limits; 0.5 s steps):
+  - hold lane 4.9% / 4.5%;
+  - cut in 11.7% / 7.5%;
+  - cross 31% (n = 13).
+- **As a rate difference over the log,** every branch type is *below* its log (−15 to −47 pt),
+  because the logs carry annotation jitter.
+
+**What the world offers (primary dose):**
+
+| Item | Result |
+|---|---|
+| Decision-sensitive episodes, any 1 s window of the 5 s episode | 29.5% (not the gate quantity) |
+| Episodes where the prior-weighted mean is > 1 m from every branch **and** in the ego corridor while no branch is, or in space no other agent traversed (invalid mean trajectory, IMTR; first 3 s) | 12.4% |
+| Targets without a real alternative (no branch more than 0.3 m from the log) | 22% |
+| Overlap exclusions | 21% of candidates; denser scenes (21.5 vs 17.8 agents within 30 m); 1 episode lost |
+| Median time until a branch is 0.3 m from its log | hold lane 1.3 s (21% ambiguous ≥ 3 s); cut in 0.6 s (1% ≥ 3 s) |
+| Targets by context | same direction about 230; crossing about 15 (3 pedestrians) |
+
+No subgroup claims are made.
+
+**Finding.** Lateral intent built from real IDD-3D tracks rarely changes what the ego must do
+immediately. A future that differs (cut in) shows itself within about 0.6 s. A future that
+stays ambiguous (hold lane) mostly does not need a different action. So, beyond timing
+uncertainty, this data offers little room for multi-future prediction to matter in closed loop.
+**Multi-future prediction is dropped as a design goal (decision of section 12.6 of the
+plan).** The multi-future line is written up as a negative result.
+
+**Engineering record, which the result depends on:**
+- **Adversarial code review:** two rounds, each finding checked by two skeptics. It found and
+  fixed:
+  - a retiming bug in hold-lane branches (noise turned into forward motion);
+  - a projection that jumped between route segments;
+  - a too-lenient "distinct branch" test;
+  - occupancy that counted the target's own track;
+  - exclusion counts that left out lost episodes.
+
+  The numbers above are after the fixes.
+- **Unit tests:** `tests/test_path_branches.py` (11 tests).
+- **GPU benchmark:** CUDA penetration made whole episodes **2.8× slower** with identical
+  commands ([`lateral_gpu_benchmark.json`](../../outputs/benchmark_v2/lateral_gpu_benchmark.json)).
+  The simulator stays on CPU.
+
+**Statistics built for the confirmation, recorded although unused:**
+- **Tests:** a max-vs-max H1 with a least-favourable union-bound sign-flip null, plus pair and
+  interaction sign-flip tests.
+- **Calibration** ([`lateral_stats_calibration.json`](../../outputs/benchmark_v2/lateral_stats_calibration.json)),
+  1,000 synthetic datasets per scenario from the section 10 scene structure:
+  - H1 false-positive rate ≤ 3.8% in every null, including composite nulls with unequal
+    singles;
+  - family-wise rate ≤ 3.2%;
+  - pairwise tests 3.9–6.0%, H5 at-fault 7.8% (asymmetric null only);
+  - power 95–98%, or 19% with a 3×-noisy set cell.
+- **Why the method changed:** the review showed the plan's first proposal (an all-cells-equal
+  recentred null) rejects a true null 20–30% of the time when the singles differ, and the
+  percentile-bootstrap p-values of section 10 reject 6–9%. They were replaced before any use.
+
+### 12.3 Part 1b: the best single-future setup on fresh draws (pre-registered now)
+
+**Question.** In section 10/11 the confidential contingency planner with an Ideal single
+(mean) had the fewest at-fault episodes of any cell. That was exploratory: it was not a
+pre-registered comparison. Does it hold on fresh draws?
+
+| | |
+|---|---|
+| World | timing branches, strong dose (section 7), unchanged |
+| Scenes, draws | 73 primary scenes, **draws 20–29**: unused anywhere. Draw history: primary 0–9 in section 10; dev 10–19 in section 8. The lateral confirmation never ran. |
+| Cells (all Ideal single (mean)) | confidential contingency planner (section 10 setting); proposal planner (frozen, section 9); proposal + 0.5 m margin (section 10) |
+| Primary metric | at-fault rate. Secondary: score. |
+| Tests | contingency vs proposal and contingency vs margin, each on at-fault and score; one-sided **scene sign-flip randomisation** tests with **200,000 flips** (Monte Carlo SE about 0.0003 at p = 0.0125); Holm over 4; CIs by scene-cluster bootstrap (2,000) |
+| Reading | **confirmed best single setup:** both at-fault tests significant; **better than the plain planner only:** only the proposal comparison significant; **not confirmed:** otherwise. Score is reported with CIs and cannot override the at-fault reading. |
+| Reported, outside the rule | each at-fault contrast with its largest-contributing scene removed. In section 10 one scene supplied 15 of the 37 avoided at-fault episodes. |
+| Integrity checks in the runner | committed and clean code; same simulator, split and scene-data hashes as the public run; identical episodes and branch draws across the three cells |
+
+**Disclosures:**
+- **Reused scenes:** the 73 scenes are used for the fourth time. Fresh draws are new stochastic
+  realisations, not new scenes, and draw-invariant scene effects carry over.
+- **Power:** limited for the margin comparison (section 10 gap −0.4 pt).
+
+**Runners:**
+- `counterfactual_sim.py confirm-1b` (public cells);
+- the confidential runner adds the contingency cell and applies `tests_1b`.

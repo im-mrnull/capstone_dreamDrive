@@ -588,8 +588,10 @@ def main() -> int:
         new = splice(new, BEGIN_CL, END_CL, closed_loop_rows())
     if BEGIN_CLCV in new:
         new = splice(new, BEGIN_CLCV, END_CLCV, closed_loop_cv_rows())
-    new = splice(new, BEGIN_WORLD, END_WORLD, world_rows())
-    new = splice(new, BEGIN_LEGACY, END_LEGACY, legacy_rows())
+    if BEGIN_WORLD in new:                     # superseded results: optional in the README
+        new = splice(new, BEGIN_WORLD, END_WORLD, world_rows())
+    if BEGIN_LEGACY in new:
+        new = splice(new, BEGIN_LEGACY, END_LEGACY, legacy_rows())
 
     if args.check:
         if new != text:

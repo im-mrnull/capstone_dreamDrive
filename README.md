@@ -1,98 +1,114 @@
-# DreamDrive — Trajectory Prediction on IDD-3D (Chaotic Mixed Traffic)
+# DreamDrive — Prediction and Planning in Indian Mixed Traffic (IDD-3D)
 
-Multi-future trajectory prediction for unstructured Indian traffic, benchmarked on the
-[IDD-3D](https://idd3d.github.io/) dataset (105 scenes, 10 fps, 22 agent classes in the benchmark).
+DreamDrive asks whether trajectory prediction, including multi-future prediction, makes an
+automated vehicle measurably safer in unstructured Indian traffic. It benchmarks map-free
+forecasters on [IDD-3D](https://idd3d.github.io/) (105 scenes, 10 fps, 22 agent classes),
+wraps them in calibrated uncertainty bands, and drives them through pre-registered closed-loop
+and planner tests. Observation 2.0 s (20 frames) → prediction 6.0 s (60 frames), `dt = 0.1 s`.
 Dataset documentation: [`DATASHEET.md`](DATASHEET.md).
-Observation window 2.0 s (20 frames) → prediction horizon 6.0 s (60 frames), `dt = 0.1 s`.
 
 **Capstone project PW26_CGM_04** — Idhant Singh, Rishav Ghosh, Shagal Verma, Shourya Rai (PES University).
 
 ---
 
-## Results integrity policy
+## Key findings
 
-Every number in the results tables below is generated from a committed metrics JSON by
-[`scripts/make_tables.py`](scripts/make_tables.py); CI fails if a table is hand-edited
-(`python scripts/make_tables.py --check`). A result without an artifact does not appear here.
+1. **Forecasting.** On one shared evaluation population and a frozen 22-scene test split, the
+   ST-GAT-inspired model (test ADE 3.41 ± 0.07 m) and a map-free transformer (3.57 ± 0.11 m)
+   have the lowest errors. They beat the re-run Trajectron++, AgentFormer and LED on every
+   seed, but not significantly once both scene and seed variation are counted.
+   [→ Benchmark](#results--benchmark-v2)
+2. **Uncertainty.** Split-conformal bands land a little under their 90% target on held-out
+   scenes, with wide spread across scene splits. Per-class radii fix the under-coverage of cars
+   and the over-coverage of pedestrians. Bands that cover a whole 6 s future are about twice as
+   wide. [→ Conformal](#calibrated-uncertainty-bands-split-conformal-wrapper)
+3. **Open-loop safety.** Every single-trajectory predictor flags near-ego conflicts with AUC
+   0.95–0.96. None is separable from constant velocity. [→ Scorecard](#safety-scorecard-pre-registered)
+4. **Closed loop.** Prediction itself cuts at-fault collision episodes from 16.4% (ignoring
+   other road users) to 2–3%. No learned predictor beats constant velocity, and planning
+   against every sampled future of a multi-future model causes *more* collisions.
+   [→ Closed loop](#closed-loop-test-v2-cross-validated-pre-registered)
+5. **Planner headroom.** With hidden timing intent injected into real scenes, perfect
+   knowledge of the future finally beats constant velocity. But the planner moves the score
+   far more than the predictor, and one trajectory with a tuned 0.5 m safety margin matches the
+   ideal multi-future set. [→ Planner headroom](#planner-headroom-can-knowing-the-future-help)
+6. **Lateral intent** built from real IDD-3D tracks rarely changes the ego's immediate
+   decision, so that benchmark stopped at its pre-registered validity gate.
 
-**Retractions (July 2026).** Earlier versions of this repository and the Phase-2 report
-contained results that were not backed by any experiment artifact, including a claimed
-66%/131% ADE/FDE degradation of Trajectron++ on collision data (a placeholder — the
-experiment was never run), a benchmark table whose values matched no artifact, and a
-Trajectron++ "correction" that divided metrics by 10 without a new evaluation. All are
-retracted; see `research/report.txt` §7.2–7.3 for the retraction text.
+In progress: further planner experiments, and a Western → Indian transfer study (Argoverse 2 →
+IDD-3D).
 
-**Corrections (October 2026).** The conformal evaluation's "valid" regime split test
-*agents* rather than test *scenes*, which leaked correlated agents across the split and
-overstated coverage. It now splits scenes and averages over 100 random scene splits. Two
-findings built on it, that conformal "fails under the val→test shift" and that "stronger
-predictors survive the shift better", are withdrawn because a scene-level analysis does not
-support them. See the conformal section below.
+## Results integrity
 
-**Correction: Trajectron++ was scored on an easier population (October 2026).** Its
-training script scores it at every valid node-timestep (23,570 test instances, many late in a
-scene with under 2 s of future left), while every other model is scored on the 2,177
-canonical test windows. Re-scored on the canonical windows from the same trained checkpoints
-([`scripts/eval_trajectronpp_canonical.py`](scripts/eval_trajectronpp_canonical.py)), its
-deployable test ADE is 3.91 ± 0.08 m, not 2.58 ± 0.04 m. Three claims are withdrawn:
+- Every number in a results table is generated from a committed artifact by
+  [`scripts/make_tables.py`](scripts/make_tables.py). CI fails if a table is hand-edited
+  (`python scripts/make_tables.py --check`). The figures are regenerated from the same artifacts.
+- Confirmatory tests are pre-registered: the decision rule is committed before the data it
+  decides on is looked at, and each result names that commit.
+- Corrections stay visible:
+  - **Retractions (July 2026).** Results with no experiment behind them were retracted: a
+    claimed degradation of Trajectron++ on collision data, a benchmark table that matched no
+    artifact, and a Trajectron++ "correction" that rescaled metrics without re-evaluating. See
+    `research/report.txt` §7.2–7.3.
+  - **Conformal (October 2026).** The conformal evaluation split test *agents* rather than test
+    *scenes*, which overstated coverage. It now splits scenes, and two findings built on it are
+    withdrawn (see the conformal section).
+  - **Trajectron++ population (October 2026).** Trajectron++ had been scored on its own denser,
+    easier population. Re-scored on the shared canonical windows
+    ([`scripts/eval_trajectronpp_canonical.py`](scripts/eval_trajectronpp_canonical.py)), its
+    deployable test ADE is 3.91 ± 0.08 m, not 2.58 ± 0.04 m. The claims that it was the best
+    deployable model, that it was separated from ST-GAT, and that it had the tightest conformal
+    band are withdrawn. A test now checks that every ranked row and every conformal input is
+    scored on the same population
+    ([`tests/test_eval_population_contract.py`](tests/test_eval_population_contract.py)).
 
-- that Trajectron++ was the best deployable model;
-- that the scene bootstrap separated it from ST-GAT;
-- that it had the tightest conformal band (±10.0 m) and lost the least coverage from val
-  to test (5.2 points). On the canonical windows its band is 13.8 m, mid-table.
+## Data
 
-The dense-protocol rows stay in the table for reference, labelled and never ranked. A test
-now checks that every ranked row and every conformal input is scored on the same population
-([`tests/test_eval_population_contract.py`](tests/test_eval_population_contract.py)).
+### The ego-motion correction
 
-## The ego-motion correction (read this first)
+Raw IDD-3D labels store `psr.position` in the **per-frame ego/LiDAR frame**, so every
+trajectory mixed agent motion with ego motion: the median apparent *pedestrian* speed was
+**5.05 m/s**. [`scripts/0_compensate_ego_motion.py`](scripts/0_compensate_ego_motion.py)
+estimates per-frame SE(2) ego motion from the annotations themselves (RANSAC rigid alignment,
+with static objects such as parked vehicles as inliers) and re-expresses all positions in a
+per-scene world frame. The median pedestrian speed is then **0.91 m/s**. Diagnostics:
+[`outputs/ego_compensation_stats.json`](outputs/ego_compensation_stats.json); regression tests:
+[`tests/test_speed_sanity.py`](tests/test_speed_sanity.py). The compensation is an
+approximation until official ego poses are available (20.7% of frames fall back to a
+constant-velocity ego).
 
-Raw IDD-3D labels store `psr.position` in the **per-frame ego/LiDAR frame**. Uncompensated,
-every trajectory mixes agent motion with ego motion — median apparent *pedestrian* speed was
-**5.05 m/s** (impossible). [`scripts/0_compensate_ego_motion.py`](scripts/0_compensate_ego_motion.py)
-estimates per-frame SE(2) ego motion from the annotations themselves (RANSAC rigid alignment;
-static objects such as parked vehicles are the inliers) and re-expresses all positions in a
-per-scene world frame. After compensation the median pedestrian speed is **0.91 m/s**
-(walking pace). Diagnostics: [`outputs/ego_compensation_stats.json`](outputs/ego_compensation_stats.json);
-regression tests: [`tests/test_speed_sanity.py`](tests/test_speed_sanity.py).
-
-Consequences:
-
-- All **legacy ego-frame results are deprecated** (kept below for the record only). They are
-  not comparable to any published benchmark, and part of the learned models' apparent
-  advantage in that frame came from implicitly learning ego motion.
-- The compensation is an approximation pending official ego poses / LiDAR odometry
-  (raw `.pcd` files are not in this repo). Fallback statistics are recorded per scene.
-
-## Pipeline
+### Pipeline
 
 ```
 IDD-3D label JSONs (per-frame, ego-relative)
-  │ 1_parse_idd3d_positions.py         → outputs/parsed_positions/*.csv        (ego frame)
-  │ 0_compensate_ego_motion.py         → outputs/parsed_positions_world/*.csv  (world frame)
-  │ 2_consolidate_trajectories.py      → outputs/trajectories_world/trajectories.csv
-  │ 3_make_windows_obs20_pred60.py     → outputs/windows_world_obs20_pred60.npz     (4,820 windows)
-  │ 4_export_multiagent_trajpp_format.py → outputs/multiagent_world_v1/scenes/*.npz (105 scenes)
-  │ 5_export_stgat_format.py           → outputs/stgat_dataset_world_obs20_pred60.npz (608 seqs, 4,443 agents)
-  │ 6_export_trajectronpp_world.py     → outputs/trajectronpp_world/{train,val}.pkl  (dt=0.1)
-  └ models: model1 (CV) · model2 (MLP) · model3 (ST-GAT-inspired) · model4 (K-mode decoder)
-            7_train_eval_trajectronpp.py (upstream Trajectron++)
+  │ 1_parse_idd3d_positions.py            → outputs/parsed_positions/*.csv          (ego frame)
+  │ 0_compensate_ego_motion.py            → outputs/parsed_positions_world/*.csv    (world frame)
+  │ 4_export_multiagent_trajpp_format.py  → outputs/multiagent_world_v1/scenes/*.npz (105 scenes)
+  │ 5_export_stgat_format.py --presence obs+1fut
+  │                                       → outputs/canonical_world_obs20_pred60.npz (718 sequences, 10,576 agents)
+  │ 8_make_scene_splits.py                → splits/scene_splits.json                (73 / 10 / 22 scenes)
+  │ 9_make_agent_windows_from_canonical.py → per-agent windows for CV and the MLP
+  │ 6_export_trajectronpp_world.py        → Trajectron++ export (dt = 0.1 s)
+  └ models: model1 CV · model2 MLP · model3 ST-GAT-inspired · model4 K-mode decoder ·
+            model5 map-free transformer · model6 AgentFormer · model7 LED ·
+            model8 multi-future transformer · model9 AutoBot-Joint · 7_train_eval_trajectronpp.py
 ```
 
-## Results — Benchmark v2 (canonical dataset, frozen test set)
+## Results — Benchmark v2
 
-The current headline benchmark. Protocol:
+Protocol:
 
-- **Data:** [`outputs/canonical_world_obs20_pred60.npz`](outputs/canonical_world_obs20_pred60_stats.json)
-  — world-frame, 718 sequences, **10,576 agents** (the legacy all-80-frames survivor filter
-  discarded 58% of predictable agents; agents now need only a full 2 s observation + ≥1 future
-  step, with per-timestep `fut_mask`). Every model evaluates on this same population.
-- **Split:** frozen [`splits/scene_splits.json`](splits/scene_splits.json) (73/10/22 scenes,
-  hash-based, committed). Model selection uses val only; **test numbers are final**.
-- **Seeds:** {0,1,2} affect model init/shuffling only, never the split. Cells are mean ± std.
-- **Metrics:** masked ADE over valid future steps; FDE at each agent's last valid step;
-  sum-and-divide aggregation. Oracle rows select the best mode *after seeing ground truth* —
-  upper bounds, never comparable with deployable rows.
+- **Data:** [`outputs/canonical_world_obs20_pred60.npz`](outputs/canonical_world_obs20_pred60_stats.json),
+  world frame, 718 sequences, **10,576 agents**. An agent needs a full 2 s observation and at
+  least one future step, with a per-timestep `fut_mask`. Every model is scored on this same
+  population.
+- **Split:** frozen [`splits/scene_splits.json`](splits/scene_splits.json) (73 / 10 / 22
+  scenes, hash-based). Model selection uses val only; **test numbers are final**.
+- **Seeds:** {0, 1, 2} affect initialisation and shuffling only, never the split. Cells are
+  mean ± std.
+- **Metrics:** masked ADE over valid future steps; FDE at each agent's last valid step.
+  Oracle rows pick the best mode *after seeing the ground truth*: they are upper bounds, not
+  comparable with deployable rows.
 
 <!-- BEGIN AUTOGENERATED: benchmark v2 results (scripts/make_tables.py) -->
 | Model | K | Deployable single output? | Test ADE (m) | Test FDE (m) | Val ADE (m) | Seeds |
@@ -123,14 +139,14 @@ Source artifact: [`outputs/benchmark_v2/summary.json`](outputs/benchmark_v2/summ
 
 ### How certain are these numbers? (scene-level bootstrap)
 
-The ± above is seed-to-seed spread only. The larger uncertainty is *which* 22 scenes
-landed in the test split. Agents within a scene share an ego drive, a layout and each
-other's interactions, so they are not independent, and an agent-level CI would be far too
-narrow. [`scripts/bootstrap_ci.py`](scripts/bootstrap_ci.py) resamples **test scenes**
-with replacement (seed-0 model of each family, from its prediction dump). It reports
-per-model CIs and **paired** differences: both models are scored on the same resampled scenes,
-which removes the shared scene difficulty from the comparison. For the top models and LED it
-also compares 3-seed means, resampling each model's training seeds as well as the scenes.
+The ± above is seed-to-seed spread only. The larger uncertainty is *which* 22 scenes landed in
+the test split: agents in a scene share an ego drive, a layout and each other's interactions, so
+they are not independent. [`scripts/bootstrap_ci.py`](scripts/bootstrap_ci.py) resamples **test
+scenes** with replacement and reports per-model CIs and **paired** differences (both models
+scored on the same resampled scenes, which removes the shared scene difficulty). For the top
+models and LED it also compares 3-seed means, resampling training seeds as well as scenes.
+
+![Test ADE with 95% scene-bootstrap CIs](outputs/benchmark_v2/benchmark_ade_ci.png)
 
 <!-- BEGIN AUTOGENERATED: bootstrap CIs (scripts/make_tables.py) -->
 | Model (seed 0) | Test ADE (m) [95% CI] | Test FDE (m) [95% CI] | Test scenes | = seed-0 artifact? |
@@ -171,16 +187,14 @@ Per-class ADE disparity for ST-GAT (MHA) (classes with n ≥ 50): **12.5×**, 95
 Source artifact: [`outputs/benchmark_v2/bootstrap_ci.json`](outputs/benchmark_v2/bootstrap_ci.json) (10,000 scene resamples of the 22 test scenes).
 <!-- END AUTOGENERATED: bootstrap CIs -->
 
-How to read it: absolute test ADEs carry wide CIs, so an ADE from this benchmark should not
-be compared with one measured on a different split. Rankings should only be claimed where the
-paired CI excludes zero (the "Separated" column). Model pairs that are not separated are ties
-on this test set.
+Rankings are claimed only where the paired CI excludes zero (the "Separated" column); pairs
+that are not separated are ties on this test set. An absolute ADE from this benchmark should not
+be compared with one measured on a different split.
 
 ### Per-class fairness audit (test split)
 
-Per-IDD-3D-class error for the deployable model with the lowest mean test ADE (it is not
-separated from the runner-up; see the bootstrap section). `ADE per path-meter` normalizes by
-how far the agent actually travels, so fast classes aren't trivially "worse".
+Per-class error for the deployable model with the lowest mean test ADE. `ADE per path-meter`
+normalises by how far the agent actually travels, so fast classes are not trivially "worse".
 
 <!-- BEGIN AUTOGENERATED: per-class audit (scripts/make_tables.py) -->
 Lowest mean test ADE among deployable models: **ST-GAT-inspired (MHA)** (per-class stats from one representative seed; see the bootstrap section for whether it is separated from the runner-up).
@@ -200,15 +214,12 @@ ADE disparity (worst/best class, n ≥ 50): **10.25×**
 
 ### Where the oracle-vs-deployable gap comes from (Trajectron++)
 
-On the canonical windows, Trajectron++'s most-likely output (3.91 m) is 1.83 m behind its
-oracle best-of-20 (2.08 m). That gap is *not* a selection failure. A best-of-K sweep plus a
-mean-over-samples readout (same 20 draws, no extra compute;
-[`scripts/eval_trajectronpp_canonical.py`](scripts/eval_trajectronpp_canonical.py)
-`sampling_curve`) splits it into a calibration slice and a coverage slice:
+Trajectron++'s most-likely output (3.91 m) is 1.83 m behind its oracle best-of-20 (2.08 m). A
+best-of-K sweep plus a random-sample readout from the same 20 draws
+([`scripts/eval_trajectronpp_canonical.py`](scripts/eval_trajectronpp_canonical.py)) splits the
+gap into a calibration slice and a coverage slice:
 
 ![Best-of-K decomposition of the Trajectron++ oracle-vs-deployable gap](outputs/benchmark_v2/gap_decomposition.png)
-
-*(Regenerate from the artifact: `python scripts/plot_gap_decomposition.py`.)*
 
 <!-- BEGIN AUTOGENERATED: trajectronpp gap decomposition (scripts/make_tables.py) -->
 | Readout | Test ADE (m) | Meaning |
@@ -229,26 +240,19 @@ Source artifact: [`outputs/benchmark_v2/summary.json`](outputs/benchmark_v2/summ
 
 A post-hoc wrapper ([`scripts/conformal_wrapper.py`](scripts/conformal_wrapper.py)) turns each
 deployable point predictor into an uncertainty band around its forecast, with no retraining.
-The nonconformity score is the per-step position error. CV and MLP are reproduced in numpy;
-the neural models are fed from prediction dumps
-([`scripts/dump_predictions.py`](scripts/dump_predictions.py),
-[`scripts/eval_trajectronpp_canonical.py`](scripts/eval_trajectronpp_canonical.py) for
-Trajectron++, and the AgentFormer/LED drivers' `--save-pred-npz`). Every dump is the seed-0
-model on the canonical windows. Two kinds of band:
+The nonconformity score is the per-step position error; the inputs are each seed-0 model's
+predictions on the canonical windows. Two kinds of band:
 
-- **per-step**: a radius r_t per future step. Guarantees each *step* is covered with
-  probability ≥ 1 − α, but not that the whole future stays inside.
-- **simultaneous**: r_t = q · σ_t, where σ_t is a per-step scale fitted on half of the
-  calibration scenes and q is the conformal quantile of each agent's max_t error_t / σ_t on
-  the other half. The guarantee covers the agent's **whole valid future**, which is what a
-  planner needs.
+- **per-step:** a radius r_t per future step. Each *step* is covered with probability ≥ 1 − α,
+  but not the whole future.
+- **simultaneous:** r_t = q · σ_t, with a per-step scale σ_t fitted on half of the calibration
+  scenes and q the conformal quantile of each agent's max_t error_t / σ_t on the other half. It
+  covers the agent's **whole valid future**, which is what a planner needs.
 
-Each comes either with one global radius or with per-IDD-3D-class radii (Mondrian conformal
-prediction). Two evaluation regimes:
-
-- **B (same distribution):** calibrate on one half of the **test scenes**, evaluate on the
-  other half, repeated over 100 random scene splits.
-- **A (deployment):** calibrate on val, evaluate on test, with a scene-bootstrap CI.
+Each comes with one global radius or with per-class radii (Mondrian conformal prediction), in
+two regimes: **B** (same distribution: calibrate on half of the test scenes, evaluate on the
+other half, over 100 random scene splits) and **A** (deployment: calibrate on val, evaluate on
+test, with a scene-bootstrap CI).
 
 <!-- BEGIN AUTOGENERATED: conformal coverage (scripts/make_tables.py) -->
 | Predictor | B: step coverage, mean (5–95%) over 100 scene folds | A: val→test step coverage [95% CI] | B folds at or below A | Trajectory coverage: per-step band | Trajectory coverage: simultaneous band | Mean radius (m): per-step / simultaneous |
@@ -280,46 +284,26 @@ Source artifact: [`outputs/benchmark_v2/conformal_metrics.json`](outputs/benchma
 
 What this shows (α = 0.1):
 
-1. **On 22 test scenes, scene clustering is what limits conformal coverage.** Split by scene,
-   regime-B coverage lands a little under target on average and varies widely from one scene
-   split to the next (5–95% range in column 2). The guarantee is exact for exchangeable units,
-   but agents within a scene are correlated, and only ~11 scenes calibrate each split.
-   *Correction:* an earlier version of this analysis split test **agents** 50/50 and reported
-   near-nominal coverage for every model. That put agents of the same scene, and Trajectron++'s
-   overlapping per-timestep windows of the same agent, on both sides of the split, so it was
-   optimistic. It has been replaced.
-2. **The val→test drop is not distinguishable from scene sampling.** Regime-A coverage is
-   below the regime-B mean for every model, but it sits inside the spread that random
-   no-shift scene splits produce (column 4: share of those splits at or below A). *Correction:*
-   the earlier claims that "naive conformal fails under the val→test shift" and that "stronger
-   predictors survive the shift better" are withdrawn as not supported at this sample size.
-3. **Per-step bands do not cover whole futures; simultaneous bands do, at a cost.** The
-   share of agents whose entire future stays inside the per-step band (column 5) is far below
-   the 90% target. The simultaneous band (column 6) recovers most of it, and its radius
-   (column 7) is roughly twice as wide. That width is the main obstacle to using these bands
-   for planning, and tighter trajectory-level bands are the next research step.
-4. **Per-class radii fix per-class unfairness, robustly across scene splits** (second
-   table). One global radius under-covers Cars and over-covers Pedestrians. Per-class radii
-   bring both close to the overall level, widening the Car band and roughly halving the
-   Pedestrian band. Per-class calibration is standard Mondrian conformal prediction; the
-   contribution is showing that heterogeneous mixed traffic needs it.
-5. **A more accurate forecaster buys a tighter band.** At a fixed coverage target the band
-   radius tracks deployable ADE (figure below).
+1. **Scene clustering limits coverage on 22 test scenes.** Regime B lands a little under
+   target on average and varies widely between scene splits. The guarantee is exact for
+   exchangeable units, but agents within a scene are correlated.
+2. **The val→test drop is not distinguishable from scene sampling.** Regime A sits inside the
+   spread that random no-shift scene splits produce (column 4). *Withdrawn (October 2026):* the
+   claims that naive conformal "fails under the val→test shift" and that "stronger predictors
+   survive the shift better".
+3. **Per-step bands do not cover whole futures; simultaneous bands do, at about twice the
+   radius.** That width is the main obstacle to using these bands for planning.
+4. **Per-class radii fix per-class unfairness** robustly across scene splits: one global radius
+   under-covers cars and over-covers pedestrians.
+5. **A more accurate forecaster buys a tighter band** at a fixed coverage target:
 
 ![Uncertainty efficiency: lower ADE buys a tighter conformal band at fixed 90% coverage](outputs/benchmark_v2/uncertainty_efficiency.png)
 
 ![The val→test coverage drop is within scene-sampling variability](outputs/benchmark_v2/robustness_gap.png)
 
-Per-class coverage, global vs per-class radii, for one scene split: one figure per model in
-`outputs/benchmark_v2/conformal_coverage_*.png`.
-
-*(Regenerate: `python scripts/conformal_wrapper.py && python scripts/plot_conformal_coverage.py &&
-python scripts/plot_uncertainty_efficiency.py`. The bands are wide because they wrap 6 s point
-predictors; their absolute width reflects the base model's accuracy.)*
-
-**Robustness to the coverage target (α).** α = 0.1 (90%) is a reporting convention, not a
-safety-derived spec. [`scripts/conformal_alpha_sensitivity.py`](scripts/conformal_alpha_sensitivity.py)
-re-runs the evaluation at 80% / 90% / 95% (B = mean over scene splits, A = val→test):
+**Robustness to the coverage target.** α = 0.1 is a reporting convention, not a safety
+specification. [`scripts/conformal_alpha_sensitivity.py`](scripts/conformal_alpha_sensitivity.py)
+repeats the evaluation at 80% / 90% / 95%; the picture is the same at every target.
 
 ![Conformal coverage across targets α](outputs/benchmark_v2/conformal_alpha_sensitivity.png)
 
@@ -351,27 +335,21 @@ Mean per-step band radius (regime B, scene-fold mean) at each target:
 Source artifact: [`outputs/benchmark_v2/conformal_sensitivity.json`](outputs/benchmark_v2/conformal_sensitivity.json) (100 scene folds per target).
 <!-- END AUTOGENERATED: conformal alpha sensitivity -->
 
-The qualitative picture is the same at every target: regime B lands near the target but slightly
-under it, regime A is lower, and the band widens as the target tightens.
+## Safety and closed-loop driving
 
-### Which model is safest? (pre-registered safety scorecard)
+### Safety scorecard (pre-registered)
 
-Mean ADE ranks forecasters, not safety. A planner needs a predictor that foresees the agents that
-actually come close to the ego vehicle, without flagging everyone, and does so for pedestrians
-and two-wheelers too, fast enough for 10 Hz. The rule below was committed **before** any
-scorecard number was computed; full definitions are in
-[`docs/wiki/safety-scorecard.md`](docs/wiki/safety-scorecard.md).
+Mean ADE ranks forecasters, not safety. The scorecard asks which predictor best foresees the
+agents that actually come close to the ego vehicle, without flagging everyone. The rule was
+committed **before** any scorecard number was computed
+([`docs/wiki/safety-scorecard.md`](docs/wiki/safety-scorecard.md)):
 
-- **Candidates (12, seeds 0–2, canonical windows).** There are 8 single-trajectory predictors and
-  4 multi-future sets (LED, AgentFormer and Trajectron++ with 10 samples each, and the K-mode
-  decoder's 10 modes). Each gets a per-step, per-class 90% conformal band calibrated on val.
-- **Conflict.** An agent's true position comes within 5 m of the ego's actual position (from
-  `outputs/ego_trajectories.csv`) at the same future step.
-- **Primary metric.** The test ROC-AUC for flagging conflict agents, sweeping a scale on the
-  band. It is reported as the 3-seed mean with a seed-pooled scene-bootstrap CI.
-- **Pick.** The highest primary AUC wins. Packages tied with it (paired 95% CI includes 0) are
-  then compared on the same AUC over vulnerable road users (pedestrians, children and
-  two-wheeler riders). Any remaining tie goes to the lowest GPU latency.
+- **Candidates:** 8 single-trajectory predictors and 4 multi-future sets (10 futures each),
+  seeds 0–2, each with a per-step, per-class 90% conformal band calibrated on val.
+- **Conflict:** the agent's true position comes within 5 m of the ego's actual position at the
+  same future step.
+- **Pick:** the highest test conflict AUC; ties (paired 95% CI includes 0) go to the AUC on
+  pedestrians and two-wheeler riders, then to latency.
 
 <!-- BEGIN AUTOGENERATED: safety scorecard (scripts/make_tables.py) -->
 Rule committed in `a33f7f0` before any of these numbers existed. Test split: 2,177 agents, 276 conflicts (195 of them pedestrians or two-wheeler riders).
@@ -405,140 +383,35 @@ Exploratory (added after the result, not used for the pick): current distance al
 Source artifacts: [`outputs/benchmark_v2/safety_scorecard.json`](outputs/benchmark_v2/safety_scorecard.json), [`outputs/benchmark_v2/safety_latency.json`](outputs/benchmark_v2/safety_latency.json) (2,000 seed-pooled scene resamples; latency on NVIDIA RTX 4500 Ada Generation).
 <!-- END AUTOGENERATED: safety scorecard -->
 
-What this means:
+**What it means.** The rule picks constant velocity because the test cannot separate the
+predictors, not because CV is safest: the rule falls through to latency. Current distance alone
+reaches AUC 0.75, and any predictor lifts it to about 0.95, so motion extrapolation provides
+almost all of the benefit. Multi-future sets raise more false alarms at the same coverage. This
+is an open-loop proxy (the ego path is what the human drove), which is why the closed-loop
+tests follow.
 
-1. **The rule picks constant velocity because the test cannot separate the predictors, not
-   because CV is safest.** All eight single-trajectory predictors flag near-ego conflicts with
-   AUC 0.95–0.96, and their paired CIs overlap, both for all agents and for pedestrians and
-   two-wheelers. The rule therefore falls through to latency, where CV is trivially fastest.
-2. **Prediction matters, but motion extrapolation provides almost all of the benefit.**
-   Current distance alone reaches AUC 0.75. Any of the predictors lifts it to about 0.95, and
-   CV already does most of that. On the conflicts that need anticipation (agents more than
-   10 m away when the prediction is made), the learned models are about 0.01–0.02 AUC ahead of
-   CV, which is not separated with 22 test scenes.
-3. **Multi-future sets do worse here.** A band around each of 10 samples covers more road,
-   so they raise more false alarms at the same coverage.
-4. **Accuracy gains do not yet show up as safety gains.** The learned models are clearly more
-   accurate than CV (ST-GAT vs CV: −1.03 m ADE, separated), including near the ego. On this
-   open-loop proxy, that accuracy does not translate into measurably better conflict
-   detection. Showing a safety benefit needs closed-loop evaluation. The cross-validated
-   closed-loop test below does that, with a planner and collision rates, and it doesn't show
-   a benefit either.
+### Closed-loop test v2: cross-validated (pre-registered)
 
-This is an open-loop proxy: the ego path is what the human driver did.
+The first pre-registered closed-loop test
+([`docs/wiki/closed-loop-test.md`](docs/wiki/closed-loop-test.md),
+[`closed_loop.json`](outputs/benchmark_v2/closed_loop.json)) also found no predictor
+demonstrably safest, and exposed three problems: a ~6% false-collision floor in the measurement,
+90% bands that paralysed the planner, and too few test scenes. The second test fixes all three
+([`docs/wiki/closed-loop-cv.md`](docs/wiki/closed-loop-cv.md), committed before any fold model
+drove a primary scene):
 
-### Closed-loop test (pre-registered)
+- **Measurement:** ego-pose glitches are excluded, the ego is oriented by its logged yaw, and
+  collisions use exact rectangles with a footprint measured from the data. The human replay's
+  false at-fault rate falls to 0–1.1%.
+- **Planner:** each predictor drives a sampling planner that replans every 0.2 s. A grid on the
+  32 development scenes chose a 1 s hard safety horizon, a soft penalty beyond it and **no
+  conformal band**.
+- **Scenes:** 5-fold scene cross-validation retrains CV, MLP, ST-GAT, the transformer and LED,
+  so every scene is driven by models that never saw it. The **primary** analysis uses the 73
+  scenes never evaluated before. Episodes score 0 after an at-fault collision; otherwise they
+  combine progress, the absence of harsh braking and the absence of near misses (nuPlan style).
 
-Each predictor drives the same planner through the recorded test scenes, in
-[`scripts/closed_loop_sim.py`](scripts/closed_loop_sim.py). The other road users replay their
-logs and do not react.
-
-- **Episodes.** There are 176 per package and seed: 22 scenes × 4 start times × 2 ego personas.
-  The *nominal* persona drives at the human's speed; the *assertive* one drives at 6 m/s or
-  more.
-- **Planner.** Every 0.2 s it chooses among 35 speed-and-swerve manoeuvres that keep clear of
-  each agent's predicted footprint, inflated by that package's val-calibrated 90% band.
-- **Score.** An episode scores 0 after a collision the ego caused. Otherwise it combines
-  progress (relative to the human driver), the absence of harsh braking and the absence of
-  near misses, in nuPlan style.
-- **Pick.** It follows the same rule as the scorecard: highest score, then pedestrian and
-  two-wheeler collisions, then latency.
-
-The protocol, including the planner fixes made on the **validation** scenes with reference
-drivers only, is in [`docs/wiki/closed-loop-test.md`](docs/wiki/closed-loop-test.md). It was
-committed before any learned predictor was run on the test scenes.
-
-<!-- BEGIN AUTOGENERATED: closed-loop test (scripts/make_tables.py) -->
-Rule committed in `b6f1a43` before any learned predictor ran on the test scenes. 22 test scenes, 176 episodes per package and seed; 3-seed means.
-
-| Package | Episode score [95% CI] | At-fault collision episodes | …with pedestrians / two-wheelers | Progress | Harsh braking | Near misses | Score without the band |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| LED (mean-denoised) | 0.745 [0.607, 0.866] | 10.6% | 8.5% | 0.86 | 37% | 23% | 0.831 |
-| ST-GAT (MHA) | 0.745 [0.613, 0.857] | 12.1% | 8.5% | 0.87 | 40% | 23% | 0.825 |
-| Map-free transformer | 0.739 [0.606, 0.853] | 10.2% | 9.1% | 0.86 | 40% | 25% | 0.819 |
-| CV (vel_k=5) | 0.733 [0.606, 0.846] | 12.5% | 10.2% | 0.86 | 43% | 23% | 0.800 |
-| AgentFormer (most-likely) | 0.724 [0.587, 0.841] | 14.0% | 11.7% | 0.87 | 42% | 25% | 0.809 |
-| Trajectron++ (most-likely) | 0.715 [0.582, 0.836] | 14.4% | 8.3% | 0.86 | 45% | 23% | 0.799 |
-| K-mode (top-1) | 0.706 [0.579, 0.818] | 13.3% | 9.7% | 0.84 | 49% | 22% | 0.803 |
-| MLP | 0.705 [0.570, 0.828] | 13.3% | 12.5% | 0.85 | 45% | 25% | 0.810 |
-| AgentFormer set (10 samples) | 0.704 [0.562, 0.830] | 13.4% | 11.4% | 0.82 | 46% | 24% | 0.750 |
-| Trajectron++ set (10 samples) | 0.694 [0.552, 0.816] | 15.2% | 10.2% | 0.84 | 52% | 25% | 0.739 |
-| LED set (10 samples) | 0.693 [0.560, 0.813] | 15.5% | 13.3% | 0.83 | 50% | 25% | 0.737 |
-| K-mode set (10 modes) | 0.524 [0.403, 0.643] | 22.3% | 16.1% | 0.73 | 81% | 37% | 0.509 |
-| *Human driver (log replay)* (reference) | 0.928 | 5.7% | 2.3% | 1.00 | 0% | 12% | — |
-| *Oracle (true future, no band)* (reference) | 0.848 | 6.2% | 6.2% | 0.90 | 6% | 26% | — |
-| *No prediction (ignore agents)* (reference) | 0.795 | 15.9% | 14.2% | 0.92 | 2% | 26% | — |
-
-How the pre-registered rule decided:
-
-1. Leader on the episode score: LED (mean-denoised) (0.745).
-2. Tied with the leader (paired 95% CI includes 0): CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), Trajectron++ (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).
-3. Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best Trajectron++ (most-likely) (0.083); still tied: LED (mean-denoised), CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).
-4. Tie-break 2 (latency): CV (vel_k=5).
-
-**Rule outcome: CV (vel_k=5).**
-
-Source artifact: [`outputs/benchmark_v2/closed_loop.json`](outputs/benchmark_v2/closed_loop.json) (2,000 seed-pooled scene resamples).
-<!-- END AUTOGENERATED: closed-loop test -->
-
-What this means:
-
-1. **The closed loop confirms the scorecard: no predictor is demonstrably safest.** Scores span
-   0.69–0.75 for every single-trajectory model and three of the sets, and their paired CIs
-   overlap. The rule therefore falls through to latency and picks constant velocity again. Only
-   the K-mode set is clearly worse: its spread-out modes block the road, so the planner brakes
-   hard in 81% of episodes.
-2. **The measurement has a floor of about 6%.** The human replay registers at-fault contacts in
-   5.7% of episodes. These come from two footprint artifacts (a diagonal car overlap and a 52°
-   route-heading error in a turn), each counted in several overlapping episodes. The
-   perfect-prediction oracle, at 6.2%, sits on that floor.
-
-Exploratory, added after the result and not used for the pick
-([`scripts/closed_loop_explore.py`](scripts/closed_loop_explore.py), the `exploratory` block of
-the artifact). These are 116 paired comparisons without multiple-comparison correction, so
-single "separated" results are hypotheses, not findings.
-
-- **The 90% band hurts every single-trajectory model.** All eight score significantly higher
-  without it (+0.07 to +0.11). As a hard constraint in dense traffic it leaves the planner with
-  no clear manoeuvre, so it brakes hard (37–50% of episodes) and its fallback escapes cause
-  more collisions. Used this way, most models do worse than ignoring other agents altogether.
-  Bands this wide are not usable as planning constraints; tighter, trajectory-level bands are
-  needed.
-- **Without the band, prediction pays.** Every single-trajectory model, CV included, cuts
-  at-fault collision episodes by 4–7 points against ignoring agents (15.9%).
-- **Without the band, LED (+0.031) and ST-GAT (+0.025) edge out CV on the episode score.** The
-  map-free transformer is borderline (+0.019, CI −0.001 to +0.038). This suggests learned
-  predictors do help in closed loop, but it needs confirmation on data this analysis has not
-  seen.
-
-### Closed-loop test v2: cross-validated, with a fixed instrument and planner (pre-registered)
-
-The first closed-loop test exposed three problems:
-- a ~6% false-collision floor in the measurement;
-- 90% bands that paralysed the planner;
-- too few test scenes to separate the predictors.
-
-The second test addresses all three. The full protocol is in
-[`docs/wiki/closed-loop-cv.md`](docs/wiki/closed-loop-cv.md), committed before any fold model
-drove a primary scene.
-
-- **Measurement.** Three fixes, each calibrated on the recorded human driver alone:
-  - Ego-pose glitches from the motion reconstruction are excluded.
-  - The ego is oriented by its logged yaw.
-  - Collisions are tested with exact rectangles and a footprint measured from the data.
-
-  The human replay's false at-fault rate falls to 0% (test), 0% (val) and 1.1% (former train
-  scenes).
-- **Planner.** A 30-configuration grid on the 32 already-seen scenes chose a 1 s hard safety
-  horizon, a soft penalty beyond it, and **no conformal band**. Every band setting scored lower
-  there (0.813 with the full band against 0.894 without). Harsh braking dropped from about 45%
-  of episodes to about 9%.
-- **More scenes.** 5-fold scene cross-validation retrains CV, MLP, ST-GAT, the transformer and
-  LED, so each of the 105 scenes is driven by models that never saw it. The **primary** analysis
-  uses the 73 scenes that were never evaluated before. Hypotheses (Holm-corrected):
-  - learned models beat CV on score (H1) and on at-fault collisions (H1b);
-  - every predictor beats ignoring agents (H2);
-  - the band hurts (H3).
+![Closed-loop test v2: episode score and at-fault collisions per package](outputs/benchmark_v2/closed_loop_cv.png)
 
 <!-- BEGIN AUTOGENERATED: closed-loop cv (scripts/make_tables.py) -->
 Rule committed in `24684e2` before any fold model drove a primary scene. Primary set: 73 scenes never evaluated before, 524 episodes per package; one model per fold (seed 0); planner v2 without the band.
@@ -622,217 +495,161 @@ Source artifacts: [`outputs/benchmark_v2/closed_loop_cv.json`](outputs/benchmark
 
 **What the confirmatory test shows:**
 
-1. **No predictor is demonstrably safest in closed loop.** The five single-trajectory
-   packages are within 0.01 of each other (0.793–0.802). The rule's tie-breaks pick constant
-   velocity. ST-GAT has the fewest collisions with pedestrians and two-wheelers (1.3% vs
-   2.1–2.9%), but that difference is not separated either. Learned models do not beat
-   constant velocity on score or on collisions (H1 and H1b are unsupported in every variant).
+1. **No predictor is demonstrably safest in closed loop.** The five single-trajectory packages
+   are within 0.01 of each other (0.793–0.802), and learned models do not beat constant
+   velocity on score or collisions in any of the 7 instrument variants.
 2. **Prediction itself matters.** Every predictor cuts at-fault collision episodes from 16.4%
-   (ignoring agents) to 2–3%. This holds in all 7 instrument variants.
-3. **The conformal band hurts this planner** (≈ 0.66 with the full band vs ≈ 0.80 without),
-   again in all 7 variants.
-4. **Planning against every future of a multi-future set is unsafe.** The K-mode decoder's 10
-   modes and LED's 10 samples score far below their own single trajectory: 0.626 vs 0.791 and
-   0.682 vs 0.793. They also cause *more* at-fault collisions: 13.4% vs 4.6%, and 7.4% vs 3.4%.
-   Both 95% CIs exclude zero in the harmful direction. When ten futures block the road, the
-   planner's fallback manoeuvres cause the collisions. Amendment 3 extends this to all five
-   multi-future models. The multi-future transformer's set is the worst package in the test
-   (0.438, 19.3% at-fault), and the Trajectron++ set also scores significantly below its own
-   single trajectory (0.752 vs 0.799). The AgentFormer set (0.793) is the only set level with
-   its single trajectory (0.800), and it brakes harshly least often of the sets (25% vs 44–93%).
-   No set is better than its single trajectory on any test (S1/S2 unsupported for all five).
-   Whether multi-future prediction pays off therefore depends on how the planner uses it.
-   That is the subject of separate, ongoing work.
-5. **The planner, not prediction accuracy, is now the limit.** The oracle, which drives
-   against the true future, scores only 0.821; the recorded human scores 0.934. On these
-   scenes the remaining gap is mostly progress and harsh braking, which no predictor can close
-   on its own.
-6. **Training with ten futures does not improve the deployable trajectory.** The
-   multi-future transformer's top-1 (0.790, 3.6% at-fault) is no better than the
-   single-output transformer (0.801, 2.9%); T1 and T2 are unsupported. AgentFormer and
-   Trajectron++ most-likely trajectories (0.800 and 0.799) join the five-way tie of point
-   predictors. They are not in the decision rule, but they would not change it.
+   (ignoring agents) to 2–3%, in all 7 variants.
+3. **The conformal band hurts this planner** (≈ 0.66 with the full band vs ≈ 0.80 without).
+4. **Planning against every future of a multi-future set is unsafe.** All five multi-future
+   models score below their own single trajectory or level with it, never above, and the K-mode
+   and LED sets cause *more* at-fault collisions (13.4% vs 4.6%, 7.4% vs 3.4%). When ten futures
+   block the road, the planner's fallback manoeuvres cause the collisions. Whether multi-future
+   prediction pays off depends on how the planner uses it: the next section.
+5. **The planner, not prediction accuracy, is the limit.** The oracle, which drives against the
+   true future, scores only 0.821; the recorded human scores 0.934.
 
-Caveats:
-- the agents don't react;
-- footprints are nominal;
-- there is one seed per fold;
-- the planner was tuned on the development scenes (excluded from the primary set).
+Caveats: the agents don't react; footprints are nominal; one seed per fold; the planner was
+tuned on the development scenes, which are excluded from the primary set.
 
-### Honest takeaways (Benchmark v2)
+## Planner headroom: can knowing the future help?
 
-1. **Two models share the top: the ST-GAT-inspired model and the map-free transformer.**
-   ST-GAT has the lowest mean test ADE (3.41 ± 0.07; seeds 3.33 / 3.39 / 3.50) and the
-   transformer is next (3.57 ± 0.11; seeds 3.43 / 3.71 / 3.58). They are tied on this test
-   set: the seed-pooled bootstrap cannot separate their 3-seed means (ΔADE −0.17 m, 95% CI
-   [−0.48, 0.13]). Both have a lower test ADE than the three published models re-run here
-   on every seed: LED 3.75 ± 0.01, AgentFormer 3.75 ± 0.00, Trajectron++ 3.91 ± 0.08.
-2. **That lead over the published models is consistent but not statistically separated.**
-   Against LED, the closest of them, both top models are better in all 9 seed pairings. But
-   once the comparison uses 3-seed means and the CI covers both test scenes and training
-   seeds, it does not exclude zero at 95%: the transformer is −0.17 m [−0.55, 0.11] and
-   ST-GAT −0.34 m [−0.76, 0.01]. The seed-0-only comparison (−0.31 m, separated) used the
-   transformer's best seed, so it overstated the gap. With 22 test scenes, "consistently
-   lower ADE" is the defensible claim, not "significantly better". The published models also
-   run under this benchmark's constraints: no map, no yaw, and AgentFormer at 2 Hz.
-3. **Validation and test disagree on the order.** LED has the best val ADE on every seed
-   (2.03 ± 0.02, against 2.38 for ST-GAT) and the best oracle among the K = 20 samplers
-   (1.98), so choosing one model on val would have picked LED. On test it ties AgentFormer
-   behind the top two, and its val→test conformal coverage drop is the largest
-   (87.1% → 73.3%). With 10 val scenes, val is a weak selector, so rankings here are claimed
-   only where the paired test-scene CI excludes zero.
-4. **Interaction modeling earns its keep on the full population.** In v1 (survivor-filtered
-   data) the ST-GAT-inspired model lost to smoothed constant velocity. On the canonical
-   dataset, which restores the 58% of agents the old filter discarded, it beats MLP
-   (ΔADE −0.63 m, CI [−1.07, −0.28]) and CV (−1.03 m, CI [−1.96, −0.32]).
-5. **No multimodal model turns its samples into a better single forecast.** The K-mode
-   decoder's oracle best-of-10 (test ADE 1.88) is the best oracle in the table, ahead of
-   LED (1.98), Trajectron++ (2.08) and AgentFormer (2.24) at K = 20. But every multimodal
-   model loses 1.5–2.4 m when it has to commit to one output (K-mode 1.88 → 4.31, LED
-   1.98 → 3.75, AgentFormer 2.24 → 3.75, Trajectron++ 2.08 → 3.91). None of those single
-   outputs beats the two single-output models above, so mode selection, not mode diversity,
-   remains the bottleneck. The K-mode decoder's learned top-1 also has the largest seed
-   variance in the table (val ADE ± 0.36).
-6. **The frozen test split is genuinely harder than val** (every deployable model's test ADE
-   is 1.3–1.9× its val ADE). v1's val-only numbers were systematically optimistic. This gap
-   is exactly what the frozen test set was created to expose.
-7. **Raw errors concentrate on fast two-wheeler riders and cars, but normalization flips the
-   story.** For the lowest-ADE model (table above), per-class ADE is highest for
-   ScooterRider / Car / TourCar / MotorcyleRider (4.1–5.4 m) and lowest for scooters and
-   pedestrians (0.5–1.1 m). Yet per meter actually traveled, pedestrians err *more*
-   (0.263 ADE/path-m) than motorcycle riders (0.161). The raw gap mostly tracks path length.
-   Relative to how far they move, slow, erratic agents remain the hard case.
-8. **The K-mode decoder's "mode-selection problem" was partly a checkpoint-selection
-   artifact.** The original pipeline selected the saved checkpoint by val *oracle* ADE, then
-   reported that same checkpoint's top-1 — but the best epoch for coverage isn't the best
-   epoch for the classifier. Selecting on val top-1 ADE instead (same architecture, same
-   loss) improves deployable test ADE from 4.31 ± 0.05 to 4.15 ± 0.10 and sharply stabilizes
-   it across seeds (val ADE std 0.36 → 0.09), at the honest cost of worse oracle coverage
-   (test 1.88 → 2.01, val 1.32 → 1.69 — a real trade-off, not free).
-   **EWTA annealing did not help further (second honest negative result).** A val-only grid
-   (seed 0, 150 epochs) compared plain WTA-with-top-1-selection against evolving-WTA variants
-   (winner set annealed 10→1 over training, with hard or soft mode-classification targets):
-   plain WTA won outright (val top-1 ADE 2.46 vs 2.60 hard-EWTA vs 2.76 soft-EWTA), so no
-   EWTA variant was carried to the final 3-seed run. Even after both fixes, the K-mode
-   decoder's top-1 remains well behind ST-GAT (3.41) — mode selection is improved, not solved.
-   **A content-aware scorer also did not help (third negative result), and the reason is
-   the interesting part.** We rebuilt the mode-scoring head to rank each mode from its
-   *decoded trajectory* (endpoint, waypoints, path length, heading) rather than from context
-   only — a unit test confirms it genuinely reads the trajectory (perturbing one mode's path
-   moves only that mode's logit). On the val gate it was a wash (val top-1 ADE 2.51 vs the
-   2.46 context-only baseline, within seed noise), so it was not promoted to a 3-seed run.
-   The mechanism explains why: this decoder is *deterministic*, so each mode's trajectory is
-   a fixed function of the per-mode context state the scorer already used — the trajectory
-   features are redundant, not new information. The classifier was never information-starved;
-   the bottleneck is the winner-takes-all *assignment target* itself. That points the next
-   attack at the objective/structure (jointly-trained mixture density, or anchor/goal modes),
-   not the scorer's input. Grid + per-seed artifacts:
-   [`outputs/benchmark_v2/mfp_ewta_grid/`](outputs/benchmark_v2/mfp_ewta_grid/),
-   [`outputs/benchmark_v2/mfp_content_grid/`](outputs/benchmark_v2/mfp_content_grid/),
-   `mfp_top1sel_seed*.json`.
-9. **Unicycle dynamics with approximate heading do not pay off (honest negative result).**
-   This variant models wheeled classes as VEHICLE nodes with Unicycle dynamics
-   (nuScenes-style; heading derived from velocity direction, since IDD-3D yaw isn't in this
-   repo's parsed data) plus rotation augmentation. It was selected over no augmentation on a
-   val grid (2.12 vs 2.26, dense protocol). On the canonical test windows it *degrades*
-   deployable most-likely (4.55 ± 0.17 vs 3.91 ± 0.08). The loss is concentrated on moving
-   vehicles (riders +1.0 to +1.3 m, cars +1.0 m), while pedestrians are unchanged (−0.15 m).
-   Oracle best-of-20 is slightly worse too (2.22 ± 0.06 vs 2.08 ± 0.02). Reading: the unicycle integrates
-   heading-estimate noise into its deterministic rollout, which sampling absorbs but
-   most-likely decoding cannot. True yaw (raw dataset / perception) is the prerequisite for
-   dynamics-aware modeling to help here. Grid + per-seed artifacts:
-   [`outputs/benchmark_v2/tpp_hetero_grid/`](outputs/benchmark_v2/tpp_hetero_grid/),
-   `trajectronpp_hetero_canonical_seed*.json`.
+In replayed scenes a perfect predictor scores no better than constant velocity, so no predictor,
+single or multi-future, can show a benefit there. The headroom test
+([`docs/wiki/headroom-test.md`](docs/wiki/headroom-test.md), simulator
+[`scripts/counterfactual_sim.py`](scripts/counterfactual_sim.py)) first creates room for
+prediction to matter, using ideal predictors only:
 
-## Results — world frame v1 (superseded by Benchmark v2)
+- **Hidden intent.** Up to three road users per episode that enter the ego's path keep their
+  logged path but follow one of three hidden timing branches: as logged (prior 0.5), hesitate,
+  or go first (0.25 each). Branches are drawn identically for every package and don't react to
+  the ego.
+- **Ideal predictors.** The *branch oracle* knows the realised branch. The *ideal singles*
+  commit to the most likely or the posterior-mean branch. The *ideal set* carries every branch
+  still consistent with the observed past, with its posterior weight: the ideal multi-future
+  predictor. A branch is ruled out once it is 0.3 m from the observed past, the scale of the
+  annotation jitter.
+- **Stage 1 (gate G1): does perfect information beat constant velocity by a margin fixed in
+  advance?** At the strong dose (32 development scenes, 880 episodes per package), yes. The
+  ideal singles already capture the oracle's whole gain
+  ([`headroom_stage1.json`](outputs/benchmark_v2/headroom_stage1.json)):
 
-⚠️ Superseded: no test set (selection and reporting shared the val split), two different eval
-populations (CV/MLP on single-agent windows vs. interaction models on multi-agent sequences),
-survivor-biased agent filter, single seeds. Kept for the record; numbers below are val-only.
+  | Package (strong dose, planner v2) | Score | At-fault | Pedestrian / two-wheeler at-fault |
+  |---|---|---|---|
+  | No prediction | 0.727 | 18.8% | 10.2% |
+  | CV | 0.795 | 5.1% | 3.6% |
+  | Branch oracle | 0.820 | 1.9% | 0.9% |
+  | Ideal single (mean) | 0.823 | 2.0% | 0.7% |
+  | Ideal set | 0.823 | 1.6% | 0.9% |
 
-<!-- BEGIN AUTOGENERATED: world-frame results (scripts/make_tables.py) -->
-| Model | Eval set | K | Deployable single output? | Val ADE (m) | Val FDE (m) | Artifact |
-| --- | --- | --- | --- | --- | --- | --- |
-| CV (vel_k=1) | windows val | 1 | yes | 6.27 | 13.81 | [`outputs/baselines_world/cv_velk1_metrics_world_obs20_pred60.json`](outputs/baselines_world/cv_velk1_metrics_world_obs20_pred60.json) |
-| CV (vel_k=5) | windows val | 1 | yes | 4.82 | 11.20 | [`outputs/baselines_world/cv_velk5_metrics_world_obs20_pred60.json`](outputs/baselines_world/cv_velk5_metrics_world_obs20_pred60.json) |
-| MLP | windows val | 1 | yes | 4.56 | 10.25 | [`outputs/baselines_world/mlp_metrics_world_obs20_pred60.json`](outputs/baselines_world/mlp_metrics_world_obs20_pred60.json) |
-| ST-GAT-inspired (MHA) | multi-agent val | 1 | yes | 6.41 | 13.40 | [`outputs/baselines_world/stgat_mha_metrics_world_obs20_pred60.json`](outputs/baselines_world/stgat_mha_metrics_world_obs20_pred60.json) |
-| K-mode variety decoder — oracle best-of-K | multi-agent val | 10 | no (oracle) | 3.66 | 6.12 | [`outputs/baselines_world/mfp_k10_metrics_world_obs20_pred60.json`](outputs/baselines_world/mfp_k10_metrics_world_obs20_pred60.json) |
-| K-mode variety decoder — learned top-1 | multi-agent val | 10 | yes | 7.70 | 15.66 | [`outputs/baselines_world/mfp_k10_metrics_world_obs20_pred60.json`](outputs/baselines_world/mfp_k10_metrics_world_obs20_pred60.json) |
-| Trajectron++ — most-likely (K=1) | multi-agent val | 1 | yes | 3.99 | 8.72 | [`outputs/baselines_world/trajectronpp_metrics_world_obs20_pred60.json`](outputs/baselines_world/trajectronpp_metrics_world_obs20_pred60.json) |
-| Trajectron++ — best-of-20 | multi-agent val | 20 | no (oracle) | 1.79 | 2.97 | [`outputs/baselines_world/trajectronpp_metrics_world_obs20_pred60.json`](outputs/baselines_world/trajectronpp_metrics_world_obs20_pred60.json) |
-<!-- END AUTOGENERATED: world-frame results -->
+  Branch oracle − CV: +0.025 score, −3.2 points at-fault. At the primary dose (+0.013, −1.0
+  point) the gate was missed, so every later stage uses the strong dose.
 
-Honest takeaways from v1 (kept for the record; superseded by the Benchmark v2 section above):
+![Planner headroom: matched planners and the primary-scene confirmation](outputs/benchmark_v2/planner_headroom.png)
 
-1. **Oracle multi-future coverage helps a lot** — Trajectron++ best-of-20 (ADE 1.79) and the
-   K-mode decoder's best-of-10 (ADE 3.66) both beat every single-output model. The
-   multi-future premise of the project survives the frame correction.
-2. **Trajectron++ most-likely had the lowest val ADE** (3.99 / FDE 8.72, against the plain
-   MLP's 4.56 / 10.25), but on a different population: node-timesteps with full 1.9 s history
-   and 6 s future, n = 3,491. Benchmark v2 shows the population matters. On matched windows,
-   Trajectron++ is not the best deployable model (see the October 2026 correction).
-3. **The homegrown interaction model lost its edge in the world frame.** The ST-GAT-inspired
-   model no longer beats smoothed constant velocity; its ego-frame advantage was substantially
-   an artifact of learning ego motion.
-4. **Learned top-1 mode selection needs rework** — it degrades badly in the world frame
-   (7.70 ADE vs. 3.66 oracle). The v1 reading that Trajectron++'s most-likely decoding had
-   solved this did not survive matched evaluation (Benchmark v2, takeaway 5).
+- **Matched planners (panel A).** Every ideal predictor drove under planner v2 and under a
+  proposal planner ([`scripts/proposal_planner.py`](scripts/proposal_planner.py)) tuned on
+  separate draws, on fresh draws of the 32 development scenes. Changing the planner gains +0.04
+  to +0.05 score (near misses fall from 45% to 32%). Changing the predictor gains at most +0.008
+  (ideal set vs the best ideal single under the proposal planner, 95% CI [−0.001, +0.018]),
+  below the pre-registered threshold
+  ([`headroom_matched.json`](outputs/benchmark_v2/headroom_matched.json)).
+- **Confirmation on the 73 primary scenes (panel B).** The set's edge over the plain singles
+  shrinks to +0.002–0.003 score, and no interval excludes zero. A single trajectory with a
+  0.5 m safety margin (the margin tuned on development draws) matches the set on at-fault
+  collisions (0.97% each) and beats it on score by 0.013 (95% CI [0.002, 0.024]), at the price
+  of more harsh braking (18% vs 11%)
+  ([`headroom_confirm.json`](outputs/benchmark_v2/headroom_confirm.json)).
+- **Lateral intent** (cut in or cross instead of timing): built from real IDD-3D tracks, it
+  failed its pre-registered validity gate on the development scenes. Only 16–18% of episodes
+  needed a different first second of driving (gate 20%), and alternative futures were 1.2–1.3 m
+  apart at 4 s (gate 1.5 m), so its confirmation was not run
+  ([`lateral_validity.json`](outputs/benchmark_v2/lateral_validity.json)).
 
-## Results — legacy ego frame (deprecated, for the record)
+**Reading.** Under timing uncertainty, what the ideal multi-future set adds over one trajectory
+is explained by caution: a single trajectory with a well-chosen buffer reproduces it, more
+cheaply. The planner is the larger lever. Caveats: branches don't react to the ego, and the 73
+primary scenes had been used in earlier tests (fresh draws are new realisations, not new scenes).
 
-⚠️ Ego-motion-contaminated data; kept only to document the project's history. Do not cite.
-Additional protocol flaws: CV rows are evaluated on *all* windows (train+val); MLP and
-ST-GAT v1/v2 use split seed 42 while v4/v5 and the K-mode decoder use seed 0.
+## Honest takeaways
 
-<!-- BEGIN AUTOGENERATED: legacy ego-frame results (scripts/make_tables.py) -->
-| Model | Eval set | ADE (m, ego-frame) | FDE (m, ego-frame) | Artifact |
-| --- | --- | --- | --- | --- |
-| CV (vel_k=1) | ALL 4,821 windows (no split) | 3.42 | 7.64 | [`outputs/baselines/1_cv_metrics_obs20_pred60.json`](outputs/baselines/1_cv_metrics_obs20_pred60.json) |
-| CV (vel_k=5) | ALL 4,821 windows (no split) | 2.67 | 6.30 | [`outputs/baselines/1.1_cv_metrics_obs20_pred60_velk5.json`](outputs/baselines/1.1_cv_metrics_obs20_pred60_velk5.json) |
-| MLP (seed 42) | windows val | 2.70 | 6.37 | [`outputs/baselines/2_mlp_metrics_obs20_pred60.json`](outputs/baselines/2_mlp_metrics_obs20_pred60.json) |
-| ST-GAT-inspired v1 (CPU, seed 42) | multi-agent val | 2.37 | 5.80 | [`outputs/baselines/3_stgat_metrics_obs20_pred60.json`](outputs/baselines/3_stgat_metrics_obs20_pred60.json) |
-| ST-GAT-inspired v2 (CUDA, seed 42) | multi-agent val | 2.31 | 5.54 | [`outputs/baselines/3.1_stgat_metrics_obs20_pred60_cuda.json`](outputs/baselines/3.1_stgat_metrics_obs20_pred60_cuda.json) |
-| ST-GAT-inspired v4 (simple+AMP, seed 0) | multi-agent val | 1.89 | 4.53 | [`outputs/baselines/3.2_stgat_metrics_obs20_pred60_cuda_simple_amp_v4.json`](outputs/baselines/3.2_stgat_metrics_obs20_pred60_cuda_simple_amp_v4.json) |
-| ST-GAT-inspired v5 (MHA+AMP, seed 0) | multi-agent val | 1.87 | 4.48 | [`outputs/baselines/3.3_stgat_metrics_obs20_pred60_cuda_mha_amp_noes_v5.json`](outputs/baselines/3.3_stgat_metrics_obs20_pred60_cuda_mha_amp_noes_v5.json) |
-| K-mode decoder K=10 — oracle (no mode head) | multi-agent val | 0.97 | 1.89 | [`outputs/baselines/4.1_mfp_metrics_obs20_pred60_cuda_k10_noes_top1.json`](outputs/baselines/4.1_mfp_metrics_obs20_pred60_cuda_k10_noes_top1.json) |
-| K-mode decoder K=10 — fixed mode-0 top-1 | multi-agent val | 7.33 | 19.83 | [`outputs/baselines/4.1_mfp_metrics_obs20_pred60_cuda_k10_noes_top1.json`](outputs/baselines/4.1_mfp_metrics_obs20_pred60_cuda_k10_noes_top1.json) |
-| K-mode decoder K=10 — oracle (with mode head) | multi-agent val | 1.05 | 1.92 | [`outputs/baselines/4.2_mfp_metrics_obs20_pred60_cuda_k10_noes_argmax_log1_v2.json`](outputs/baselines/4.2_mfp_metrics_obs20_pred60_cuda_k10_noes_argmax_log1_v2.json) |
-| K-mode decoder K=10 — learned top-1 | multi-agent val | 2.18 | 4.86 | [`outputs/baselines/4.2_mfp_metrics_obs20_pred60_cuda_k10_noes_argmax_log1_v2.json`](outputs/baselines/4.2_mfp_metrics_obs20_pred60_cuda_k10_noes_argmax_log1_v2.json) |
-<!-- END AUTOGENERATED: legacy ego-frame results -->
+1. **Two models share the top: ST-GAT-inspired and the map-free transformer.** They are tied
+   with each other (seed-pooled ΔADE −0.17 m, 95% CI [−0.48, 0.13]). Both have lower test ADE
+   than LED, AgentFormer and Trajectron++ on every seed, but the seed-pooled CIs against LED do
+   not exclude zero, so "consistently lower ADE" is the defensible claim, not "significantly
+   better". The published models also run under this benchmark's constraints: no map, no yaw,
+   AgentFormer at 2 Hz.
+2. **Validation and test disagree on the order.** LED has the best val ADE on every seed, so
+   selecting on 10 val scenes would have picked it. Rankings are claimed only where the paired
+   test-scene CI excludes zero.
+3. **Interaction modelling earns its keep on the full population.** On the canonical dataset
+   ST-GAT beats MLP (ΔADE −0.63 m, CI [−1.07, −0.28]) and CV (−1.03 m, CI [−1.96, −0.32]).
+4. **No multimodal model turns its samples into a better single forecast.** Every multimodal
+   model loses 1.5–2.4 m when it commits to one output, and none of those single outputs beats
+   the two single-output leaders. Mode selection, not mode diversity, is the bottleneck. For
+   the K-mode decoder, selecting checkpoints on val top-1 ADE helped (test 4.31 → 4.15 m);
+   evolving winner-takes-all and a trajectory-aware mode scorer did not
+   ([`mfp_ewta_grid/`](outputs/benchmark_v2/mfp_ewta_grid/),
+   [`mfp_content_grid/`](outputs/benchmark_v2/mfp_content_grid/)).
+5. **Unicycle dynamics with approximate heading do not pay off.** Modelling wheeled classes
+   with unicycle dynamics in Trajectron++ worsens most-likely test ADE (4.55 vs 3.91 m), mostly
+   for moving vehicles; true yaw is the prerequisite
+   ([`tpp_hetero_grid/`](outputs/benchmark_v2/tpp_hetero_grid/)).
+6. **The frozen test split is genuinely harder than val** (test ADE 1.3–1.9× val ADE for every
+   deployable model).
+7. **Raw errors concentrate on fast riders and cars, but per metre travelled pedestrians err
+   most** (0.263 ADE per path-metre vs 0.161 for motorcycle riders).
+8. **Accuracy gains have not become safety gains.** Better forecasts do not separate in the
+   scorecard or in closed loop. Prediction matters (at-fault collision episodes fall from
+   16.4% to 2–3%), but constant velocity already delivers that, and the planner is the larger
+   lever.
+
+## In progress: Western → Indian transfer
+
+Do map-free predictors trained on Western traffic (Argoverse 2) lose accuracy on Indian mixed
+traffic, per road-user class, and how many Indian scenes close the gap? The Argoverse 2 adapter,
+the dataset builder and an AutoBot-Joint port (below) are in place, and every learned model
+used in the study accepts `--init-ckpt` for fine-tuning. The study will be pre-registered before
+any frozen-test result is computed; no results are reported yet.
 
 ## Reproducing
 
 ```bash
 pip install -r requirements.txt
-# GPU training additionally:
-pip install torch --index-url https://download.pytorch.org/whl/cu124
+pip install torch --index-url https://download.pytorch.org/whl/cu124        # GPU training
 
-# World-frame data (from committed parsed positions):
+# Data, from the committed parsed positions
 python scripts/0_compensate_ego_motion.py
-python scripts/2_consolidate_trajectories.py --input-dir outputs/parsed_positions_world --output-csv outputs/trajectories_world/trajectories.csv
-python scripts/3_make_windows_obs20_pred60.py --input-csv outputs/trajectories_world/trajectories.csv --output-npz outputs/windows_world_obs20_pred60.npz
-python scripts/4_export_multiagent_trajpp_format.py --parsed-positions-dir outputs/parsed_positions_world --out-dir outputs/multiagent_world_v1
-python scripts/5_export_stgat_format.py --scenes-dir outputs/multiagent_world_v1/scenes --out outputs/stgat_dataset_world_obs20_pred60.npz --write-stats outputs/stgat_dataset_world_obs20_pred60_stats.json
+python scripts/4_export_multiagent_trajpp_format.py --parsed-positions-dir outputs/parsed_positions_world \
+  --out-dir outputs/multiagent_world_v1
+python scripts/5_export_stgat_format.py --scenes-dir outputs/multiagent_world_v1/scenes --presence obs+1fut \
+  --out outputs/canonical_world_obs20_pred60.npz --write-stats outputs/canonical_world_obs20_pred60_stats.json
+python scripts/9_make_agent_windows_from_canonical.py
+# splits/scene_splits.json is committed (scripts/8_make_scene_splits.py regenerates it)
 
-# Baselines (exact commands used for the artifacts in outputs/baselines_world/):
-python scripts/model1_baseline_cv_eval.py --input-npz outputs/windows_world_obs20_pred60.npz --vel-k 5 --split-by-scene --seed 0 --val-frac 0.2 \
-  --save-metrics-json outputs/baselines_world/cv_velk5_metrics_world_obs20_pred60.json --save-pred-npz outputs/baselines_world/cv_velk5_pred_world_obs20_pred60.npz
-python scripts/model2_baseline_mlp_train_eval.py --input outputs/windows_world_obs20_pred60.npz --seed 0 \
-  --save-best outputs/baselines_world/mlp_best_world_obs20_pred60.npz --save-metrics-json outputs/baselines_world/mlp_metrics_world_obs20_pred60.json \
-  --save-pred-npz outputs/baselines_world/mlp_pred_val_world_obs20_pred60.npz
-python scripts/model3_stgat_train_eval.py --data outputs/stgat_dataset_world_obs20_pred60.npz --device cuda --pool mha --amp --loss mse \
-  --epochs 300 --patience 0 --lr 0.001 --weight-decay 1e-5 --batch-size 128 --hidden-dim 256 --emb-dim 64 --num-heads 4 --gat-layers 2 --dropout 0.1 \
-  --lr-plateau --lr-plateau-factor 0.5 --lr-plateau-patience 10 --min-lr 1e-5 --tf-start 1.0 --tf-end 1.0 --tf-decay-epochs 1 --seed 0 \
-  --save-metrics-json outputs/baselines_world/stgat_mha_metrics_world_obs20_pred60.json --save-ckpt outputs/baselines_world/stgat_mha_ckpt_world_obs20_pred60.pt \
-  --save-pred-npz outputs/baselines_world/stgat_mha_pred_val_world_obs20_pred60.npz
-python scripts/model4_mfp_train_eval.py --data outputs/stgat_dataset_world_obs20_pred60.npz --device cuda --k 10 --batch-size 64 \
-  --epochs 300 --patience 0 --mode-cls-weight 0.1 --top1-by argmax --seed 0 \
-  --save-metrics-json outputs/baselines_world/mfp_k10_metrics_world_obs20_pred60.json --save-ckpt outputs/baselines_world/mfp_k10_ckpt_world_obs20_pred60.pt \
-  --save-pred-npz outputs/baselines_world/mfp_k10_pred_val_world_obs20_pred60.npz
+# Benchmark v2: every model x seeds 0-2, then aggregation into summary.json (~7 h GPU)
+python scripts/run_benchmark_v2.py
+
+# Analyses
+python scripts/dump_predictions.py --device cuda
+python scripts/bootstrap_ci.py
+python scripts/conformal_wrapper.py --alpha 0.1
+python scripts/conformal_alpha_sensitivity.py --alphas 0.2 0.1 0.05
+python scripts/safety_scorecard.py && python scripts/safety_latency.py
+python scripts/multifuture_scorecard.py
+python scripts/closed_loop_cv.py run          # fold models and steps: docs/wiki/closed-loop-cv.md
+python scripts/counterfactual_sim.py stage1   # then tune / matched / confirm-tune / confirm
+
+# Tables and figures
+python scripts/make_tables.py
+python scripts/plot_readme_figures.py && python scripts/plot_gap_decomposition.py
+python scripts/plot_conformal_coverage.py && python scripts/plot_uncertainty_efficiency.py
 ```
 
-### Trajectron++ (upstream, end to end)
+`run_benchmark_v2.py` skips any run whose metrics file exists, so an interrupted run resumes.
+The upstream models need their repositories first:
+
+### Trajectron++ (upstream)
 
 ```bash
 git clone --depth 1 https://github.com/StanfordASL/Trajectron-plus-plus.git third_party/trajectron-plus-plus
@@ -840,17 +657,13 @@ python scripts/patch_trajectronpp.py          # Py3.12/NumPy2/Torch2 compatibili
 pip install dill orjson pathos seaborn matplotlib scipy tensorboard tqdm
 python scripts/6_export_trajectronpp_world.py --dt 0.1
 python scripts/7_train_eval_trajectronpp.py --epochs 100
-python scripts/eval_trajectronpp_canonical.py              # benchmark rows: seeds 0-2 on the canonical windows
-python scripts/eval_trajectronpp_canonical.py --hetero     # same for the unicycle variant
+python scripts/eval_trajectronpp_canonical.py              # benchmark rows on the canonical windows
+python scripts/eval_trajectronpp_canonical.py --hetero     # the unicycle variant
 ```
 
-Script 7 trains with the upstream `train.py` and writes
-`outputs/baselines_world/trajectronpp_metrics_world_obs20_pred60.json` (both oracle
-best-of-20 and the deployable most-likely output). It scores Trajectron++'s own dense protocol
-(every valid node-timestep). The ranked benchmark rows come from the last two commands, which
-re-score the same checkpoints on the canonical windows every other model uses. All agents are exported as point-mass
-`PEDESTRIAN` nodes; class-conditioned dynamics is future work. `dt=0.1` is the default —
-the historical `dt=0.4` bug cannot recur through this path.
+Script 7 trains with upstream `train.py` and scores Trajectron++'s own dense protocol; the
+ranked rows come from re-scoring the same checkpoints on the canonical windows. All agents are
+point-mass `PEDESTRIAN` nodes.
 
 ### AgentFormer (upstream, map-free base CVAE)
 
@@ -861,30 +674,14 @@ pip install easydict glob2
 cd scripts && python model6_agentformer_train_eval.py --data ../outputs/canonical_world_obs20_pred60.npz \
   --splits-file ../splits/scene_splits.json --epochs 100 --seed 0 --stride 5 \
   --save-metrics-json ../outputs/benchmark_v2/agentformer_seed0.json \
-  --save-ckpt ../outputs/benchmark_v2/agentformer_ckpt_seed0.pt \
-  --save-pred-npz ../outputs/benchmark_v2/preds_agentformer.npz      # seed 0 only
-# plumbing check only (CPU, tiny model, smallest scenes, ~7 s):
-python scripts/model6_agentformer_train_eval.py --smoke --device cpu \
-  --save-metrics-json /tmp/af_smoke.json --save-ckpt /tmp/af_smoke.pt
+  --save-ckpt ../outputs/benchmark_v2/agentformer_ckpt_seed0.pt
 ```
 
-**Rate: AgentFormer runs at 2 Hz (`--stride 5`), its native nuScenes regime.** It attends
-over every agent × timestep token and decodes autoregressively, so at 10 Hz the largest
-IDD-3D scene (61 agents) needs ~35 GB for a single training step. At stride 5 it sees 4
-observed + 12 future keyframes (that scene: 1.8 GB). Its 12 predicted keyframes are linearly
-interpolated back to 10 Hz from the last observed position
-([`dd_agentformer.upsample_keyframes`](scripts/dd_agentformer.py)), so it is scored on the same
-agents, frames and metric as every other model. The cost of the coarser input is borne by
-AgentFormer alone.
-
-The driver runs the upstream AgentFormer **base CVAE** in a map-free configuration
-(`input_type=['scene_norm','vel']`, `use_map=False`, no heading; standard-normal prior),
-fed canonical sequences directly by [`scripts/dd_agentformer.py`](scripts/dd_agentformer.py) so
-the eval population matches the shared contract. It writes the multimodal JSON schema
-(deployable `most_likely` = z=0 rollout, oracle `best_of_k` = min over K=20 prior samples).
-[`scripts/run_benchmark_v2.py`](scripts/run_benchmark_v2.py) launches any missing seed
-automatically when the repo is present. The DLow diversity head is out of scope for this
-configuration.
+AgentFormer runs at **2 Hz** (`--stride 5`), its native nuScenes regime: at 10 Hz the largest
+IDD-3D scene (61 agents) needs ~35 GB for one training step. Its 12 predicted keyframes are
+interpolated back to 10 Hz ([`dd_agentformer.upsample_keyframes`](scripts/dd_agentformer.py)),
+so it is scored on the same agents and frames as every other model; the coarser input is a cost
+it bears alone.
 
 ### LED (upstream leapfrog diffusion)
 
@@ -893,24 +690,37 @@ git clone --depth 1 https://github.com/MediaBrain-SJTU/LED.git third_party/led
 cd scripts && python model7_led_train_eval.py --data ../outputs/canonical_world_obs20_pred60.npz \
   --splits-file ../splits/scene_splits.json --seed 0 --core-epochs 100 --init-epochs 100 \
   --save-metrics-json ../outputs/benchmark_v2/led_seed0.json \
-  --save-ckpt ../outputs/benchmark_v2/led_ckpt_seed0.pt \
-  --save-pred-npz ../outputs/benchmark_v2/preds_led.npz              # seed 0 only
-# plumbing check only (CPU, few sequences, ~10 s):
-cd scripts && python model7_led_train_eval.py --data ../outputs/canonical_world_obs20_pred60.npz \
-  --splits-file ../splits/scene_splits.json --smoke --device cpu \
-  --save-metrics-json /tmp/led_smoke.json --save-ckpt /tmp/led_smoke.pt
+  --save-ckpt ../outputs/benchmark_v2/led_ckpt_seed0.pt
 ```
 
-LED (Mao et al., CVPR 2023) has two networks: a DDPM core denoiser, and a "leapfrog"
-initializer that jumps the reverse process to its last few steps. Upstream ships only
-the stage-2 trainer plus an NBA-pretrained core, and its code is hard-wired to NBA shapes (11
-agents, 10/20 frames). [`scripts/dd_led.py`](scripts/dd_led.py) reuses the upstream modules
-and makes only those shapes parametric. The driver trains **both stages** on IDD-3D at the full
-10 Hz: the core with upstream's own (unused) noise-estimation loss, then the initializer with
-the core frozen. Deployable output: the initializer's mean estimate, denoised with zero noise.
-Oracle: best of the K = 20 leapfrog samples. One deliberate deviation is that upstream's
+Upstream ships only the stage-2 trainer and an NBA-pretrained core, hard-wired to NBA shapes.
+[`scripts/dd_led.py`](scripts/dd_led.py) reuses the upstream modules with parametric shapes, and
+the driver trains **both stages** on IDD-3D at 10 Hz. One deliberate deviation: upstream's
 uncertainty loss broadcasts an (N,1) tensor against an (N,) tensor into an N×N outer product;
 here each agent's uncertainty is paired with its own error, as the paper describes.
+
+### AutoBot-Joint (upstream, map-free)
+
+```bash
+git clone https://github.com/roggirg/AutoBots.git third_party/autobots
+git -C third_party/autobots checkout 0ceb8f7f4c6e011ed0af879bc9cc3e9c1ad53351
+cd scripts && python model9_autobot_train_eval.py --data ../outputs/canonical_world_obs20_pred60.npz \
+  --splits-file ../splits/scene_splits.json --seed 0 --device cuda \
+  --save-metrics-json ../outputs/benchmark_v2/autobot_seed0.json \
+  --save-ckpt ../outputs/benchmark_v2/autobot_ckpt_seed0.pt
+```
+
+AutoBot-Joint (Girgis et al., ICLR 2022; BSD-3) is the map-free state-of-the-art port for the
+transfer study: the map-based state of the art (MTR, Wayformer) needs HD maps, which IDD-3D
+lacks. [`scripts/model9_autobot_train_eval.py`](scripts/model9_autobot_train_eval.py) runs the
+upstream `AutoBotJoint` module unchanged, K = 6 modes, class-agnostic like every benchmark model.
+- **One sequence size per batch:** upstream sums the mode logits over every agent slot, so
+  padding would change a scene's mode probabilities. `--max-slots` caps a batch's memory.
+- **Masked loss:** upstream's loss, with every agent masked by its own future.
+- **Frame:** scene-centred, in metres.
+- **Outputs:** deployable = the scene's most likely mode; oracle = best of the 6 modes.
+
+The AgentFormer, LED and AutoBot drivers have a `--smoke` plumbing check (CPU, a few sequences).
 
 ## Testing & CI
 
@@ -919,69 +729,48 @@ pytest tests -q
 python scripts/make_tables.py --check
 ```
 
-[`tests/`](tests/) contains: synthetic-scene recovery tests for the ego-motion compensation,
-**pedestrian/car speed sanity checks on the committed world-frame data** (these would have
-caught the ego-frame bug automatically), window-centering and dataset-consistency invariants,
-metric-math correctness, the conformal engine (finite-sample radius, scene-level folds that never
-split a scene, trajectory-level coverage of the simultaneous band), the scene-level bootstrap
-(calibrated CIs on clustered data), the AgentFormer/LED adapters, the README↔artifact provenance
-check, and a guard that the retracted claims never resurface in tracked documents. [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
-runs all of it on every push and pull request.
+[`tests/`](tests/) covers: the ego-motion compensation on synthetic scenes; pedestrian and car
+speed sanity on the committed world-frame data (these would have caught the ego-frame bug);
+dataset invariants and metric maths; the shared evaluation-population contract; the conformal
+engine and the scene bootstrap; the upstream-model adapters; the closed-loop, reactive and
+counterfactual simulators; README↔artifact provenance; and a guard that retracted claims never
+resurface. [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs it on every push and pull
+request.
 
 ## Model naming honesty
 
-- *ST-GAT-inspired* — LSTM encoder + agent self-attention + LSTM decoder. **Not** the
-  published ST-GAT (Huang et al., 2019).
-- *K-mode variety decoder* (formerly "MFP") — best-of-K variety loss + learned mode-scoring
+- *ST-GAT-inspired*: LSTM encoder + agent self-attention + LSTM decoder. **Not** the published
+  ST-GAT (Huang et al., 2019).
+- *K-mode variety decoder* (formerly "MFP"): best-of-K variety loss + a learned mode-scoring
   head. **Not** Multiple Futures Prediction (Tang & Salakhutdinov, NeurIPS 2019).
-- *Map-free transformer* — a plain Transformer (per-agent temporal encoder + agent
-  self-attention + query decoder) on agent-relative displacements. **Not** a QCNet/map-based
-  model: IDD-3D is lane-free, so there is no map branch and no map-anchored frame.
-- *Trajectron++* — the actual upstream implementation (Salzmann et al., 2021), patched for
-  modern Python/PyTorch by [`scripts/patch_trajectronpp.py`](scripts/patch_trajectronpp.py).
-- *AgentFormer* — the actual upstream implementation (Yuan et al., ICCV 2021), patched for
-  modern Python/PyTorch by [`scripts/patch_agentformer.py`](scripts/patch_agentformer.py) and
-  run as the **base CVAE in a map-free configuration** (no map/lane channel, no heading input;
-  standard-normal prior, so most-likely = the z=0 rollout). It is driven through its model
-  interface on the shared canonical population by
-  [`scripts/dd_agentformer.py`](scripts/dd_agentformer.py) — **not** its own frame-sliding data
-  loader — so it is scored on exactly the same agents as every other model. The DLow diversity
-  head is out of scope for this configuration. Runs at 2 Hz with predictions interpolated to
-  10 Hz (see the AgentFormer reproduction notes).
-- *LED* — the upstream modules (Mao et al., CVPR 2023) with NBA shape constants made
-  parametric, both training stages run on IDD-3D by
-  [`scripts/model7_led_train_eval.py`](scripts/model7_led_train_eval.py). It is **not** the
-  authors' released checkpoint (that core is trained on NBA basketball).
+- *Map-free transformer*: a plain Transformer on agent-relative displacements. **Not** a
+  QCNet-style map-based model: IDD-3D is lane-free.
+- *Trajectron++*, *AgentFormer*, *LED*, *AutoBot-Joint*: the actual upstream implementations,
+  patched only for modern Python/PyTorch or for shapes, and driven on the shared canonical
+  population (not their own data loaders). AgentFormer is the base CVAE without the DLow head;
+  LED's core is trained here, not the authors' NBA checkpoint.
 
-## Known limitations / next steps
+## Known limitations
 
-- Ego compensation is annotation-based RANSAC (20.7% of frames fall back to a
-  constant-velocity ego assumption); replace it with official ego poses when available. The raw
-  IDD-3D label JSONs are not in this repo, so yaw and box sizes are unavailable.
-- The test split is 22 scenes and val is 10. Absolute ADEs carry wide scene-bootstrap CIs, and
-  conformal calibration on ~10 scenes is noisy. Use paired comparisons.
-- Trajectron++'s export keeps only the longest contiguous run of each track. So 29 canonical
-  windows (24 val, 5 test), whose track has a gap, have no Trajectron++ prediction, and
-  constant velocity stands in. They are counted as `n_cv_fallback` in its metrics JSON.
-- The seed-pooled significance test covers ST-GAT, the transformer and LED. The other models
-  are compared on their seed-0 dumps only.
-- Every ranked model is scored on the same windows, from the same 2 s observed history, and
-  none sees the future at prediction time (checked in
-  [`tests/test_eval_population_contract.py`](tests/test_eval_population_contract.py)).
-  Trajectron++ keeps two upstream advantages:
-  - it trains on every node-timestep of the train scenes, including agents with under 2 s
-    of history. The other models train on the canonical train windows only.
-  - at test time its scene graph also includes agents that are present but not part of the
-    canonical windows.
-
-  Both favour Trajectron++, so they make the other models' lead over it conservative.
-  AgentFormer runs at 2 Hz, a cost it bears alone.
-- The closed-loop tests replay the recorded agents, which do not react to our car. Any
-  safety benefit that depends on interaction (agents yielding or cutting in) cannot appear
-  in them. A reactive simulation is not built yet.
+- Ego compensation is annotation-based; official ego poses would replace it. The raw IDD-3D
+  label JSONs are not in this repo, so yaw and box sizes are unavailable.
+- The test split is 22 scenes and val is 10, so absolute ADEs carry wide CIs and conformal
+  calibration on ~10 scenes is noisy. Use the paired comparisons.
+- Trajectron++'s export keeps the longest contiguous run of each track, so 29 canonical windows
+  (24 val, 5 test) fall back to constant velocity (`n_cv_fallback` in its metrics). It also
+  trains on every node-timestep and sees extra agents in its scene graph at test time; both
+  favour it, so the other models' lead over it is conservative.
+- The closed-loop tests replay recorded agents, which do not react to the ego. The headroom test
+  adds hidden timing branches, but those do not react either.
 - Agent class labels are used only by the class-conditional conformal radii; no forecaster
-  consumes them yet.
-- CARLA is used only for visualization: [`scripts/viz_*.py`](scripts/) replay recorded
-  IDD-3D and Argoverse 2 scenes with a model's predictions and conformal band. The
-  collision-split evaluation and synthetic collision generation remain **planned work**, and
-  no results exist yet (see report §7.3 for the protocol).
+  consumes them.
+- CARLA is used only for visualisation ([`scripts/viz_*.py`](scripts/)).
+
+## Earlier results (superseded)
+
+Benchmark v1 (world frame, survivor-filtered agents, val-only, single seeds) and the legacy
+ego-frame results are superseded and no longer tabulated here. Their artifacts remain in
+`outputs/baselines_world/` and `outputs/baselines/`, and their tables are in this file's git
+history. Two v1 readings changed in v2: ST-GAT lost to smoothed constant velocity on the
+survivor-filtered data but beats it on the full population, and Trajectron++ led only on its own
+denser population.

@@ -4,3 +4,5 @@ numpy>=1.26
 pandas>=2.0
 pytest>=8.0
 matplotlib>=3.8   # scripts/plot_*.py (figures regenerable from committed artifacts)
+scipy>=1.11       # scripts/cg_kinematics.py
+pyarrow>=14       # scripts/cg_av2_canonical.py (Argoverse 2 parquet)

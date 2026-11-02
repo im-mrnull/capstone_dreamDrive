@@ -14,6 +14,8 @@ Benchmark v2 interface (matches AgentFormer/Trajectron++): canonical NPZ + froze
 splits; seeds affect init/shuffle only; masked per-timestep ADE/FDE (dd_data,
 FDE at last valid step); multimodal JSON schema {"val": {"most_likely": ...,
 "best_of_k": ...}, "test": {...}} that run_benchmark_v2.py aggregates.
+--init-ckpt starts both stages from another run's core and initializer
+(fine-tuning); unset, nothing changes.
 """
 
 from __future__ import annotations
@@ -103,6 +105,8 @@ def main() -> int:
     ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--save-metrics-json", default="outputs/benchmark_v2/led_metrics.json")
     ap.add_argument("--save-ckpt", default="outputs/benchmark_v2/led_ckpt.pt")
+    ap.add_argument("--init-ckpt", default=None,
+                    help="start from these weights (another run's --save-ckpt; fine-tuning)")
     ap.add_argument("--save-pred-npz", default=None,
                     help="optional: dump val+test most-likely predictions (conformal)")
     ap.add_argument("--save-samples", action="store_true",
@@ -132,6 +136,9 @@ def main() -> int:
                     help="skip training: load --save-ckpt and evaluate val + test (with "
                          "--save-pred-npz, also dump the most-likely predictions)")
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
     args = ap.parse_args()
 
     if args.eval_only:
@@ -142,6 +149,8 @@ def main() -> int:
         args.k = min(args.k, 4)
 
     device = torch.device(args.device if (args.device != "cuda" or torch.cuda.is_available()) else "cpu")
+    if args.gpu_mem_frac and device.type == "cuda":   # free cached blocks at the cap, never spill
+        torch.cuda.set_per_process_memory_fraction(args.gpu_mem_frac)   # current device
     set_seed(args.seed)
 
     def make_ds(split, rot=False):
@@ -156,6 +165,9 @@ def main() -> int:
     obs, pred, *_ = train_ds[0]
     core, init = build_models(obs.shape[-1], pred.shape[-1], args.k)
     core, init = core.to(device), init.to(device)
+    if args.init_ckpt:                                                     # fine-tuning: both stages
+        ck0 = torch.load(args.init_ckpt, map_location=device, weights_only=False)
+        core.load_state_dict(ck0["core"]); init.load_state_dict(ck0["init"])
     diff = Diffusion(device, steps=args.diffusion_steps)
     rng = np.random.default_rng(args.seed)
     Path(args.save_ckpt).parent.mkdir(parents=True, exist_ok=True)
@@ -192,6 +204,8 @@ def main() -> int:
     best_val_ade, best_epoch = float("inf"), -1
     for epoch in range(1, args.init_epochs + 1):
         core.eval(); init.train()
+        if device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(device)
         order = list(train_idx); rng.shuffle(order)
         losses = []
         for items, _ in batches(train_ds, order, args.init_batch_seqs):
@@ -215,6 +229,8 @@ def main() -> int:
                        args.save_ckpt)
         print(f"init epoch {epoch:3d} | train_loss={np.mean(losses):.3f} | val_ML_ADE={v:.4f} "
               f"| val_bestof{args.k}_ADE={val['best_of_k']['ade']:.4f}"
+              + (f" | peak_GB={torch.cuda.max_memory_allocated(device) / 2**30:.1f}"
+                 if device.type == "cuda" else "")
               + ("  (best)" if improved else ""), flush=True)
 
     # ---- final: reload best, full val + test (population contract) ---------
@@ -229,13 +245,13 @@ def main() -> int:
     metrics = {
         "model": "LED_v2",
         "upstream": "MediaBrain-SJTU/LED (Mao et al., CVPR 2023), modules reused, IDD-3D shapes",
-        "data": args.data, "splits_file": args.splits_file,
+        "data": args.data, "splits_file": args.splits_file, "init_ckpt": args.init_ckpt,
         "obs_len": int(obs.shape[-1]), "pred_len": int(pred.shape[-1]), "seed": args.seed,
         "best_epoch": best_epoch, "core_best_epoch": best_core_epoch, "eval_k": args.k,
         "val": val_summary, "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
                   if k not in {"data", "splits_file", "save_metrics_json",
-                               "save_ckpt", "save_pred_npz", "save_samples"}},
+                               "save_ckpt", "save_pred_npz", "save_samples", "init_ckpt"}},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: LED leapfrog diffusion at 10 Hz. Stage 1 trains the core "
                 "denoiser (DDPM eps loss; upstream ships only an NBA core), stage 2 the "

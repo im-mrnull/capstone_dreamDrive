@@ -9,6 +9,9 @@ future positions (pred_len*2). Benchmark v2 interface:
   y-standardization statistics are computed over VALID entries only
 - model selection on val ADE; final metrics reported for val AND test with
   per-class breakdown.
+- --init-ckpt (fine-tuning) starts from a --save-best file: its weights AND its
+  standardization statistics, which are then not refit on this run's train split
+  (the weights only make sense on the inputs they were trained on).
 """
 
 from __future__ import annotations
@@ -115,6 +118,8 @@ def main() -> int:
     ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--save-metrics-json", default="outputs/benchmark_v2/mlp_metrics.json")
     ap.add_argument("--save-best", default="outputs/benchmark_v2/mlp_best.npz")
+    ap.add_argument("--init-ckpt", default=None,
+                    help="start from this --save-best file (fine-tuning): weights and standardizers")
 
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=300)
@@ -145,15 +150,24 @@ def main() -> int:
     split_of = np.array([mapping.get(str(s), "?") for s in scene_id])
     idx = {s: np.where(split_of == s)[0] for s in ("train", "val", "test")}
 
-    x_mean = x[idx["train"]].mean(axis=0, keepdims=True).astype(np.float32)
-    x_std = np.maximum(x[idx["train"]].std(axis=0, keepdims=True), 1e-6).astype(np.float32)
-    y_mean, y_std = fit_masked_standardizer(y[idx["train"]], m[idx["train"]])
+    if args.init_ckpt:
+        ck = np.load(args.init_ckpt)
+        x_mean, x_std, y_mean, y_std = (ck[k].astype(np.float32) for k in ("x_mean", "x_std", "y_mean", "y_std"))
+    else:
+        x_mean = x[idx["train"]].mean(axis=0, keepdims=True).astype(np.float32)
+        x_std = np.maximum(x[idx["train"]].std(axis=0, keepdims=True), 1e-6).astype(np.float32)
+        y_mean, y_std = fit_masked_standardizer(y[idx["train"]], m[idx["train"]])
 
     def xs(a): return (a - x_mean) / x_std
     def ys(a): return (a - y_mean) / y_std
     def y_inv(a): return a * y_std + y_mean
 
     model = MLP(x.shape[1], y.shape[1], int(args.hidden_dim), int(args.depth), rng)
+    if args.init_ckpt:
+        for k in model.params:
+            if ck[k].shape != model.params[k].shape:
+                raise SystemExit(f"--init-ckpt {k}: shape {ck[k].shape} != {model.params[k].shape}")
+            model.params[k] = ck[k].astype(np.float32)
     opt = Adam(model.params, lr=float(args.lr))
 
     def eval_split(split: str) -> dict:
@@ -218,6 +232,7 @@ def main() -> int:
         "model": "MLP",
         "input": str(args.input),
         "splits_file": str(args.splits_file),
+        "init_ckpt": args.init_ckpt,
         "obs_len": int(obs_len),
         "pred_len": int(pred_len),
         "seed": int(args.seed),

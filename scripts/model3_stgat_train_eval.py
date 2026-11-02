@@ -10,6 +10,8 @@ Benchmark v2 interface:
 Architecture (unchanged from v1): LSTM encoder per agent, agent self-attention
 (simple QKV pool or stacked MHA blocks), LSTMCell decoder emitting per-step
 displacements. This is ST-GAT-*inspired*, not the published ST-GAT.
+
+--init-ckpt starts from another run's weights (fine-tuning); unset, nothing changes.
 """
 
 from __future__ import annotations
@@ -197,6 +199,8 @@ def main() -> int:
     ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--save-metrics-json", default="outputs/benchmark_v2/stgat_metrics.json")
     ap.add_argument("--save-ckpt", default="outputs/benchmark_v2/stgat_ckpt.pt")
+    ap.add_argument("--init-ckpt", default=None,
+                    help="start from these weights (another run's --save-ckpt; fine-tuning)")
     ap.add_argument("--save-pred-npz", default=None,
                     help="optional: save test-split predictions NPZ")
 
@@ -255,6 +259,8 @@ def main() -> int:
         num_heads=int(args.num_heads), gat_layers=int(args.gat_layers),
         dropout=float(args.dropout),
     ).to(device)
+    if args.init_ckpt:                                                     # fine-tuning
+        model.load_state_dict(torch.load(args.init_ckpt, map_location=device, weights_only=False)["model"])
 
     opt = torch.optim.AdamW(model.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))
     scaler = torch.cuda.amp.GradScaler(enabled=bool(args.amp) and device.type == "cuda")
@@ -326,6 +332,7 @@ def main() -> int:
         "model": "STGAT_inspired_v2",
         "data": str(args.data),
         "splits_file": str(args.splits_file),
+        "init_ckpt": args.init_ckpt,
         "obs_len": int(obs_len),
         "pred_len": int(pred_len),
         "seed": int(args.seed),
@@ -333,7 +340,8 @@ def main() -> int:
         "val": val_summary,
         "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
-                  if k not in {"data", "splits_file", "save_metrics_json", "save_ckpt", "save_pred_npz"}},
+                  if k not in {"data", "splits_file", "save_metrics_json", "save_ckpt", "save_pred_npz",
+                               "init_ckpt"}},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: canonical dataset, frozen splits, masked per-timestep "
                 "metrics, FDE at last valid step, model selection on val only.",

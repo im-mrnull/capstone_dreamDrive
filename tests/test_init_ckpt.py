@@ -1,7 +1,9 @@
 """--init-ckpt (fine-tuning) in ST-GAT, the map-free transformer and LED: a run started from a
 checkpoint with a zero learning rate saves exactly the checkpoint's weights, so the weights
 were loaded, and its metrics record where they came from. (The MLP and AutoBot have their own
-tests: test_mlp_init_ckpt.py, test_autobot.py.)"""
+tests: test_mlp_init_ckpt.py, test_autobot.py.)
+
+The LED case skips cleanly if the LED repo is not cloned into third_party/led."""
 
 import json
 import sys
@@ -17,6 +19,14 @@ try:
 except Exception as e:  # pragma: no cover - environment-dependent
     _err = repr(e)
 needs_torch = pytest.mark.skipif(_err is not None, reason=f"torch unavailable: {_err}")
+
+_led_err = None
+try:
+    import dd_led
+    dd_led.add_led_to_path()
+except Exception as e:  # pragma: no cover - environment-dependent
+    _led_err = repr(e)
+needs_led = pytest.mark.skipif(_led_err is not None, reason=f"LED stack unavailable: {_led_err}")
 
 TO, TF = 20, 60
 MODELS = {
@@ -45,7 +55,7 @@ def _data(tmp_path):
 
 
 @needs_torch
-@pytest.mark.parametrize("name", list(MODELS))
+@pytest.mark.parametrize("name", ["stgat", "transformer", pytest.param("led", marks=needs_led)])
 def test_init_ckpt_loads_the_weights(name, monkeypatch, tmp_path):
     script, epochs, zero_lr, keys = MODELS[name]
     _data(tmp_path)

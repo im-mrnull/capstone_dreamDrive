@@ -38,6 +38,27 @@ Dataset documentation: [`DATASHEET.md`](DATASHEET.md).
 In progress: further planner experiments, and a Western → Indian transfer study (Argoverse 2 →
 IDD-3D).
 
+## What the scenes look like
+
+![Ten seconds of an IDD-3D validation scene: 98 road users move along their recorded tracks while predictions branch from each issue time](docs/figures/scene_playback.gif)
+
+*IDD-3D validation scene `20220118105838_seq_8` (98 road users, 10 s). Grey: the last 3 s of every
+road user; red: LED's most-likely 6 s prediction, re-issued every 0.3 s once 2 s of history exist;
+the circled car: its most-likely path (red, 1–6 s marks) against what it actually did (green).*
+
+![One car in detail: MFP's ranked modes, the oracle best-of-K, the probability density and the actual future](docs/figures/agent_modes.png)
+
+*The same car, as MFP sees it at 2.8 s: its top-ranked mode (red) overshoots, the next modes
+(orange, with the model's probabilities) include one that turns the way the car really went
+(green); the dashed violet path is the oracle best-of-K, picked with the answer and so not
+deployable; blue shading is the model's probability density at +6 s.*
+
+Benchmark-v2 models trained on IDD-3D (seed 0) and constant velocity, on a validation scene:
+results this README already reports. Frame: the ego's initial pose (x forward, y left); ego
+motion is estimated from the annotations; road-user markers use nominal class sizes, because
+IDD-3D has no map and its boxes are not in this repository.
+A full-scene still: [`docs/figures/scene_overview.png`](docs/figures/scene_overview.png).
+
 ## Results integrity
 
 - Every number in a results table is generated from a committed artifact by

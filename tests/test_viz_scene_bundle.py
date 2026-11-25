@@ -16,9 +16,18 @@ from conftest import load_script
 REPO = Path(__file__).resolve().parent.parent
 SCENE = "20220118105838_seq_8"
 CANON = REPO / "outputs" / "canonical_world_obs20_pred60.npz"
-needs_data = pytest.mark.skipif(not (CANON.exists() and (REPO / "outputs" / "parsed_positions_world" / f"{SCENE}.csv").exists()),
-                                reason="canonical data or parsed tracks not on this machine")
 vb = load_script("viz_scene_bundle.py")
+
+
+def _sources_present() -> bool:
+    """Every prediction dump and weight file the bundle reads (gitignored, so absent on CI)."""
+    return all((REPO / src[k]).exists() for *_, src in vb.MODELS for k in ("dump", "weights") if k in src)
+
+
+needs_data = pytest.mark.skipif(
+    not (CANON.exists() and (REPO / "outputs" / "parsed_positions_world" / f"{SCENE}.csv").exists()
+         and _sources_present()),
+    reason="canonical data, parsed tracks or the prediction dumps not on this machine")
 TOL = 0.0051                                                            # int16 centimetres
 
 

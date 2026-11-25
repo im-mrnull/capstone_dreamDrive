@@ -8,6 +8,9 @@ Idempotent: safe to run multiple times. Applied patches:
 4. torch.load(..., weights_only=False) in model_registrar (PyTorch 2.6
    default flipped to True; the checkpoint stores an nn.ModuleDict).
 5. pack_padded_sequence lengths must be on CPU (PyTorch >= 1.7).
+6. Opt-in CUDA cache cap in train.py when DD_GPU_MEM_FRAC is set
+   (7_train_eval_trajectronpp.py --gpu-mem-frac): Windows spills an uncapped cache
+   into shared system memory instead of raising OOM.
 
 Usage:
     python scripts/patch_trajectronpp.py [--repo third_party/trajectron-plus-plus]
@@ -60,6 +63,15 @@ SPECIFIC = [
         "from ncls import NCLS",
         "try:\n    from ncls import NCLS\nexcept ImportError:  # optional; only used by MultiNode\n    NCLS = None",
         "except ImportError:  # optional; only used by MultiNode",
+    ),
+    (
+        # opt-in cap, set by scripts/7_train_eval_trajectronpp.py --gpu-mem-frac
+        "trajectron/train.py",
+        "torch.cuda.set_device(args.device)\n",
+        "torch.cuda.set_device(args.device)\n"
+        "if os.environ.get(\"DD_GPU_MEM_FRAC\"):  # free cached blocks at the cap, never spill\n"
+        "    torch.cuda.set_per_process_memory_fraction(float(os.environ[\"DD_GPU_MEM_FRAC\"]))\n",
+        "DD_GPU_MEM_FRAC",
     ),
     (
         # torch's SummaryWriter (unlike old tensorboardX) rejects plain lists.

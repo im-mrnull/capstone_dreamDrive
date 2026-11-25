@@ -1,9 +1,9 @@
-"""--init-ckpt (fine-tuning) in ST-GAT, the map-free transformer and LED: a run started from a
-checkpoint with a zero learning rate saves exactly the checkpoint's weights, so the weights
-were loaded, and its metrics record where they came from. (The MLP and AutoBot have their own
-tests: test_mlp_init_ckpt.py, test_autobot.py.)
+"""--init-ckpt (fine-tuning) in ST-GAT, the map-free transformer, MFP (the K-mode decoder),
+AgentFormer and LED: a run started from a checkpoint with a zero learning rate saves exactly the
+checkpoint's weights, so the weights were loaded, and its metrics record where they came from.
+(The MLP and AutoBot have their own tests: test_mlp_init_ckpt.py, test_autobot.py.)
 
-The LED case skips cleanly if the LED repo is not cloned into third_party/led."""
+The LED and AgentFormer cases skip cleanly if their repos are not cloned into third_party/."""
 
 import json
 import sys
@@ -28,10 +28,20 @@ except Exception as e:  # pragma: no cover - environment-dependent
     _led_err = repr(e)
 needs_led = pytest.mark.skipif(_led_err is not None, reason=f"LED stack unavailable: {_led_err}")
 
+_af_err = None
+try:
+    import dd_agentformer
+    dd_agentformer.add_af_to_path()
+except Exception as e:  # pragma: no cover - environment-dependent
+    _af_err = repr(e)
+needs_af = pytest.mark.skipif(_af_err is not None, reason=f"AgentFormer stack unavailable: {_af_err}")
+
 TO, TF = 20, 60
 MODELS = {
     "stgat": ("model3_stgat_train_eval.py", ["--epochs", "1"], ["--lr", "0"], ("model",)),
     "transformer": ("model5_transformer_train_eval.py", ["--epochs", "1"], ["--lr", "0"], ("model",)),
+    "mfp": ("model4_mfp_train_eval.py", ["--epochs", "1", "--k", "2"], ["--lr", "0"], ("model",)),
+    "agentformer": ("model6_agentformer_train_eval.py", ["--smoke", "--epochs", "1"], ["--lr", "0"], ("model",)),
     "led": ("model7_led_train_eval.py", ["--core-epochs", "1", "--init-epochs", "1", "--k", "4"],
             ["--core-lr", "0", "--init-lr", "0"], ("core", "init")),
 }
@@ -55,7 +65,8 @@ def _data(tmp_path):
 
 
 @needs_torch
-@pytest.mark.parametrize("name", ["stgat", "transformer", pytest.param("led", marks=needs_led)])
+@pytest.mark.parametrize("name", ["stgat", "transformer", "mfp", pytest.param("agentformer", marks=needs_af),
+                                  pytest.param("led", marks=needs_led)])
 def test_init_ckpt_loads_the_weights(name, monkeypatch, tmp_path):
     script, epochs, zero_lr, keys = MODELS[name]
     _data(tmp_path)

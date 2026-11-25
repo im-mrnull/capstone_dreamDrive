@@ -49,7 +49,7 @@ from dd_data import per_class_summary  # noqa: E402
 
 
 def train(epochs: int, device: str, log_tag: str, seed: int,
-          augment: bool = False) -> Path:
+          augment: bool = False, eval_every: int = 5, gpu_mem_frac: float | None = None) -> Path:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     cmd = [
         sys.executable, "train.py",
@@ -62,7 +62,7 @@ def train(epochs: int, device: str, log_tag: str, seed: int,
         "--train_epochs", str(epochs),
         "--device", device,
         "--seed", str(seed),
-        "--eval_every", "5",
+        "--eval_every", str(eval_every),
         "--vis_every", "100000",
         "--save_every", "1",
         "--preprocess_workers", "0",
@@ -71,7 +71,9 @@ def train(epochs: int, device: str, log_tag: str, seed: int,
     if augment:
         cmd.append("--augment")
     print("launching:", " ".join(cmd))
-    subprocess.run(cmd, cwd=TRAJECTRON, check=True)
+    # the patched train.py caps the CUDA cache when DD_GPU_MEM_FRAC is set (scripts/patch_trajectronpp.py)
+    env = {**os.environ, "DD_GPU_MEM_FRAC": str(gpu_mem_frac)} if gpu_mem_frac else None
+    subprocess.run(cmd, cwd=TRAJECTRON, check=True, env=env)
     runs = sorted(LOG_DIR.glob(f"*{log_tag}"), key=os.path.getmtime)
     if not runs:
         raise SystemExit(f"no run directory matching *{log_tag} under {LOG_DIR}")
@@ -280,6 +282,12 @@ def main() -> int:
     ap.add_argument("--augment", action="store_true",
                     help="pass --augment to upstream train.py (needs an export "
                          "made with --augment-copies > 0)")
+    ap.add_argument("--eval-every", type=int, default=5,
+                    help="upstream's periodic evaluation (on its eval device, the CPU by default); it only "
+                         "logs and never selects a checkpoint, so a large value just saves time")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
     ap.add_argument("--dump-preds", default=None,
                     help="also save most-likely predictions (val+test) to this NPZ "
                          "for the conformal wrapper")
@@ -307,7 +315,8 @@ def main() -> int:
             model_dir = runs[-1]
     else:
         model_dir = train(args.epochs, args.device, args.log_tag, int(args.seed),
-                          augment=bool(args.augment))
+                          augment=bool(args.augment), eval_every=int(args.eval_every),
+                          gpu_mem_frac=args.gpu_mem_frac)
 
     dp = bool(args.dump_preds)
     val_results = evaluate(model_dir, args.device, args.k_best_of, "val", type_map,

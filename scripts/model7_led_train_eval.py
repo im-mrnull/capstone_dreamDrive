@@ -15,7 +15,9 @@ splits; seeds affect init/shuffle only; masked per-timestep ADE/FDE (dd_data,
 FDE at last valid step); multimodal JSON schema {"val": {"most_likely": ...,
 "best_of_k": ...}, "test": {...}} that run_benchmark_v2.py aggregates.
 --init-ckpt starts both stages from another run's core and initializer
-(fine-tuning); unset, nothing changes.
+(fine-tuning); unset, nothing changes. --select, --select-include-init and
+--train-repeat apply to both stages; each stage has its own --*-lr-milestones and
+history (core_history: val noise loss; history: val most-likely ADE).
 """
 
 from __future__ import annotations
@@ -119,6 +121,22 @@ def main() -> int:
     ap.add_argument("--init-lr", type=float, default=1e-3, help="upstream cfg lr")
     ap.add_argument("--decay-step", type=int, default=8, help="upstream cfg")
     ap.add_argument("--decay-gamma", type=float, default=0.5, help="upstream cfg")
+    ap.add_argument("--core-lr-milestones", type=int, nargs="*", default=None,
+                    help="fixed stage-1 schedule: halve the lr at these epochs (replaces the quarter-run StepLR; given with no epochs: a constant lr)")
+    ap.add_argument("--init-lr-milestones", type=int, nargs="*", default=None,
+                    help="fixed stage-2 schedule: halve the lr at these epochs (replaces --decay-step / --decay-gamma; given with no epochs: a constant lr)")
+    ap.add_argument("--select", choices=["best", "last"], default="best",
+                    help="both stages. best: the lowest val noise loss (stage 1) / most-likely ADE (stage 2); "
+                         "last: each stage's final epoch (no val-based choice)")
+    ap.add_argument("--select-include-init", action="store_true",
+                    help="with --select best: each stage's starting weights (epoch 0) are also a candidate")
+    ap.add_argument("--init-patience", type=int, default=0,
+                    help="with --select best: stop stage 2 once the val most-likely ADE has not improved for this "
+                         "many epochs (0: every epoch runs). Stage 1 always runs its full length. The kept "
+                         "checkpoint is still the best stage-2 epoch seen")
+    ap.add_argument("--train-repeat", type=int, default=1,
+                    help="repeat the training set this many times per epoch in both stages (fine-tuning: equal "
+                         "optimizer steps across training-set sizes; schedules stay in epochs)")
     ap.add_argument("--batch-seqs", type=int, default=8,
                     help="canonical sequences per batch for stage 1 and eval "
                          "(~upstream's 10 NBA scenes)")
@@ -172,13 +190,31 @@ def main() -> int:
     rng = np.random.default_rng(args.seed)
     Path(args.save_ckpt).parent.mkdir(parents=True, exist_ok=True)
 
+    def schedule(opt, milestones, step_size, gamma):
+        if milestones is not None:
+            return torch.optim.lr_scheduler.MultiStepLR(opt, milestones=list(milestones), gamma=0.5)
+        return torch.optim.lr_scheduler.StepLR(opt, step_size=step_size, gamma=gamma)
+
+    def improved(value, best, epoch, epochs):
+        return value < best - 1e-6 if args.select == "best" else epoch == epochs
+
+    # per epoch: the lr it trained at, the val selection value, cumulative steps / agent-windows
+    core_history, history = [], []
+    include_init = args.select_include_init and not args.eval_only    # epoch 0, the starting weights, is a candidate
+
     # ---- stage 1: core denoiser -------------------------------------------
     opt = torch.optim.AdamW(core.parameters(), lr=args.core_lr)
-    sched = torch.optim.lr_scheduler.StepLR(opt, step_size=max(args.core_epochs // 4, 1), gamma=0.5)
+    sched = schedule(opt, args.core_lr_milestones, max(args.core_epochs // 4, 1), 0.5)
     best_core, best_core_loss, best_core_epoch = None, float("inf"), -1
+    steps, seen = 0, 0
+    if include_init and args.core_epochs > 0:
+        best_core_loss, best_core_epoch = val_noise_loss(core, diff, val_ds, args, device, val_idx), 0
+        best_core = {k: v.detach().clone() for k, v in core.state_dict().items()}
+        core_history.append({"epoch": 0, "lr": None, "val_loss": best_core_loss, "steps": 0, "agent_windows": 0})
     for epoch in range(1, args.core_epochs + 1):
         core.train()
-        order = list(train_idx); rng.shuffle(order)
+        lr_now = opt.param_groups[0]["lr"]
+        order = list(train_idx) * args.train_repeat; rng.shuffle(order)
         losses = []
         for items, _ in batches(train_ds, order, args.batch_seqs):
             b = build_batch(items, args.traj_scale, device)
@@ -186,9 +222,12 @@ def main() -> int:
             opt.zero_grad(set_to_none=True); loss.backward()
             torch.nn.utils.clip_grad_norm_(core.parameters(), 1.0); opt.step()
             losses.append(float(loss))
+            steps += 1
+            seen += int(b["past"].shape[0])
         sched.step()
         vl = val_noise_loss(core, diff, val_ds, args, device, val_idx)
-        if vl < best_core_loss - 1e-6:
+        core_history.append({"epoch": epoch, "lr": lr_now, "val_loss": vl, "steps": steps, "agent_windows": seen})
+        if improved(vl, best_core_loss, epoch, args.core_epochs):
             best_core_loss, best_core_epoch = vl, epoch
             best_core = {k: v.detach().clone() for k, v in core.state_dict().items()}
         print(f"core epoch {epoch:3d} | train_eps={np.mean(losses):.4f} | val_eps={vl:.4f}"
@@ -200,13 +239,20 @@ def main() -> int:
 
     # ---- stage 2: leapfrog initializer -------------------------------------
     opt = torch.optim.AdamW(init.parameters(), lr=args.init_lr)
-    sched = torch.optim.lr_scheduler.StepLR(opt, step_size=args.decay_step, gamma=args.decay_gamma)
+    sched = schedule(opt, args.init_lr_milestones, args.decay_step, args.decay_gamma)
     best_val_ade, best_epoch = float("inf"), -1
+    steps, seen = 0, 0
+    if include_init and args.init_epochs > 0:
+        best_val_ade, best_epoch = run_split(core, init, diff, val_ds, args, device, val_idx)["most_likely"]["ade"], 0
+        torch.save({"core": core.state_dict(), "init": init.state_dict(), "epoch": 0,
+                    "core_epoch": best_core_epoch, "val_ml_ade": best_val_ade, "args": vars(args)}, args.save_ckpt)
+        history.append({"epoch": 0, "lr": None, "val_ade": best_val_ade, "steps": 0, "agent_windows": 0})
     for epoch in range(1, args.init_epochs + 1):
         core.eval(); init.train()
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
-        order = list(train_idx); rng.shuffle(order)
+        lr_now = opt.param_groups[0]["lr"]
+        order = list(train_idx) * args.train_repeat; rng.shuffle(order)
         losses = []
         for items, _ in batches(train_ds, order, args.init_batch_seqs):
             b = build_batch(items, args.traj_scale, device)
@@ -216,13 +262,16 @@ def main() -> int:
             opt.zero_grad(set_to_none=True); loss.backward()
             torch.nn.utils.clip_grad_norm_(init.parameters(), 1.0); opt.step()
             losses.append(float(loss))
+            steps += 1
+            seen += int(b["past"].shape[0])
         sched.step()
         val = run_split(core, init, diff, val_ds, args, device, val_idx)
         if device.type == "cuda":
             torch.cuda.empty_cache()   # release the K-sample eval cache (shared GPU)
         v = val["most_likely"]["ade"]
-        improved = v < best_val_ade - 1e-6
-        if improved:
+        history.append({"epoch": epoch, "lr": lr_now, "val_ade": v, "steps": steps, "agent_windows": seen})
+        better = improved(v, best_val_ade, epoch, args.init_epochs)
+        if better:
             best_val_ade, best_epoch = v, epoch
             torch.save({"core": core.state_dict(), "init": init.state_dict(), "epoch": epoch,
                         "core_epoch": best_core_epoch, "val_ml_ade": v, "args": vars(args)},
@@ -231,7 +280,11 @@ def main() -> int:
               f"| val_bestof{args.k}_ADE={val['best_of_k']['ade']:.4f}"
               + (f" | peak_GB={torch.cuda.max_memory_allocated(device) / 2**30:.1f}"
                  if device.type == "cuda" else "")
-              + ("  (best)" if improved else ""), flush=True)
+              + ("  (best)" if better else ""), flush=True)
+        if args.init_patience > 0 and args.select == "best" and epoch - best_epoch >= args.init_patience:
+            print(f"early stop (stage 2): no improvement for {args.init_patience} epochs since epoch {best_epoch}",
+                  flush=True)
+            break
 
     # ---- final: reload best, full val + test (population contract) ---------
     ck = torch.load(args.save_ckpt, map_location=device, weights_only=False)
@@ -248,6 +301,7 @@ def main() -> int:
         "data": args.data, "splits_file": args.splits_file, "init_ckpt": args.init_ckpt,
         "obs_len": int(obs.shape[-1]), "pred_len": int(pred.shape[-1]), "seed": args.seed,
         "best_epoch": best_epoch, "core_best_epoch": best_core_epoch, "eval_k": args.k,
+        "history": history, "core_history": core_history,
         "val": val_summary, "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
                   if k not in {"data", "splits_file", "save_metrics_json",

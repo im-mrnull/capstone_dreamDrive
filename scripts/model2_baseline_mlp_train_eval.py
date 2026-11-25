@@ -120,6 +120,10 @@ def main() -> int:
     ap.add_argument("--save-best", default="outputs/benchmark_v2/mlp_best.npz")
     ap.add_argument("--init-ckpt", default=None,
                     help="start from this --save-best file (fine-tuning): weights and standardizers")
+    ap.add_argument("--eval-only", action="store_true",
+                    help="evaluate --init-ckpt on val and test of --input / --splits-file, without training")
+    ap.add_argument("--save-pred-npz", default=None,
+                    help="also dump flat per-agent val+test predictions (in the windows' per-agent frame)")
 
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=300)
@@ -129,7 +133,15 @@ def main() -> int:
     ap.add_argument("--hidden-dim", type=int, default=256)
     ap.add_argument("--depth", type=int, default=2)
     ap.add_argument("--patience", type=int, default=30)
+    ap.add_argument("--select", choices=["best", "last"], default="best",
+                    help="best: the checkpoint with the lowest val ADE; last: the final epoch (no val-based choice)")
+    ap.add_argument("--select-include-init", action="store_true",
+                    help="with --select best: the starting weights (epoch 0) are also a candidate")
+    ap.add_argument("--train-repeat", type=int, default=1,
+                    help="repeat the training set this many times per epoch (fine-tuning: equal optimizer steps across training-set sizes; schedules and patience stay in epochs)")
     args = ap.parse_args()
+    if args.eval_only and not args.init_ckpt:
+        raise SystemExit("--eval-only needs --init-ckpt")
 
     rng = np.random.default_rng(int(args.seed))
 
@@ -170,20 +182,28 @@ def main() -> int:
             model.params[k] = ck[k].astype(np.float32)
     opt = Adam(model.params, lr=float(args.lr))
 
+    def predict(split: str) -> np.ndarray:
+        yhat, _ = model.forward(xs(x[idx[split]]))
+        return y_inv(yhat).reshape(len(idx[split]), pred_len, 2)
+
     def eval_split(split: str) -> dict:
         sel = idx[split]
-        yhat, _ = model.forward(xs(x[sel]))
-        pred = y_inv(yhat).reshape(len(sel), pred_len, 2)
-        ade, fde, path = masked_ade_fde_np(pred, fut[sel], fut_mask[sel])
+        ade, fde, path = masked_ade_fde_np(predict(split), fut[sel], fut_mask[sel])
         return summarize_np(ade, fde, path, agent_type[sel])
 
     best_val_ade = float("inf")
     best_epoch = -1
-    best_params = None
+    best_params = None if not args.eval_only else model.params
     patience_left = int(args.patience)
+    history, steps, seen = [], 0, 0             # per epoch: lr, val ADE, cumulative steps / agent-windows
+    if args.select_include_init and not args.eval_only:   # epoch 0, the starting weights, is a candidate
+        val = eval_split("val")
+        best_val_ade, best_epoch = val["ade"], 0
+        best_params = {k: v.copy() for k, v in model.params.items()}
+        history.append({"epoch": 0, "lr": None, "val_ade": val["ade"], "steps": 0, "agent_windows": 0})
 
-    for epoch in range(1, int(args.epochs) + 1):
-        order = idx["train"].copy()
+    for epoch in range(1, 0 if args.eval_only else int(args.epochs) + 1):
+        order = np.tile(idx["train"], int(args.train_repeat))
         rng.shuffle(order)
         epoch_loss, n_seen = 0.0, 0
         for start in range(0, len(order), int(args.batch_size)):
@@ -199,10 +219,13 @@ def main() -> int:
             opt.step(model.params, grads)
             epoch_loss += loss * len(mb)
             n_seen += len(mb)
+            steps += 1
+            seen += len(mb)
         epoch_loss /= max(1, n_seen)
 
         val = eval_split("val")
-        improved = val["ade"] < best_val_ade - 1e-6
+        history.append({"epoch": epoch, "lr": float(args.lr), "val_ade": val["ade"], "steps": steps, "agent_windows": seen})
+        improved = val["ade"] < best_val_ade - 1e-6 if args.select == "best" else epoch == int(args.epochs)
         if improved:
             best_val_ade = val["ade"]
             best_epoch = epoch
@@ -215,7 +238,7 @@ def main() -> int:
             print(f"epoch {epoch:4d} | train_mse={epoch_loss:.6f} "
                   f"| val_ADE={val['ade']:.4f} | val_FDE={val['fde']:.4f}"
                   + ("  (best)" if improved else ""))
-        if patience_left <= 0:
+        if args.select == "best" and patience_left <= 0:
             print(f"early stopping at epoch {epoch} (best_epoch={best_epoch})")
             break
 
@@ -224,25 +247,29 @@ def main() -> int:
     val_summary = eval_split("val")
     test_summary = eval_split("test")
 
-    Path(args.save_best).parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(args.save_best, **model.params,
-                        x_mean=x_mean, x_std=x_std, y_mean=y_mean, y_std=y_std)
+    if not args.eval_only:                              # evaluate-only never overwrites a checkpoint
+        Path(args.save_best).parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(args.save_best, **model.params,
+                            x_mean=x_mean, x_std=x_std, y_mean=y_mean, y_std=y_std)
 
     metrics = {
         "model": "MLP",
         "input": str(args.input),
         "splits_file": str(args.splits_file),
         "init_ckpt": args.init_ckpt,
+        "eval_only": bool(args.eval_only),
         "obs_len": int(obs_len),
         "pred_len": int(pred_len),
         "seed": int(args.seed),
         "best_epoch": int(best_epoch),
+        "history": history,
         "val": val_summary,
         "test": test_summary,
         "hyper": {"hidden_dim": int(args.hidden_dim), "depth": int(args.depth),
                   "lr": float(args.lr), "batch_size": int(args.batch_size),
                   "weight_decay": float(args.weight_decay), "epochs": int(args.epochs),
-                  "patience": int(args.patience)},
+                  "patience": int(args.patience), "train_repeat": int(args.train_repeat),
+                  "select": args.select, "select_include_init": bool(args.select_include_init)},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: canonical per-agent windows, frozen splits, masked "
                 "loss/metrics, y-standardization over valid entries only.",
@@ -252,6 +279,15 @@ def main() -> int:
     print(f"val  ADE={val_summary['ade']:.4f} FDE={val_summary['fde']:.4f}")
     print(f"test ADE={test_summary['ade']:.4f} FDE={test_summary['fde']:.4f}")
     print(f"saved metrics: {args.save_metrics_json}")
+    if args.save_pred_npz:
+        sel = np.concatenate([idx["val"], idx["test"]])
+        Path(args.save_pred_npz).parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            args.save_pred_npz, pred=np.concatenate([predict("val"), predict("test")]).astype(np.float32),
+            gt=fut[sel], fut_mask=fut_mask[sel], agent_type=agent_type[sel],
+            split=np.asarray(["val"] * len(idx["val"]) + ["test"] * len(idx["test"]), dtype=object),
+            scene_id=scene_id[sel], frame="per-agent (the windows file's)", model="MLP")
+        print(f"saved val+test predictions: {args.save_pred_npz}")
     return 0
 
 

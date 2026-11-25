@@ -17,6 +17,8 @@ splits; seeds affect init/shuffle only; masked per-timestep ADE/FDE (dd_data,
 FDE at last valid step); model selection on val most-likely ADE; multimodal JSON
 schema {"val": {"most_likely": {...}, "best_of_k": {...}}, "test": {...}} that
 run_benchmark_v2.py aggregates.
+
+--init-ckpt starts from another run's weights (fine-tuning); unset, nothing changes.
 """
 
 from __future__ import annotations
@@ -150,6 +152,8 @@ def main() -> int:
     ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--save-metrics-json", default="outputs/benchmark_v2/agentformer_metrics.json")
     ap.add_argument("--save-ckpt", default="outputs/benchmark_v2/agentformer_ckpt.pt")
+    ap.add_argument("--init-ckpt", default=None,
+                    help="start from these weights (another run's --save-ckpt; fine-tuning)")
     ap.add_argument("--save-pred-npz", default=None,
                     help="optional: dump val+test most-likely predictions (conformal)")
     ap.add_argument("--save-samples", action="store_true",
@@ -163,6 +167,17 @@ def main() -> int:
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--decay-step", type=int, default=10)
     ap.add_argument("--decay-gamma", type=float, default=0.5)
+    ap.add_argument("--lr-milestones", type=int, nargs="*", default=None,
+                    help="fixed schedule: halve the lr at these epochs (replaces --decay-step / --decay-gamma; given with no epochs: a constant lr)")
+    ap.add_argument("--select", choices=["best", "last"], default="best",
+                    help="best: the checkpoint with the lowest val most-likely ADE; last: the final epoch (no val-based choice)")
+    ap.add_argument("--select-include-init", action="store_true",
+                    help="with --select best: the starting weights (epoch 0) are also a candidate")
+    ap.add_argument("--patience", type=int, default=0,
+                    help="with --select best: stop once the val most-likely ADE has not improved for this many "
+                         "epochs (0: every epoch runs). The kept checkpoint is still the best epoch seen")
+    ap.add_argument("--train-repeat", type=int, default=1,
+                    help="repeat the training set this many times per epoch (fine-tuning: equal optimizer steps across training-set sizes; schedules stay in epochs)")
     ap.add_argument("--grad-clip", type=float, default=1.0)
 
     ap.add_argument("--nz", type=int, default=32)
@@ -187,6 +202,9 @@ def main() -> int:
     ap.add_argument("--train-seq-limit", type=int, default=None)
     ap.add_argument("--eval-seq-limit", type=int, default=None)
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
     args = ap.parse_args()
 
     if args.eval_only:
@@ -213,6 +231,8 @@ def main() -> int:
         args.eval_seq_limit = args.eval_seq_limit or 6
 
     device = torch.device(args.device if (args.device != "cuda" or torch.cuda.is_available()) else "cpu")
+    if args.gpu_mem_frac and device.type == "cuda":   # free cached blocks at the cap, never spill
+        torch.cuda.set_per_process_memory_fraction(args.gpu_mem_frac)   # current device
     set_seed(args.seed)
 
     obs_len, pred_len = 20, 60
@@ -236,16 +256,29 @@ def main() -> int:
     test_indices = pick_indices(test_ds, args.eval_seq_limit, smallest=args.smoke, max_agents=smoke_cap)
 
     model = build_model(cfg, device)
+    if args.init_ckpt:                                                     # fine-tuning
+        model.load_state_dict(torch.load(args.init_ckpt, map_location=device, weights_only=False)["model"])
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
-    sched = torch.optim.lr_scheduler.StepLR(opt, step_size=args.decay_step, gamma=args.decay_gamma)
+    if args.lr_milestones is not None:
+        sched = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=list(args.lr_milestones), gamma=0.5)
+    else:
+        sched = torch.optim.lr_scheduler.StepLR(opt, step_size=args.decay_step, gamma=args.decay_gamma)
 
     rng = np.random.default_rng(args.seed)
     best_val_ade, best_epoch = float("inf"), -1
     Path(args.save_ckpt).parent.mkdir(parents=True, exist_ok=True)
+    history, steps, seen = [], 0, 0             # per epoch: the lr it trained at, val ADE, cumulative steps / agent-windows
+    if args.select_include_init and not args.eval_only:   # epoch 0, the starting weights, is a candidate
+        val = evaluate(model, val_ds, cfg, args.eval_k, device, indices=val_indices)
+        best_val_ade, best_epoch = val["most_likely"]["ade"], 0
+        torch.save({"model": model.state_dict(), "epoch": 0, "val_ml_ade": best_val_ade, "args": vars(args)},
+                   args.save_ckpt)
+        history.append({"epoch": 0, "lr": None, "val_ade": best_val_ade, "steps": 0, "agent_windows": 0})
 
     for epoch in range(1, args.epochs + 1):
         model.train()
-        order = list(train_indices)
+        lr_now = opt.param_groups[0]["lr"]
+        order = list(train_indices) * int(args.train_repeat)
         rng.shuffle(order)
         losses = []
         for idx in order:
@@ -260,6 +293,8 @@ def main() -> int:
             opt.step()
             model.step_annealer()
             losses.append(float(loss.item()))
+            steps += 1
+            seen += int(obs.shape[0])
         sched.step()
 
         val = evaluate(model, val_ds, cfg, args.eval_k, device, indices=val_indices)
@@ -268,7 +303,8 @@ def main() -> int:
             # GPU a process pinned near the limit stalls in allocator retries.
             torch.cuda.empty_cache()
         val_ml_ade = val["most_likely"]["ade"]
-        improved = val_ml_ade < best_val_ade - 1e-6
+        history.append({"epoch": epoch, "lr": lr_now, "val_ade": val_ml_ade, "steps": steps, "agent_windows": seen})
+        improved = val_ml_ade < best_val_ade - 1e-6 if args.select == "best" else epoch == args.epochs
         if improved:
             best_val_ade, best_epoch = val_ml_ade, epoch
             torch.save({"model": model.state_dict(), "epoch": epoch,
@@ -276,6 +312,9 @@ def main() -> int:
         print(f"epoch {epoch:3d} | train_loss={np.mean(losses):.3f} "
               f"| val_ML_ADE={val_ml_ade:.4f} | val_bestof{args.eval_k}_ADE="
               f"{val['best_of_k']['ade']:.4f}" + ("  (best)" if improved else ""), flush=True)
+        if args.patience > 0 and args.select == "best" and epoch - best_epoch >= args.patience:
+            print(f"early stop: no improvement for {args.patience} epochs since epoch {best_epoch}", flush=True)
+            break
 
     # Final: reload best, evaluate val + test in full (population contract holds here).
     ckpt = torch.load(args.save_ckpt, map_location=device, weights_only=False)
@@ -288,13 +327,13 @@ def main() -> int:
     metrics = {
         "model": "AgentFormer_v2_mapfree",
         "upstream": "Khrylx/AgentFormer (Yuan et al., ICCV 2021), base CVAE, patched",
-        "data": args.data, "splits_file": args.splits_file,
+        "data": args.data, "splits_file": args.splits_file, "init_ckpt": args.init_ckpt,
         "obs_len": obs_len, "pred_len": pred_len, "seed": args.seed,
-        "best_epoch": best_epoch, "eval_k": args.eval_k,
+        "best_epoch": best_epoch, "eval_k": args.eval_k, "history": history,
         "val": val_summary, "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
                   if k not in {"data", "splits_file", "save_metrics_json",
-                               "save_ckpt", "save_pred_npz", "save_samples", "eval_only"}},
+                               "save_ckpt", "save_pred_npz", "save_samples", "eval_only", "init_ckpt"}},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: upstream AgentFormer base CVAE, map-free "
                 "(scene_norm+vel, no map, no heading), standard-normal prior. "

@@ -38,7 +38,7 @@ from typing import List
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset, DataLoader
 
 from dd_data import (
     CanonicalSeqDataset,
@@ -189,6 +189,14 @@ def main() -> int:
     ap.add_argument("--weight-decay", type=float, default=1e-4)
     ap.add_argument("--loss", choices=["mse", "huber"], default="huber")
     ap.add_argument("--patience", type=int, default=0, help="early stopping on val ADE (0 disables)")
+    ap.add_argument("--select", choices=["best", "last"], default="best",
+                    help="best: the checkpoint with the lowest val ADE; last: the final epoch (no val-based choice)")
+    ap.add_argument("--select-include-init", action="store_true",
+                    help="with --select best: the starting weights (epoch 0) are also a candidate")
+    ap.add_argument("--lr-milestones", type=int, nargs="*", default=None,
+                    help="fixed schedule: halve the lr at these epochs (replaces the val plateau schedule; given with no epochs: a constant lr)")
+    ap.add_argument("--train-repeat", type=int, default=1,
+                    help="repeat the training set this many times per epoch (fine-tuning: equal optimizer steps across training-set sizes; schedules and patience stay in epochs)")
     ap.add_argument("--lr-plateau", action="store_true", default=True)
     ap.add_argument("--no-lr-plateau", dest="lr_plateau", action="store_false")
     ap.add_argument("--lr-plateau-factor", type=float, default=0.5)
@@ -210,14 +218,21 @@ def main() -> int:
     ap.add_argument("--heading-k", type=int, default=HEADING_K_DEFAULT)
 
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
     args = ap.parse_args()
 
     device = torch.device(args.device if (args.device != "cuda" or torch.cuda.is_available()) else "cpu")
+    if args.gpu_mem_frac and device.type == "cuda":   # free cached blocks at the cap, never spill
+        torch.cuda.set_per_process_memory_fraction(args.gpu_mem_frac)   # current device
     set_seed(int(args.seed))
 
     def make_loader(split: str, shuffle: bool, rot_aug: bool = False) -> DataLoader:
         ds = CanonicalSeqDataset(args.data, split, args.splits_file,
                                  rot_aug=rot_aug, seed=int(args.seed))
+        if split == "train" and int(args.train_repeat) > 1:
+            ds = ConcatDataset([ds] * int(args.train_repeat))
         return DataLoader(ds, batch_size=int(args.batch_size), shuffle=shuffle,
                           num_workers=0, collate_fn=collate_pad)
 
@@ -244,7 +259,9 @@ def main() -> int:
                             weight_decay=float(args.weight_decay))
     scaler = torch.cuda.amp.GradScaler(enabled=bool(args.amp) and device.type == "cuda")
     scheduler = None
-    if bool(args.lr_plateau):
+    if args.lr_milestones is not None:
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=list(args.lr_milestones), gamma=0.5)
+    elif bool(args.lr_plateau):
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             opt, mode="min", factor=float(args.lr_plateau_factor),
             patience=int(args.lr_plateau_patience), min_lr=float(args.min_lr))
@@ -252,6 +269,15 @@ def main() -> int:
     best_val_ade = float("inf")
     best_epoch = -1
     patience_left = int(args.patience)
+    history, steps, seen = [], 0, 0             # per epoch: the lr it trained at, val ADE, cumulative steps / agent-windows
+    if args.select_include_init:                # epoch 0, the starting weights, is a candidate
+        val = evaluate(model, val_loader, device)
+        best_val_ade, best_epoch = val["ade"], 0
+        ckpt_path = Path(args.save_ckpt)
+        ckpt_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"model": model.state_dict(), "epoch": 0, "val_ade": val["ade"], "val_fde": val["fde"],
+                    "args": vars(args)}, ckpt_path)
+        history.append({"epoch": 0, "lr": None, "val_ade": val["ade"], "steps": 0, "agent_windows": 0})
 
     for epoch in range(1, int(args.epochs) + 1):
         model.train()
@@ -269,13 +295,19 @@ def main() -> int:
             scaler.step(opt)
             scaler.update()
             train_losses.append(float(loss.item()))
+            steps += 1
+            seen += int(b.agent_mask.sum().item())
 
         val = evaluate(model, val_loader, device)
         val_ade, val_fde = val["ade"], val["fde"]
-        if scheduler is not None:
+        history.append({"epoch": epoch, "lr": opt.param_groups[0]["lr"], "val_ade": val_ade, "steps": steps,
+                        "agent_windows": seen})
+        if args.lr_milestones is not None:
+            scheduler.step()
+        elif scheduler is not None:
             scheduler.step(val_ade)
 
-        improved = val_ade < best_val_ade - 1e-6
+        improved = val_ade < best_val_ade - 1e-6 if args.select == "best" else epoch == int(args.epochs)
         if improved:
             best_val_ade = val_ade
             best_epoch = epoch
@@ -293,7 +325,7 @@ def main() -> int:
                   f"| val_ADE={val_ade:.4f} | val_FDE={val_fde:.4f}"
                   + ("  (best)" if improved else ""))
 
-        if int(args.patience) > 0 and patience_left <= 0:
+        if args.select == "best" and int(args.patience) > 0 and patience_left <= 0:
             print(f"early stopping at epoch {epoch} (best_epoch={best_epoch})")
             break
 
@@ -312,6 +344,7 @@ def main() -> int:
         "pred_len": int(pred_len),
         "seed": int(args.seed),
         "best_epoch": int(best_epoch),
+        "history": history,
         "val": val_summary,
         "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()

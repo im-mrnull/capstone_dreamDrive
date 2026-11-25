@@ -106,6 +106,53 @@ def train_batches(sizes, order, batch_seqs, max_slots, rng):
     return out
 
 
+def split_seqs(chunk, m: int, max_pairs: int):
+    """[chunk], unless its agent pairs (sequences x m x m, what the social attention holds) exceed max_pairs
+    (0: never split); then runs of consecutive whole sequences of at most max_pairs pairs each (at least one)."""
+    if max_pairs <= 0 or len(chunk) * m * m <= max_pairs:
+        return [chunk]
+    step = max(1, max_pairs // (m * m))
+    return [chunk[i:i + step] for i in range(0, len(chunk), step)]
+
+
+class Diverged(RuntimeError):
+    """A non-finite prediction, loss or gradient norm. The step would turn the weights NaN, and a NaN model never
+    recovers (every later epoch's val ADE is NaN, never selected); raised before opt.step(), weights untouched."""
+
+
+def train_step(model, opt, ds, chunk, m, args, device):
+    """One optimizer step on one one-size batch. Every loss term is a mean over the batch's sequences, so a batch
+    split by split_seqs runs as parts whose losses are weighted by their share of the sequences, with gradients
+    accumulated: the same loss and the same step (only dropout draws differ). Returns (loss parts, agents seen).
+    Raises Diverged (before any weight changes) on a non-finite prediction, loss or gradient norm."""
+    pieces = split_seqs(chunk, m, args.max_batch_pairs)
+    opt.zero_grad(set_to_none=True)
+    agg, seen = {}, 0
+    for sub in pieces:
+        b = collate_pad([ds[i] for i in sub]).to(device)
+        pred_obs, mode_probs, fut, fut_m, _ = forward(model, b, args.pos_scale)
+        if not (torch.isfinite(pred_obs).all() and torch.isfinite(mode_probs).all()):
+            raise Diverged("non-finite prediction")
+        loss, parts = autobot_joint_loss(pred_obs, mode_probs, fut, fut_m, b.agent_mask,
+                                         args.entropy_weight, args.kl_weight)
+        if not torch.isfinite(loss):
+            raise Diverged("non-finite loss")
+        if len(pieces) == 1:
+            loss.backward()
+            agg = parts
+        else:
+            w = len(sub) / len(chunk)
+            (loss * w).backward()
+            for k, v in parts.items():
+                agg[k] = agg.get(k, 0.0) + w * v
+        seen += int(b.agent_mask.sum())
+    norm = torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+    if not torch.isfinite(norm):
+        raise Diverged("non-finite gradient norm")
+    opt.step()
+    return agg, seen
+
+
 def scene_inputs(b: Batch, scale: float):
     """Batch -> AutoBot-Joint inputs in the scene frame.
 
@@ -224,9 +271,25 @@ def main() -> int:
                     help="memory cap: sequences x sequence size per batch. Training peaks at ~26 MB "
                          "per slot at 60 future steps, so 512 is ~14 GB; 2048 exceeds a 24 GB card, "
                          "and Windows then spills to system RAM (~20x slower)")
+    ap.add_argument("--max-batch-pairs", type=int, default=26244,
+                    help="a training batch of B sequences of m agents with B*m*m above this runs as parts of whole "
+                         "sequences with accumulated gradients: the same loss and one optimizer step (train_step). "
+                         "Default 9 x 54^2, the largest batch any Argoverse 2 run trained with; IDD-3D's 55-61-agent "
+                         "scenes exceed it (the 61-agent scene ran out of memory under the 0.8 cap on 2026-11-11). "
+                         "0: never split")
     ap.add_argument("--lr", type=float, default=7.5e-4)
     ap.add_argument("--adam-eps", type=float, default=1e-4)
-    ap.add_argument("--lr-sched", type=int, nargs="+", default=[10, 20, 30, 40, 50], help="epochs halving the lr")
+    ap.add_argument("--lr-sched", type=int, nargs="*", default=[10, 20, 30, 40, 50],
+                    help="epochs halving the lr (none given: a constant lr)")
+    ap.add_argument("--select", choices=["best", "last"], default="best",
+                    help="best: the checkpoint with the lowest val most-likely ADE; last: the final epoch (no val-based choice)")
+    ap.add_argument("--select-include-init", action="store_true",
+                    help="with --select best: the starting weights (epoch 0) are also a candidate")
+    ap.add_argument("--patience", type=int, default=0,
+                    help="with --select best: stop once the val most-likely ADE has not improved for this many "
+                         "epochs (0: every epoch runs). The kept checkpoint is still the best epoch seen")
+    ap.add_argument("--train-repeat", type=int, default=1,
+                    help="repeat the training set this many times per epoch (fine-tuning: equal optimizer steps across training-set sizes; schedules stay in epochs)")
     ap.add_argument("--grad-clip", type=float, default=5.0)
     ap.add_argument("--num-modes", type=int, default=6)
     ap.add_argument("--hidden-size", type=int, default=128)
@@ -283,22 +346,38 @@ def main() -> int:
     Path(args.save_ckpt).parent.mkdir(parents=True, exist_ok=True)
 
     best_val_ade, best_epoch = float("inf"), -1
+    history, steps, seen = [], 0, 0             # per epoch: the lr it trained at, val ADE, cumulative steps / agent-windows
+    diverged = None                             # {"epoch", "step", "why"} if training stopped on Diverged
+    if args.select_include_init and not args.eval_only:   # epoch 0, the starting weights, is a candidate
+        best_val_ade, best_epoch = run_split(model, val_ds, sizes["val"], args, device, val_idx)["most_likely"]["ade"], 0
+        torch.save({"model": model.state_dict(), "epoch": 0, "val_ml_ade": best_val_ade, "args": vars(args)},
+                   args.save_ckpt)
+        history.append({"epoch": 0, "lr": None, "val_ade": best_val_ade, "steps": 0, "agent_windows": 0})
     for epoch in range(1, args.epochs + 1):
         model.train()
-        order = list(train_idx); rng.shuffle(order)
+        lr_now = opt.param_groups[0]["lr"]
+        order = list(train_idx) * args.train_repeat; rng.shuffle(order)
         logs = []
-        for chunk in train_batches(sizes["train"], order, args.batch_seqs, args.max_slots, rng):
-            b = collate_pad([train_ds[i] for i in chunk]).to(device)
-            pred_obs, mode_probs, fut, fut_m, _ = forward(model, b, args.pos_scale)
-            loss, parts = autobot_joint_loss(pred_obs, mode_probs, fut, fut_m, b.agent_mask,
-                                             args.entropy_weight, args.kl_weight)
-            opt.zero_grad(set_to_none=True); loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip); opt.step()
-            logs.append(parts)
+        try:
+            for chunk in train_batches(sizes["train"], order, args.batch_seqs, args.max_slots, rng):
+                parts, n_seen = train_step(model, opt, train_ds, chunk, int(sizes["train"][chunk[0]]), args, device)
+                logs.append(parts)
+                steps += 1
+                seen += n_seen
+        except Diverged as e:
+            # --select best: every later epoch would be NaN and never selected, so stopping here keeps the same
+            # checkpoint (the best epoch so far). --select last has no such epoch to keep: the run fails, as before.
+            if args.select != "best" or best_epoch < 0:
+                raise
+            diverged = {"epoch": epoch, "step": steps + 1, "why": str(e)}
+            print(f"diverged in epoch {epoch} (step {steps + 1}, {e}); training stops, the best epoch so far "
+                  f"({best_epoch}) is kept", flush=True)
+            break
         sched.step()
         val = run_split(model, val_ds, sizes["val"], args, device, val_idx)
         v = val["most_likely"]["ade"]
-        improved = v < best_val_ade - 1e-6
+        history.append({"epoch": epoch, "lr": lr_now, "val_ade": v, "steps": steps, "agent_windows": seen})
+        improved = v < best_val_ade - 1e-6 if args.select == "best" else epoch == args.epochs
         if improved:
             best_val_ade, best_epoch = v, epoch
             torch.save({"model": model.state_dict(), "epoch": epoch, "val_ml_ade": v, "args": vars(args)},
@@ -308,6 +387,9 @@ def main() -> int:
               f"adefde={mean['adefde']:.1f} | val_ML_ADE={v:.4f} "
               f"| val_bestof{args.num_modes}_ADE={val['best_of_k']['ade']:.4f}" + ("  (best)" if improved else ""),
               flush=True)
+        if args.patience > 0 and args.select == "best" and epoch - best_epoch >= args.patience:
+            print(f"early stop: no improvement for {args.patience} epochs since epoch {best_epoch}", flush=True)
+            break
 
     # ---- final: reload best, full val + test (population contract) ---------
     ck = torch.load(args.save_ckpt, map_location=device, weights_only=False)
@@ -322,7 +404,7 @@ def main() -> int:
         "upstream": "roggirg/AutoBots (Girgis et al., ICLR 2022) @ 0ceb8f7, AutoBotJoint unchanged, map-free",
         "data": args.data, "splits_file": args.splits_file, "init_ckpt": args.init_ckpt,
         "obs_len": int(obs.shape[-1]), "pred_len": int(pred.shape[-1]), "seed": args.seed,
-        "best_epoch": best_epoch, "eval_k": args.num_modes,
+        "best_epoch": best_epoch, "eval_k": args.num_modes, "history": history, "diverged": diverged,
         "val": val_summary, "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
                   if k not in {"data", "splits_file", "save_metrics_json", "save_ckpt", "save_pred_npz",

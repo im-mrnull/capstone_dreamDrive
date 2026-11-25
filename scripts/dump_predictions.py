@@ -21,6 +21,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -29,7 +30,7 @@ import torch
 import model3_stgat_train_eval as m3
 import model4_mfp_train_eval as m4
 import model5_transformer_train_eval as m5
-from dd_data import CanonicalSeqDataset, collate_pad, abs_from_rel
+from dd_data import CanonicalSeqDataset, collate_pad, abs_from_rel, masked_ade_fde_np, summarize_np
 from torch.utils.data import DataLoader
 
 REPO = Path(__file__).resolve().parent.parent
@@ -97,7 +98,7 @@ def flatten_probs(loader: DataLoader, probs_fn, device: torch.device) -> list:
 
 
 def dump(name: str, predict_fn, device: torch.device, out_path: Path,
-         save_samples: bool = False) -> None:
+         save_samples: bool = False, metrics_json: Path | None = None, ckpt: str | None = None) -> None:
     P, G, M, C, S, Z, K, R = [], [], [], [], [], [], [], []
     samples_fn = getattr(predict_fn, "samples_fn", None) if save_samples else None
     probs_fn = getattr(predict_fn, "probs_fn", None) if save_samples else None
@@ -121,10 +122,26 @@ def dump(name: str, predict_fn, device: torch.device, out_path: Path,
         split=np.asarray(S, dtype=object), scene_id=np.asarray(Z, dtype=object),
         model=name)
     print(f"{name}: {len(P)} agents (val+test) -> {out_path}")
+    if metrics_json:                                    # evaluate-only: metrics of this checkpoint on --data
+        pred, gt, fm, types, split = (np.asarray(P), np.asarray(G), np.asarray(M, dtype=bool),
+                                      np.asarray(C, dtype=object), np.asarray(S, dtype=object))
+        res = {}
+        for sp in ("val", "test"):
+            sel = split == sp
+            a, f, path = masked_ade_fde_np(pred[sel].astype(np.float64), gt[sel].astype(np.float64), fm[sel])
+            res[sp] = summarize_np(a, f, path, types[sel])
+            print(f"{sp}: most-likely ADE={res[sp]['ade']:.4f} FDE={res[sp]['fde']:.4f} (n={res[sp]['n_agents']})")
+        Path(metrics_json).parent.mkdir(parents=True, exist_ok=True)
+        Path(metrics_json).write_text(json.dumps(
+            {"model": name, "eval_only": True, "ckpt": ckpt, "data": str(DATA), "splits_file": str(SPLITS), **res,
+             "note": "evaluate-only: computed from the dump with dd_data.masked_ade_fde_np (ADE over valid "
+                     "steps, FDE at the last valid step)"}, indent=2), encoding="utf-8")
+        print(f"saved metrics: {metrics_json}")
 
 
-def load_stgat(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
-    ck = torch.load(Path(ckpt_dir) / f"stgat_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+def load_stgat(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT, ckpt: str | None = None):
+    ck = torch.load(Path(ckpt) if ckpt else Path(ckpt_dir) / f"stgat_ckpt_seed{seed}.pt", map_location=device,
+                    weights_only=False)
     a = ck["args"]
     model = m3.STGATModel(
         obs_len=20, pred_len=60, emb_dim=a["emb_dim"], hidden_dim=a["hidden_dim"],
@@ -134,11 +151,12 @@ def load_stgat(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
     return lambda b: abs_from_rel(b.obs_abs, model(b.obs_rel, b.agent_mask, False))
 
 
-def load_mfp(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
+def load_mfp(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT, ckpt: str | None = None):
     # The top-1-selected checkpoint is the better deployable K-mode (test 4.15).
     # It predates the sprint-3 traj_enc module, so load non-strictly: the content
     # scorer is off, traj_enc is unused, and every real weight matches.
-    ck = torch.load(Path(ckpt_dir) / f"mfp_top1sel_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+    ck = torch.load(Path(ckpt) if ckpt else Path(ckpt_dir) / f"mfp_top1sel_ckpt_seed{seed}.pt", map_location=device,
+                    weights_only=False)
     a = ck["args"]
     model = m4.MFPModel(
         obs_len=20, pred_len=60, k=a["k"], emb_dim=a["emb_dim"], hidden_dim=a["hidden_dim"],
@@ -163,8 +181,9 @@ def load_mfp(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
     return predict
 
 
-def load_transformer(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
-    ck = torch.load(Path(ckpt_dir) / f"transformer_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+def load_transformer(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT, ckpt: str | None = None):
+    ck = torch.load(Path(ckpt) if ckpt else Path(ckpt_dir) / f"transformer_ckpt_seed{seed}.pt", map_location=device,
+                    weights_only=False)
     a = ck["args"]
     model = m5.MapFreeTransformer(
         obs_len=20, pred_len=60, d_model=a["d_model"], n_heads=a["n_heads"],
@@ -175,9 +194,10 @@ def load_transformer(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
     return lambda b: abs_from_rel(b.obs_abs, model(b.obs_rel, b.agent_mask))
 
 
-def load_mftf(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT):
+def load_mftf(device: torch.device, seed: int = 0, ckpt_dir: Path = OUT, ckpt: str | None = None):
     import model8_mf_transformer_train_eval as m8
-    ck = torch.load(Path(ckpt_dir) / f"mftf_ckpt_seed{seed}.pt", map_location=device, weights_only=False)
+    ck = torch.load(Path(ckpt) if ckpt else Path(ckpt_dir) / f"mftf_ckpt_seed{seed}.pt", map_location=device,
+                    weights_only=False)
     a = ck["args"]
     model = m8.MultiFutureTransformer(
         obs_len=20, pred_len=60, k=a["k"], d_model=a["d_model"], n_heads=a["n_heads"],
@@ -226,15 +246,29 @@ def main() -> int:
     ap.add_argument("--out-dir", default=str(OUT),
                     help="output directory; keep non-seed-0 dumps out of outputs/benchmark_v2 "
                          "itself, whose preds_*.npz are the conformal inputs")
+    ap.add_argument("--ckpt", default=None,
+                    help="evaluate this checkpoint file instead of <ckpt-dir>/<model>_ckpt_seed<k>.pt "
+                         "(one model only), e.g. a chaos-gap run on another dataset")
+    ap.add_argument("--out-name", default=None, help="dump file name (one model only; default preds_<model>.npz)")
+    ap.add_argument("--metrics-json", default=None,
+                    help="also write val/test metrics of the dump (one model only): evaluate-only")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
     args = ap.parse_args()
+    if (args.ckpt or args.out_name or args.metrics_json) and len(args.models) != 1:
+        raise SystemExit("--ckpt / --out-name / --metrics-json need exactly one --models entry")
     DATA, SPLITS = Path(args.data), args.splits_file
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    if args.gpu_mem_frac and device.type == "cuda":   # free cached blocks at the cap, never spill
+        torch.cuda.set_per_process_memory_fraction(args.gpu_mem_frac)   # current device
 
     for key in args.models:
         name, loader, fname = REGISTRY[key]
-        dump(name, loader(device, args.seed, args.ckpt_dir), device, out_dir / fname, args.save_samples)
+        dump(name, loader(device, args.seed, args.ckpt_dir, args.ckpt), device, out_dir / (args.out_name or fname),
+             args.save_samples, args.metrics_json, args.ckpt)
     return 0
 
 

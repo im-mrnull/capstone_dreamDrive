@@ -45,6 +45,8 @@ def main() -> int:
     ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--vel-k", type=int, default=5)
     ap.add_argument("--save-metrics-json", default="outputs/benchmark_v2/cv_metrics.json")
+    ap.add_argument("--save-pred-npz", default=None,
+                    help="also dump flat per-agent val+test predictions (in the windows' per-agent frame)")
     args = ap.parse_args()
 
     d = np.load(args.input_npz, allow_pickle=True)
@@ -84,6 +86,14 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     print(f"saved metrics: {out}")
+    if args.save_pred_npz:
+        sel = np.concatenate([np.flatnonzero(split_of == s) for s in ("val", "test")])
+        Path(args.save_pred_npz).parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            args.save_pred_npz, pred=pred[sel].astype(np.float32), gt=fut[sel], fut_mask=fut_mask[sel],
+            agent_type=agent_type[sel], split=split_of[sel].astype(object), scene_id=scene_id[sel],
+            frame="per-agent (the windows file's)", model=f"CV (vel_k={args.vel_k})")
+        print(f"saved val+test predictions: {args.save_pred_npz}")
     return 0
 
 

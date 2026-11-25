@@ -141,3 +141,89 @@ def test_loading_autobot_leaves_no_models_package_behind():
     m9.load_autobot_joint()
     assert not any(k == "models" or k.startswith("models.") for k in sys.modules if "autobots" in
                    str(getattr(sys.modules[k], "__file__", "") or ""))
+
+
+@needs_ab
+def test_split_seqs_keeps_whole_sequences_in_order_under_the_pair_cap():
+    chunk = list(range(10))
+    assert m9.split_seqs(chunk, 4, 0) == [chunk]                          # 0: never split
+    assert m9.split_seqs(chunk, 4, 160) == [chunk]                        # 10 x 16 pairs = 160: at the cap
+    parts = m9.split_seqs(chunk, 4, 48)                                   # 3 sequences of 16 pairs per part
+    assert parts == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
+    assert m9.split_seqs(chunk, 4, 5) == [[i] for i in chunk]             # a sequence above the cap: one per part
+
+
+@needs_ab
+@pytest.mark.parametrize("fut_steps", [None, 5])
+def test_a_split_batch_takes_the_same_optimizer_step(fut_steps):
+    """The batch loss is a mean over its sequences, so parts weighted by their share of the sequences, with
+    accumulated gradients, give the whole-batch gradient: one step lands on the same weights (SGD, dropout 0)."""
+    ds = [_seq(4, s, fut_steps=fut_steps if s % 2 else None) for s in range(7)]
+    chunk = list(range(7))
+    args = SimpleNamespace(pos_scale=1.0, entropy_weight=8.0, kl_weight=20.0, grad_clip=5.0, max_batch_pairs=0)
+    res = []
+    for cap in (0, 2 * 16):                                               # whole batch; parts of 2 sequences
+        model = _model().train()
+        opt = torch.optim.SGD(model.parameters(), lr=0.01)
+        args.max_batch_pairs = cap
+        parts, seen = m9.train_step(model, opt, ds, chunk, 4, args, torch.device("cpu"))
+        res.append((parts, seen, {k: v.detach().clone() for k, v in model.state_dict().items()}))
+    (p0, s0, w0), (p1, s1, w1) = res
+    assert s0 == s1 == 7 * 4
+    for k in p0:
+        assert abs(p0[k] - p1[k]) <= 1e-4 * max(1.0, abs(p0[k]))
+    for k in w0:
+        assert torch.allclose(w0[k], w1[k], atol=1e-6, rtol=1e-5), k
+
+
+@needs_ab
+def test_a_batch_under_the_pair_cap_is_not_split():
+    ds = [_seq(3, s) for s in range(4)]
+    args = SimpleNamespace(pos_scale=1.0, entropy_weight=8.0, kl_weight=20.0, grad_clip=5.0, max_batch_pairs=26244)
+    ws = []
+    for cap in (0, 26244):
+        model = _model().train(); opt = torch.optim.SGD(model.parameters(), lr=0.01)
+        args.max_batch_pairs = cap
+        m9.train_step(model, opt, ds, list(range(4)), 3, args, torch.device("cpu"))
+        ws.append(model.state_dict())
+    assert all(torch.equal(ws[0][k], ws[1][k]) for k in ws[0])           # bit-identical: the same code path
+
+
+@needs_ab
+@pytest.mark.parametrize("poison", ["weights", "target"])
+def test_a_non_finite_step_raises_diverged_and_leaves_the_weights(poison):
+    """A NaN weight (non-finite prediction) or an infinite target (non-finite loss / gradient) raises Diverged
+    before opt.step(): the weights are exactly the ones the step started from."""
+    ds = [_seq(3, s) for s in range(4)]
+    if poison == "target":
+        obs, pred, *rest = ds[0]
+        pred = pred.copy(); pred[0, 0, 3] = np.inf
+        ds[0] = (obs, pred, *rest)
+    model = _model().train()
+    if poison == "weights":
+        with torch.no_grad():
+            next(model.parameters()).view(-1)[0] = float("nan")
+    before = {k: v.detach().clone() for k, v in model.state_dict().items()}
+    opt = torch.optim.Adam(model.parameters(), lr=0.01)
+    args = SimpleNamespace(pos_scale=1.0, entropy_weight=8.0, kl_weight=20.0, grad_clip=5.0, max_batch_pairs=0)
+    with pytest.raises(m9.Diverged):
+        m9.train_step(model, opt, ds, list(range(4)), 3, args, torch.device("cpu"))
+    after = model.state_dict()
+    assert all(torch.equal(before[k], after[k]) or (before[k].isnan() == after[k].isnan()).all() and
+               torch.equal(torch.nan_to_num(before[k]), torch.nan_to_num(after[k])) for k in before)
+
+
+@needs_ab
+def test_a_finite_step_is_unchanged_by_the_divergence_guard():
+    """The guard only reads values: a finite step lands on the weights of a plain clip + step."""
+    ds = [_seq(3, s) for s in range(4)]
+    args = SimpleNamespace(pos_scale=1.0, entropy_weight=8.0, kl_weight=20.0, grad_clip=5.0, max_batch_pairs=0)
+    model = _model().train(); opt = torch.optim.SGD(model.parameters(), lr=0.01)
+    m9.train_step(model, opt, ds, list(range(4)), 3, args, torch.device("cpu"))
+    ref = _model().train(); ropt = torch.optim.SGD(ref.parameters(), lr=0.01)
+    b = collate_pad([ds[i] for i in range(4)])
+    pred_obs, mode_probs, fut, fut_m, _ = m9.forward(ref, b, 1.0)
+    loss, _ = m9.autobot_joint_loss(pred_obs, mode_probs, fut, fut_m, b.agent_mask, 8.0, 20.0)
+    ropt.zero_grad(); loss.backward(); torch.nn.utils.clip_grad_norm_(ref.parameters(), 5.0); ropt.step()
+    w, r = model.state_dict(), ref.state_dict()
+    assert all(torch.equal(w[k], r[k]) for k in w)

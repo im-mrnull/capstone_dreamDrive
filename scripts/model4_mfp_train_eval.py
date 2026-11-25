@@ -10,6 +10,8 @@ Benchmark v2 interface (matches model3):
 - model selection on val oracle ADE; oracle AND top-1 are then both reported
   from that single best checkpoint on val and test (the v1 practice of quoting
   oracle and top-1 from different epochs is gone).
+
+--init-ckpt starts from another run's weights (fine-tuning); unset, nothing changes.
 """
 
 from __future__ import annotations
@@ -25,7 +27,7 @@ import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset, DataLoader
 
 from dd_data import (
     Batch,
@@ -42,6 +44,31 @@ from dd_data import (
 def set_seed(seed: int) -> None:
     torch.manual_seed(seed)
     np.random.seed(seed)
+
+
+def split_batch(b: Batch, max_slots: int) -> List[Batch]:
+    """[b], unless its padded agent slots (sequences x most agents) exceed max_slots (0: never split); then
+    runs of consecutive whole sequences, each padded only to its own most agents, of at most max_slots slots
+    (a single sequence larger than that is a part by itself)."""
+    B, M = b.agent_mask.shape
+    if max_slots <= 0 or B * M <= max_slots:
+        return [b]
+    n = b.agent_mask.sum(dim=1).tolist()                                 # agents, packed first by collate_pad
+    parts, i = [], 0
+    while i < B:
+        j = i + 1
+        while j < B and (j + 1 - i) * max(n[i:j + 1]) <= max_slots:
+            j += 1
+        m = max(n[i:j])
+        parts.append(Batch(b.obs_abs[i:j, :m], b.pred_abs[i:j, :m], b.obs_rel[i:j, :m], b.pred_rel[i:j, :m],
+                           b.agent_mask[i:j, :m], b.fut_mask[i:j, :m], b.agent_type[i:j, :m]))
+        i = j
+    return parts
+
+
+def valid_steps(b: Batch) -> torch.Tensor:
+    """The valid displacement count that masked_variety_loss normalizes by (up to its 2 * w factor)."""
+    return (b.agent_mask.unsqueeze(-1) & rel_valid_mask(b.fut_mask)).sum()
 
 
 class AgentSelfAttentionLayer(nn.Module):
@@ -254,12 +281,50 @@ def evaluate(model: MFPModel, loader: DataLoader, device: torch.device) -> dict:
     return {"oracle_best_of_k": acc_oracle.summary(), "top1": acc_top1.summary()}
 
 
+@torch.no_grad()
+def dump_predictions(model: MFPModel, loaders: dict, device: torch.device, out_path: str) -> None:
+    """Flat per-agent val+test predictions, one row per real agent in canonical order: the top-1
+    pred (N,T,2), all K modes (N,K,T,2) with their scores mode_logits (N,K) (best-of-K over the
+    top-scored modes), gt (N,T,2), fut_mask (N,T), agent_type, split and scene_id."""
+    model.eval()
+    P, Q, L, G, M, C, S, Z = [], [], [], [], [], [], [], []
+    for split, loader in loaders.items():
+        ds, seq = loader.dataset, 0
+        for batch in loader:
+            b = batch.to(device)
+            pred_rel_k, mode_logits = model(b.obs_rel, b.agent_mask)
+            modes = abs_from_rel_k(b.obs_abs, pred_rel_k).permute(0, 1, 2, 4, 3).float().cpu().numpy()
+            top1 = top1_abs(pred_rel_k, mode_logits, b.obs_abs).permute(0, 1, 3, 2).float().cpu().numpy()
+            gt = b.pred_abs.permute(0, 1, 3, 2).cpu().numpy()
+            logits, am, fm = mode_logits.float().cpu().numpy(), b.agent_mask.cpu().numpy(), b.fut_mask.cpu().numpy()
+            for i in range(am.shape[0]):
+                scene = str(ds.scene_id[int(ds.seq_indices[seq + i])])
+                for j in np.flatnonzero(am[i]):
+                    P.append(top1[i, j]); Q.append(modes[i, j]); L.append(logits[i, j]); G.append(gt[i, j])
+                    M.append(fm[i, j]); C.append(str(b.agent_type[i, j])); S.append(split); Z.append(scene)
+            seq += am.shape[0]
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        out_path, pred=np.asarray(P, dtype=np.float32), modes=np.asarray(Q, dtype=np.float32),
+        mode_logits=np.asarray(L, dtype=np.float32), gt=np.asarray(G, dtype=np.float32),
+        fut_mask=np.asarray(M, dtype=bool), agent_type=np.asarray(C, dtype=object),
+        split=np.asarray(S, dtype=object), scene_id=np.asarray(Z, dtype=object),
+        model="K-mode decoder (top-1)")
+    print(f"saved val+test predictions: {out_path}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="outputs/canonical_world_obs20_pred60.npz")
     ap.add_argument("--splits-file", default="splits/scene_splits.json")
     ap.add_argument("--save-metrics-json", default="outputs/benchmark_v2/mfp_metrics.json")
     ap.add_argument("--save-ckpt", default="outputs/benchmark_v2/mfp_ckpt.pt")
+    ap.add_argument("--init-ckpt", default=None,
+                    help="start from these weights (another run's --save-ckpt; fine-tuning)")
+    ap.add_argument("--save-pred-npz", default=None,
+                    help="also dump flat per-agent val+test predictions (top-1, all K modes, mode_logits)")
+    ap.add_argument("--eval-only", action="store_true",
+                    help="load --save-ckpt, skip training, evaluate val and test of --data / --splits-file")
 
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--epochs", type=int, default=300)
@@ -270,6 +335,20 @@ def main() -> int:
 
     ap.add_argument("--k", type=int, default=10)
     ap.add_argument("--patience", type=int, default=0)
+    ap.add_argument("--keep", choices=["best", "last"], default="best",
+                    help="best: the checkpoint with the lowest val --select metric; last: the final epoch (no "
+                         "val-based choice). Models 2, 3 and 5 call this --select, which here names the metric")
+    ap.add_argument("--select-include-init", action="store_true",
+                    help="with --keep best: the starting weights (epoch 0) are also a candidate")
+    ap.add_argument("--lr-milestones", type=int, nargs="*", default=None,
+                    help="fixed schedule: halve the lr at these epochs (replaces the val plateau schedule; given with no epochs: a constant lr)")
+    ap.add_argument("--train-repeat", type=int, default=1,
+                    help="repeat the training set this many times per epoch (fine-tuning: equal optimizer steps across training-set sizes; schedules and patience stay in epochs)")
+    ap.add_argument("--max-batch-slots", type=int, default=0,
+                    help="a training batch with more padded agent slots (sequences x most agents) than this runs as "
+                         "parts of whole sequences, gradients accumulated with each part's loss weighted by its "
+                         "share of the batch, so it is still one optimizer step on the batch's loss (fits the GPU "
+                         "memory cap on scenes with many agents); 0: never split")
     ap.add_argument("--lr-plateau", action="store_true", default=True)
     ap.add_argument("--no-lr-plateau", dest="lr_plateau", action="store_false")
     ap.add_argument("--lr-plateau-factor", type=float, default=0.5)
@@ -302,14 +381,29 @@ def main() -> int:
                          "waypoints, path length, heading) instead of context only")
 
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
     args = ap.parse_args()
 
+    if args.eval_only:
+        # architecture must match the trained checkpoint
+        saved = torch.load(args.save_ckpt, map_location="cpu", weights_only=False)["args"]
+        for key in ("k", "emb_dim", "hidden_dim", "pool", "attn_dim", "num_heads", "gat_layers",
+                    "dropout", "content_scorer"):
+            setattr(args, key, saved[key])
+        args.epochs = 0
+
     device = torch.device(args.device)
+    if args.gpu_mem_frac and device.type == "cuda":   # free cached blocks at the cap, never spill
+        torch.cuda.set_per_process_memory_fraction(args.gpu_mem_frac)   # current device
     set_seed(int(args.seed))
 
     def make_loader(split: str, shuffle: bool, rot_aug: bool = False) -> DataLoader:
         ds = CanonicalSeqDataset(args.data, split, args.splits_file,
                                  rot_aug=rot_aug, seed=int(args.seed))
+        if split == "train" and int(args.train_repeat) > 1:
+            ds = ConcatDataset([ds] * int(args.train_repeat))
         return DataLoader(ds, batch_size=int(args.batch_size), shuffle=shuffle,
                           num_workers=0, collate_fn=collate_pad)
 
@@ -317,7 +411,7 @@ def main() -> int:
     val_loader = make_loader("val", shuffle=False)
     test_loader = make_loader("test", shuffle=False)
 
-    obs0, pred0, *_ = train_loader.dataset[0]
+    obs0, pred0, *_ = (val_loader if args.eval_only else train_loader).dataset[0]
     obs_len, pred_len = obs0.shape[-1], pred0.shape[-1]
 
     model = MFPModel(
@@ -327,18 +421,33 @@ def main() -> int:
         num_heads=int(args.num_heads), gat_layers=int(args.gat_layers),
         dropout=float(args.dropout), content_scorer=bool(args.content_scorer),
     ).to(device)
+    if args.init_ckpt:                                                     # fine-tuning
+        model.load_state_dict(torch.load(args.init_ckpt, map_location=device, weights_only=False)["model"])
 
     opt = torch.optim.AdamW(model.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))
     scaler = torch.cuda.amp.GradScaler(enabled=bool(args.amp) and device.type == "cuda")
     scheduler = None
-    if bool(args.lr_plateau):
+    if args.lr_milestones is not None:
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=list(args.lr_milestones), gamma=0.5)
+    elif bool(args.lr_plateau):
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             opt, mode="min", factor=float(args.lr_plateau_factor),
             patience=int(args.lr_plateau_patience), min_lr=float(args.min_lr))
 
+    def select_ade(val: dict) -> float:
+        return val["top1"]["ade"] if str(args.select) == "top1" else val["oracle_best_of_k"]["ade"]
+
     best_val_ade = float("inf")
     best_epoch = -1
     patience_left = int(args.patience)
+    history, steps, seen = [], 0, 0             # per epoch: the lr it trained at, val ADE, cumulative steps / agent-windows
+    if args.select_include_init and not args.eval_only:   # epoch 0, the starting weights, is a candidate
+        val = evaluate(model, val_loader, device)
+        best_val_ade, best_epoch = select_ade(val), 0
+        ckpt_path = Path(args.save_ckpt)
+        ckpt_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"model": model.state_dict(), "epoch": 0, "val": val, "args": vars(args)}, ckpt_path)
+        history.append({"epoch": 0, "lr": None, "val_ade": best_val_ade, "steps": 0, "agent_windows": 0})
 
     # EWTA schedule: geometric stages [K, K/2, ..., 2, 1] spread over the
     # first ewta_frac of epochs; pure WTA (w=1) afterwards / when frac=0.
@@ -374,36 +483,49 @@ def main() -> int:
         for batch in train_loader:
             b = batch.to(device)
             opt.zero_grad(set_to_none=True)
-            with torch.cuda.amp.autocast(enabled=scaler.is_enabled()):
-                pred_rel_k, mode_logits = model(b.obs_rel, b.agent_mask)
-                reg_loss, best_mode = masked_variety_loss(pred_rel_k, b.pred_rel,
-                                                          b.agent_mask, b.fut_mask,
-                                                          top_w=w_now)
-                if float(args.mode_cls_weight) > 0.0 and bool(b.agent_mask.any()):
-                    if str(args.mode_target) == "soft":
-                        tgt = soft_mode_targets(pred_rel_k, b)
-                        logp = torch.log_softmax(mode_logits[b.agent_mask], dim=-1)
-                        ce = -(tgt[b.agent_mask] * logp).sum(dim=-1).mean()
+            parts = split_batch(b, int(args.max_batch_slots))
+            batch_loss = 0.0
+            for p in parts:
+                with torch.cuda.amp.autocast(enabled=scaler.is_enabled()):
+                    pred_rel_k, mode_logits = model(p.obs_rel, p.agent_mask)
+                    reg_loss, best_mode = masked_variety_loss(pred_rel_k, p.pred_rel,
+                                                              p.agent_mask, p.fut_mask,
+                                                              top_w=w_now)
+                    if len(parts) > 1:                                   # this part's share of the batch mean
+                        reg_loss = reg_loss * (valid_steps(p) / valid_steps(b).clamp_min(1))
+                    if float(args.mode_cls_weight) > 0.0 and bool(p.agent_mask.any()):
+                        if str(args.mode_target) == "soft":
+                            tgt = soft_mode_targets(pred_rel_k, p)
+                            logp = torch.log_softmax(mode_logits[p.agent_mask], dim=-1)
+                            ce = -(tgt[p.agent_mask] * logp).sum(dim=-1).mean()
+                        else:
+                            ce = F.cross_entropy(mode_logits[p.agent_mask],
+                                                 best_mode[p.agent_mask])
+                        if len(parts) > 1:
+                            ce = ce * (p.agent_mask.sum() / b.agent_mask.sum())
+                        loss = reg_loss + float(args.mode_cls_weight) * ce
                     else:
-                        ce = F.cross_entropy(mode_logits[b.agent_mask],
-                                             best_mode[b.agent_mask])
-                    loss = reg_loss + float(args.mode_cls_weight) * ce
-                else:
-                    loss = reg_loss
-            scaler.scale(loss).backward()
+                        loss = reg_loss
+                scaler.scale(loss).backward()
+                batch_loss += float(loss.item())
             scaler.unscale_(opt)
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             scaler.step(opt)
             scaler.update()
-            train_losses.append(float(loss.item()))
+            train_losses.append(batch_loss)
+            steps += 1
+            seen += int(b.agent_mask.sum().item())
 
         val = evaluate(model, val_loader, device)
-        val_ade = (val["top1"]["ade"] if str(args.select) == "top1"
-                   else val["oracle_best_of_k"]["ade"])
-        if scheduler is not None:
+        val_ade = select_ade(val)
+        history.append({"epoch": epoch, "lr": opt.param_groups[0]["lr"], "val_ade": val_ade, "steps": steps,
+                        "agent_windows": seen})
+        if args.lr_milestones is not None:
+            scheduler.step()
+        elif scheduler is not None:
             scheduler.step(val_ade)
 
-        improved = val_ade < best_val_ade - 1e-6
+        improved = val_ade < best_val_ade - 1e-6 if args.keep == "best" else epoch == int(args.epochs)
         if improved:
             best_val_ade = val_ade
             best_epoch = epoch
@@ -423,7 +545,7 @@ def main() -> int:
                   f"| val_top1_ADE={val['top1']['ade']:.4f}"
                   + ("  (best)" if improved else ""))
 
-        if int(args.patience) > 0 and patience_left <= 0:
+        if args.keep == "best" and int(args.patience) > 0 and patience_left <= 0:
             print(f"early stopping at epoch {epoch} (best_epoch={best_epoch})")
             break
 
@@ -432,19 +554,26 @@ def main() -> int:
     model.load_state_dict(ckpt["model"])
     val_summary = evaluate(model, val_loader, device)
     test_summary = evaluate(model, test_loader, device)
+    if args.eval_only:
+        best_epoch = int(ckpt["epoch"])
 
     metrics = {
         "model": "KModeVarietyDecoder_v2",
         "data": str(args.data),
         "splits_file": str(args.splits_file),
+        "init_ckpt": args.init_ckpt,
         "obs_len": int(obs_len),
         "pred_len": int(pred_len),
         "seed": int(args.seed),
         "best_epoch": int(best_epoch),
+        "eval_only": bool(args.eval_only),
+        "ckpt": str(args.save_ckpt),
+        "history": history,
         "val": val_summary,
         "test": test_summary,
         "hyper": {k: v for k, v in vars(args).items()
-                  if k not in {"data", "splits_file", "save_metrics_json", "save_ckpt"}},
+                  if k not in {"data", "splits_file", "save_metrics_json", "save_ckpt", "save_pred_npz",
+                               "eval_only", "init_ckpt"}},
         "when": datetime.now().isoformat(timespec="seconds"),
         "note": "Benchmark v2: oracle and top-1 both from the single best-val checkpoint; "
                 "masked per-timestep metrics; FDE at last valid step.",
@@ -457,6 +586,8 @@ def main() -> int:
     print(f"test oracle ADE={test_summary['oracle_best_of_k']['ade']:.4f} "
           f"top1 ADE={test_summary['top1']['ade']:.4f}")
     print(f"saved metrics: {out}")
+    if args.save_pred_npz:
+        dump_predictions(model, {"val": val_loader, "test": test_loader}, device, args.save_pred_npz)
     return 0
 
 

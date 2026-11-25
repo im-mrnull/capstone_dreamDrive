@@ -41,6 +41,7 @@ TAG = "trajectronpp"   # metrics-file prefix; --hetero switches both
 TRAJECTRON = REPO / "third_party" / "trajectron-plus-plus" / "trajectron"
 OBS_LEN, PRED_LEN = 20, 60
 SPLITS_FILE = REPO / "splits" / "scene_splits.json"   # --splits-file (cross-validation folds)
+CANONICAL = REPO / "outputs" / "canonical_world_obs20_pred60.npz"   # --canonical (a chaos-gap file)
 
 sys.path.insert(0, str(SCRIPTS))
 from dd_data import masked_ade_fde_np, summarize_np  # noqa: E402
@@ -66,7 +67,7 @@ def model_dir_for(seed: int) -> Path:
 
 def windows(split: str) -> list[tuple[str, int, int]]:
     """(scene_id, t0, row) for every canonical agent-window of `split`, in NPZ order."""
-    c = np.load(REPO / "outputs" / "canonical_world_obs20_pred60.npz", allow_pickle=True)
+    c = np.load(CANONICAL, allow_pickle=True)
     mapping = load_splits(SPLITS_FILE)
     out = []
     for q, (a, b) in enumerate(c["seq_start_end"]):
@@ -76,7 +77,7 @@ def windows(split: str) -> list[tuple[str, int, int]]:
     return out
 
 
-def evaluate(seed: int, device: str, k: int) -> tuple[dict, dict]:
+def evaluate(seed: int, device: str, k: int, checkpoint_iter: int | None = None) -> tuple[dict, dict]:
     sys.path.insert(0, str(TRAJECTRON))
     import dill
     import torch
@@ -86,14 +87,15 @@ def evaluate(seed: int, device: str, k: int) -> tuple[dict, dict]:
     exp7 = _load_module("exp7", SCRIPTS / "7_train_eval_trajectronpp.py")
     model_dir = model_dir_for(seed)
     hyper = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
+    it = checkpoint_iter or exp7.latest_checkpoint_iter(model_dir)      # default: the final checkpoint
     reg = ModelRegistrar(str(model_dir), device)
-    reg.load_models(exp7.latest_checkpoint_iter(model_dir))
+    reg.load_models(it)
     stg = Trajectron(reg, hyper, None, device)
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    c = np.load(REPO / "outputs" / "canonical_world_obs20_pred60.npz", allow_pickle=True)
-    results, dump = {"seed": seed, "model_dir": model_dir.name}, {}
+    c = np.load(CANONICAL, allow_pickle=True)
+    results, dump = {"seed": seed, "model_dir": model_dir.name, "checkpoint_iter": it}, {}
     for split in ("val", "test"):
         with open(TPP_DATA / f"{split}.pkl", "rb") as f:
             env = dill.load(f, encoding="latin1")
@@ -182,11 +184,25 @@ def main() -> int:
     ap.add_argument("--metrics-dir", default=None,
                     help="where <tag>_seed<k>.json are read and <tag>_canonical_seed<k>.json written")
     ap.add_argument("--splits-file", default=None, help="split file of the T++ export")
+    ap.add_argument("--canonical", default=None,
+                    help="canonical NPZ whose windows are scored (default outputs/canonical_world_obs20_pred60.npz; "
+                         "a chaos-gap file with a scripts/cg_av2_trajectronpp.py export for the transfer study)")
     ap.add_argument("--hetero", action="store_true",
                     help="the VEHICLE=Unicycle variant (outputs/trajectronpp_world_hetero)")
+    ap.add_argument("--gpu-mem-frac", type=float, default=None,
+                    help="cap the CUDA cache at this fraction of the card (Windows spills an "
+                         "uncapped cache into shared system memory instead of raising OOM)")
+    ap.add_argument("--checkpoint-iter", type=int, default=None,
+                    help="score this epoch's checkpoint (model_registrar-<n>.pt) instead of the final one, "
+                         "e.g. the pre-registered budget inside a longer run")
     args = ap.parse_args()
+    if args.gpu_mem_frac and str(args.device).startswith("cuda"):   # free cached blocks at the cap, never spill
+        import torch
+        torch.cuda.set_per_process_memory_fraction(args.gpu_mem_frac)   # current device
 
-    global TPP_DATA, TAG, OUT, SPLITS_FILE
+    global TPP_DATA, TAG, OUT, SPLITS_FILE, CANONICAL
+    if args.canonical:
+        CANONICAL = Path(args.canonical) if Path(args.canonical).is_absolute() else REPO / args.canonical
     if args.hetero:
         TPP_DATA, TAG = REPO / "outputs" / "trajectronpp_world_hetero", "trajectronpp_hetero"
     if args.data_dir:
@@ -200,13 +216,14 @@ def main() -> int:
              "Trajectron++ (upstream, patched; all agents as point-mass PEDESTRIAN nodes)")
 
     for seed in args.seeds:
-        res, dump = evaluate(seed, args.device, args.k)
+        res, dump = evaluate(seed, args.device, args.k, args.checkpoint_iter)
         payload = {
             "model": model,
             "protocol": "canonical windows: prediction at t0+19 for each canonical agent-window, "
                         "scored on the canonical future and mask (same population as every "
                         "other benchmark-v2 model)",
-            "data": "outputs/canonical_world_obs20_pred60.npz",
+            "data": (CANONICAL.relative_to(REPO).as_posix() if CANONICAL.is_relative_to(REPO)
+                     else str(CANONICAL)),
             "splits_file": str(SPLITS_FILE),
             "eval_k": args.k,
             "device": args.device,

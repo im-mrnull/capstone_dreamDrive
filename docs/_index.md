@@ -63,7 +63,8 @@ All on the same 2,177 canonical test windows, 3 seeds. Top tier = ST-GAT ≈ tra
 
 ## Wiki Notes — Completed Work (13 items)
 
-- [[ego-motion-compensation]] — dataset flaw discovery, speed 5.05→0.91 m/s
+- [[ego-motion-compensation]] — dataset flaw discovery, speed 5.05→0.91 m/s; ⚠️ the estimate fails in 73 of 105 scenes (found 2026-11-25)
+- [[ego-quality-sensitivity]] — every reported result re-scored on the 32 scenes with a reliable ego estimate: closed-loop and headroom conclusions hold; the open-loop edge over constant velocity and the coverage drop come from flagged scenes
 - [[canonical-dataset]] — 10,576 agents, frozen 73/10/22 split
 - [[benchmark-v2]] — 6 models, 3-seed, CI-enforced results table
 - [[fairness-audit]] — 16× ADE disparity across 15 classes

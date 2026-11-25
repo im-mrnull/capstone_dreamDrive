@@ -35,6 +35,18 @@ Dataset documentation: [`DATASHEET.md`](DATASHEET.md).
 6. **Lateral intent** built from real IDD-3D tracks rarely changes the ego's immediate
    decision, so that benchmark stopped at its pre-registered validity gate.
 
+> **Data-quality caveat (November 2026).** Our ego-motion estimate (below) fails in 73 of the 105
+> scenes: reversed travel, or ego speed jumps above 5 m/s within 0.5 s. We re-scored every result on
+> the 32 scenes that pass the check (development analysis):
+> - **Hold:** findings 4 and 5.
+> - **Do not hold on the 6 clean test scenes:**
+>   - the open-loop advantage of the learned models over constant velocity (every model there has an
+>     ADE of 1.4–1.8 m);
+>   - the val→test drop in band coverage (coverage there is 0.90–0.97).
+>
+> The clean scenes are also denser and richer in pedestrians, so the defect and the scene type are not
+> separated. Details: [`docs/wiki/ego-quality-sensitivity.md`](docs/wiki/ego-quality-sensitivity.md).
+
 In progress: further planner experiments, and a Western → Indian transfer study (Argoverse 2 →
 IDD-3D).
 
@@ -97,6 +109,17 @@ per-scene world frame. The median pedestrian speed is then **0.91 m/s**. Diagnos
 [`tests/test_speed_sanity.py`](tests/test_speed_sanity.py). The compensation is an
 approximation until official ego poses are available (20.7% of frames fall back to a
 constant-velocity ego).
+
+**Known failure (found November 2026).** In many scenes the estimate locks onto moving traffic, so
+the estimated travel reverses or the ego speed jumps. The whole world frame, road users included,
+then carries that error. [`scripts/ego_quality.py`](scripts/ego_quality.py) flags a scene when:
+- the travel is reversed;
+- more than 10 frames fall back;
+- the ego speed changes by more than 5 m/s within 0.5 s.
+
+The thresholds were fixed on development scenes before the check was applied to test. 32 of 105 scenes
+pass (26 development, 6 test). The effect on every reported result is in
+[`docs/wiki/ego-quality-sensitivity.md`](docs/wiki/ego-quality-sensitivity.md).
 
 ### Pipeline
 

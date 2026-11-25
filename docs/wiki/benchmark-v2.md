@@ -2,6 +2,15 @@
 
 ## Status: ✅ Fully Done — CI-Enforced Provenance
 
+> **Data-quality note (2026-11-26):** the ego-motion estimate fails in 16 of the 22 test scenes
+> ([[ego-motion-compensation]]).
+> - **On the 6 clean test scenes:** every model's 3-seed ADE is 1.39–1.78 m. No learned model beats constant
+>   velocity (1.39 m); the paired CIs exclude the advantage of about 1 m reported on all 22 scenes.
+> - **On the 16 flagged scenes:** all seven beat it by 0.8–1.8 m.
+> - The clean scenes are also denser and richer in pedestrians, so the defect and the scene type are not separated.
+>
+> Details: [[ego-quality-sensitivity]].
+
 ## Protocol
 
 - Data: `canonical_world_obs20_pred60.npz` — 10,576 agents, world-frame

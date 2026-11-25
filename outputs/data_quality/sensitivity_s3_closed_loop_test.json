@@ -1,0 +1,2081 @@
+{
+  "source": "closed_loop.json (episodes_test.json)",
+  "subsets": {
+    "all": {
+      "n_scenes": 22,
+      "packages": {
+        "CV (vel_k=5)": {
+          "score": 0.7330605822049745,
+          "at_fault_rate": 0.125,
+          "at_fault_vru_rate": 0.10227272727272728,
+          "progress": 0.8602603614088467,
+          "harsh_braking_rate": 0.4318181818181818,
+          "near_miss_rate": 0.22727272727272727,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6060639211408148,
+            0.8455063561567873
+          ],
+          "no_band": {
+            "score": 0.7999861245271634,
+            "at_fault_rate": 0.10795454545454546,
+            "at_fault_vru_rate": 0.0909090909090909,
+            "progress": 0.9043148402136555
+          }
+        },
+        "MLP": {
+          "score": 0.7049944154066196,
+          "at_fault_rate": 0.13257575757575757,
+          "at_fault_vru_rate": 0.125,
+          "progress": 0.8528192215022138,
+          "harsh_braking_rate": 0.44507575757575757,
+          "near_miss_rate": 0.2537878787878788,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.569587204904154,
+            0.8280951866552899
+          ],
+          "no_band": {
+            "score": 0.8104038160591663,
+            "at_fault_rate": 0.0909090909090909,
+            "at_fault_vru_rate": 0.07765151515151515,
+            "progress": 0.9003089998418604
+          }
+        },
+        "ST-GAT (MHA)": {
+          "score": 0.7446464828641123,
+          "at_fault_rate": 0.12121212121212122,
+          "at_fault_vru_rate": 0.08522727272727272,
+          "progress": 0.8699144776132846,
+          "harsh_braking_rate": 0.3996212121212121,
+          "near_miss_rate": 0.2272727272727273,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6129934637141373,
+            0.8572982922093058
+          ],
+          "no_band": {
+            "score": 0.8249592996196654,
+            "at_fault_rate": 0.09469696969696968,
+            "at_fault_vru_rate": 0.08712121212121211,
+            "progress": 0.9026699379066633
+          }
+        },
+        "Map-free transformer": {
+          "score": 0.7389155479045676,
+          "at_fault_rate": 0.10227272727272728,
+          "at_fault_vru_rate": 0.0909090909090909,
+          "progress": 0.8581297344020299,
+          "harsh_braking_rate": 0.40151515151515155,
+          "near_miss_rate": 0.2537878787878788,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6059807312623289,
+            0.8529140464245296
+          ],
+          "no_band": {
+            "score": 0.8186605273468798,
+            "at_fault_rate": 0.09469696969696968,
+            "at_fault_vru_rate": 0.08143939393939394,
+            "progress": 0.8964112849537068
+          }
+        },
+        "K-mode (top-1)": {
+          "score": 0.7056752260896841,
+          "at_fault_rate": 0.13257575757575757,
+          "at_fault_vru_rate": 0.0965909090909091,
+          "progress": 0.8395955971673604,
+          "harsh_braking_rate": 0.49053030303030304,
+          "near_miss_rate": 0.21969696969696972,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5786155388341171,
+            0.8175086596187211
+          ],
+          "no_band": {
+            "score": 0.8027840869642863,
+            "at_fault_rate": 0.11742424242424243,
+            "at_fault_vru_rate": 0.10037878787878789,
+            "progress": 0.903307261176988
+          }
+        },
+        "AgentFormer (most-likely)": {
+          "score": 0.723556727049803,
+          "at_fault_rate": 0.14015151515151514,
+          "at_fault_vru_rate": 0.11742424242424243,
+          "progress": 0.8729321643679749,
+          "harsh_braking_rate": 0.42234848484848486,
+          "near_miss_rate": 0.24621212121212122,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5865359677449894,
+            0.8406179669843137
+          ],
+          "no_band": {
+            "score": 0.8090080127543212,
+            "at_fault_rate": 0.10795454545454546,
+            "at_fault_vru_rate": 0.09659090909090907,
+            "progress": 0.9036686878180702
+          }
+        },
+        "LED (mean-denoised)": {
+          "score": 0.7452267160057545,
+          "at_fault_rate": 0.10606060606060606,
+          "at_fault_vru_rate": 0.08522727272727272,
+          "progress": 0.8598593710862482,
+          "harsh_braking_rate": 0.3693181818181818,
+          "near_miss_rate": 0.23484848484848486,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6069356405913306,
+            0.865524805270011
+          ],
+          "no_band": {
+            "score": 0.8308613697587933,
+            "at_fault_rate": 0.08712121212121211,
+            "at_fault_vru_rate": 0.08143939393939394,
+            "progress": 0.9037946501084546
+          }
+        },
+        "Trajectron++ (most-likely)": {
+          "score": 0.7149250485986777,
+          "at_fault_rate": 0.14393939393939392,
+          "at_fault_vru_rate": 0.08333333333333333,
+          "progress": 0.8624531683181326,
+          "harsh_braking_rate": 0.4507575757575757,
+          "near_miss_rate": 0.23106060606060608,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5822572769673899,
+            0.8360658322346373
+          ],
+          "no_band": {
+            "score": 0.7992510977216557,
+            "at_fault_rate": 0.1268939393939394,
+            "at_fault_vru_rate": 0.12310606060606061,
+            "progress": 0.9078790296832963
+          }
+        },
+        "K-mode set (10 modes)": {
+          "score": 0.5241354543019661,
+          "at_fault_rate": 0.22348484848484848,
+          "at_fault_vru_rate": 0.16098484848484848,
+          "progress": 0.7335778780791921,
+          "harsh_braking_rate": 0.8143939393939394,
+          "near_miss_rate": 0.37121212121212127,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.40262934929946786,
+            0.6429445468579037
+          ],
+          "no_band": {
+            "score": 0.5087692003545773,
+            "at_fault_rate": 0.23863636363636365,
+            "at_fault_vru_rate": 0.17424242424242423,
+            "progress": 0.7140696355594901
+          }
+        },
+        "AgentFormer set (10 samples)": {
+          "score": 0.7037264260190548,
+          "at_fault_rate": 0.13446969696969696,
+          "at_fault_vru_rate": 0.11363636363636365,
+          "progress": 0.8242817200531016,
+          "harsh_braking_rate": 0.46022727272727276,
+          "near_miss_rate": 0.23863636363636365,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5617836633012127,
+            0.8301174545778042
+          ],
+          "no_band": {
+            "score": 0.7498351766479773,
+            "at_fault_rate": 0.15151515151515152,
+            "at_fault_vru_rate": 0.1306818181818182,
+            "progress": 0.866301772653081
+          }
+        },
+        "LED set (10 samples)": {
+          "score": 0.6927280662476405,
+          "at_fault_rate": 0.1553030303030303,
+          "at_fault_vru_rate": 0.13257575757575757,
+          "progress": 0.8317490045539285,
+          "harsh_braking_rate": 0.49621212121212127,
+          "near_miss_rate": 0.24621212121212122,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5603598996799549,
+            0.8133795229335785
+          ],
+          "no_band": {
+            "score": 0.7372091854938144,
+            "at_fault_rate": 0.13825757575757577,
+            "at_fault_vru_rate": 0.1268939393939394,
+            "progress": 0.8631409648351233
+          }
+        },
+        "Trajectron++ set (10 samples)": {
+          "score": 0.6939693696771038,
+          "at_fault_rate": 0.15151515151515152,
+          "at_fault_vru_rate": 0.10227272727272728,
+          "progress": 0.840981942969511,
+          "harsh_braking_rate": 0.524621212121212,
+          "near_miss_rate": 0.24621212121212122,
+          "n_episodes": 176,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5517812329637044,
+            0.815806271805508
+          ],
+          "no_band": {
+            "score": 0.7390682814391138,
+            "at_fault_rate": 0.13636363636363638,
+            "at_fault_vru_rate": 0.11742424242424243,
+            "progress": 0.8781726959272899
+          }
+        },
+        "Human driver (log replay)": {
+          "score": 0.9280303030303031,
+          "at_fault_rate": 0.056818181818181816,
+          "at_fault_vru_rate": 0.022727272727272728,
+          "progress": 1.0,
+          "harsh_braking_rate": 0.0,
+          "near_miss_rate": 0.125,
+          "n_episodes": 176,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.8434343434343435,
+            0.9924242424242423
+          ]
+        },
+        "Oracle (true future, no band)": {
+          "score": 0.8480631361080292,
+          "at_fault_rate": 0.0625,
+          "at_fault_vru_rate": 0.0625,
+          "progress": 0.9026890570833888,
+          "harsh_braking_rate": 0.0625,
+          "near_miss_rate": 0.26136363636363635,
+          "n_episodes": 176,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7375547193666879,
+            0.9342115222109288
+          ]
+        },
+        "No prediction (ignore agents)": {
+          "score": 0.7945303594768145,
+          "at_fault_rate": 0.1590909090909091,
+          "at_fault_vru_rate": 0.14204545454545456,
+          "progress": 0.9202261115252349,
+          "harsh_braking_rate": 0.017045454545454544,
+          "near_miss_rate": 0.2556818181818182,
+          "n_episodes": 176,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6475799385316446,
+            0.9139089323239448
+          ]
+        }
+      },
+      "decision": {
+        "leader": "LED (mean-denoised)",
+        "vs_leader": [
+          {
+            "a": "LED (mean-denoised)",
+            "b": "CV (vel_k=5)",
+            "diff": 0.012166133800780021,
+            "ci95": [
+              -0.049963600884580885,
+              0.06802864658537307
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "MLP",
+            "diff": 0.04023230059913496,
+            "ci95": [
+              0.010059238127037443,
+              0.07472736439147579
+            ],
+            "tied": false
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "ST-GAT (MHA)",
+            "diff": 0.000580233141642239,
+            "ci95": [
+              -0.06898167950156553,
+              0.060666332751760844
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Map-free transformer",
+            "diff": 0.006311168101186926,
+            "ci95": [
+              -0.0356067776791233,
+              0.04416730423539304
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "K-mode (top-1)",
+            "diff": 0.03955148991607038,
+            "ci95": [
+              -0.03306420342488416,
+              0.10379518161292688
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "AgentFormer (most-likely)",
+            "diff": 0.021669988955951514,
+            "ci95": [
+              -0.029547462983520463,
+              0.07937994258647858
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Trajectron++ (most-likely)",
+            "diff": 0.03030166740707685,
+            "ci95": [
+              -0.02848257901572283,
+              0.08618913862555601
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "K-mode set (10 modes)",
+            "diff": 0.22109126170378846,
+            "ci95": [
+              0.1243330252168122,
+              0.31370566925820964
+            ],
+            "tied": false
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "AgentFormer set (10 samples)",
+            "diff": 0.041500289986699745,
+            "ci95": [
+              -0.035394801815607196,
+              0.12943221968873597
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "LED set (10 samples)",
+            "diff": 0.052498649758114024,
+            "ci95": [
+              -0.006574500022085318,
+              0.11831515537508121
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Trajectron++ set (10 samples)",
+            "diff": 0.051257346328650755,
+            "ci95": [
+              -0.026334229263160737,
+              0.12980118021749493
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_score": [
+          "LED (mean-denoised)",
+          "CV (vel_k=5)",
+          "ST-GAT (MHA)",
+          "Map-free transformer",
+          "K-mode (top-1)",
+          "AgentFormer (most-likely)",
+          "Trajectron++ (most-likely)",
+          "AgentFormer set (10 samples)",
+          "LED set (10 samples)",
+          "Trajectron++ set (10 samples)"
+        ],
+        "vru_pairs": [
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "LED (mean-denoised)",
+            "diff": -0.0018939393939393923,
+            "ci95": [
+              -0.08333333333333331,
+              0.09469696969696968
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "CV (vel_k=5)",
+            "diff": -0.01893939393939395,
+            "ci95": [
+              -0.13257575757575757,
+              0.08333333333333333
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "ST-GAT (MHA)",
+            "diff": -0.0018939393939393923,
+            "ci95": [
+              -0.08148674242424234,
+              0.06439393939393938
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "Map-free transformer",
+            "diff": -0.007575757575757569,
+            "ci95": [
+              -0.10227272727272727,
+              0.07575757575757577
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "K-mode (top-1)",
+            "diff": -0.013257575757575774,
+            "ci95": [
+              -0.0871212121212121,
+              0.04545454545454544
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "AgentFormer (most-likely)",
+            "diff": -0.0340909090909091,
+            "ci95": [
+              -0.13257575757575757,
+              0.05303030303030304
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "AgentFormer set (10 samples)",
+            "diff": -0.030303030303030318,
+            "ci95": [
+              -0.13257575757575757,
+              0.0606060606060606
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "LED set (10 samples)",
+            "diff": -0.04924242424242424,
+            "ci95": [
+              -0.15151515151515152,
+              0.030303030303030304
+            ],
+            "tied": true
+          },
+          {
+            "a": "Trajectron++ (most-likely)",
+            "b": "Trajectron++ set (10 samples)",
+            "diff": -0.01893939393939395,
+            "ci95": [
+              -0.0946969696969697,
+              0.049242424242424226
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_vru": [
+          "Trajectron++ (most-likely)",
+          "LED (mean-denoised)",
+          "CV (vel_k=5)",
+          "ST-GAT (MHA)",
+          "Map-free transformer",
+          "K-mode (top-1)",
+          "AgentFormer (most-likely)",
+          "AgentFormer set (10 samples)",
+          "LED set (10 samples)",
+          "Trajectron++ set (10 samples)"
+        ],
+        "pick": "CV (vel_k=5)",
+        "steps": [
+          "Leader on the episode score: LED (mean-denoised) (0.745).",
+          "Tied with the leader (paired 95% CI includes 0): CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), Trajectron++ (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).",
+          "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best Trajectron++ (most-likely) (0.083); still tied: LED (mean-denoised), CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).",
+          "Tie-break 2 (latency): CV (vel_k=5)."
+        ]
+      },
+      "at_fault_vs_ignore": {
+        "CV (vel_k=5)": {
+          "at_fault_diff": -0.03409090909090909,
+          "ci95": [
+            -0.09090909090909094,
+            0.022727272727272707
+          ]
+        },
+        "MLP": {
+          "at_fault_diff": -0.02651515151515152,
+          "ci95": [
+            -0.11742424242424243,
+            0.07196969696969696
+          ]
+        },
+        "ST-GAT (MHA)": {
+          "at_fault_diff": -0.03787878787878787,
+          "ci95": [
+            -0.09469696969696967,
+            0.0037878787878787568
+          ]
+        },
+        "Map-free transformer": {
+          "at_fault_diff": -0.05681818181818181,
+          "ci95": [
+            -0.14393939393939395,
+            0.03030303030303029
+          ]
+        },
+        "K-mode (top-1)": {
+          "at_fault_diff": -0.02651515151515152,
+          "ci95": [
+            -0.08333333333333336,
+            0.018939393939393936
+          ]
+        },
+        "AgentFormer (most-likely)": {
+          "at_fault_diff": -0.01893939393939395,
+          "ci95": [
+            -0.09090909090909094,
+            0.05303030303030301
+          ]
+        },
+        "LED (mean-denoised)": {
+          "at_fault_diff": -0.053030303030303025,
+          "ci95": [
+            -0.1477272727272727,
+            0.03030303030303029
+          ]
+        },
+        "Trajectron++ (most-likely)": {
+          "at_fault_diff": -0.015151515151515166,
+          "ci95": [
+            -0.08333333333333334,
+            0.04166666666666666
+          ]
+        },
+        "K-mode set (10 modes)": {
+          "at_fault_diff": 0.06439393939393939,
+          "ci95": [
+            -0.0378787878787879,
+            0.17234848484848483
+          ]
+        },
+        "AgentFormer set (10 samples)": {
+          "at_fault_diff": -0.024621212121212127,
+          "ci95": [
+            -0.10984848484848486,
+            0.058712121212121215
+          ]
+        },
+        "LED set (10 samples)": {
+          "at_fault_diff": -0.0037878787878787845,
+          "ci95": [
+            -0.060606060606060635,
+            0.06060606060606058
+          ]
+        },
+        "Trajectron++ set (10 samples)": {
+          "at_fault_diff": -0.007575757575757569,
+          "ci95": [
+            -0.06818181818181818,
+            0.056818181818181795
+          ]
+        }
+      }
+    },
+    "clean": {
+      "n_scenes": 6,
+      "packages": {
+        "CV (vel_k=5)": {
+          "score": 0.8569553618295854,
+          "at_fault_rate": 0.041666666666666664,
+          "at_fault_vru_rate": 0.0,
+          "progress": 0.9758529846265871,
+          "harsh_braking_rate": 0.1875,
+          "near_miss_rate": 0.25,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7416885014369486,
+            0.9722222222222222
+          ],
+          "no_band": {
+            "score": 0.9481357122024207,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.956644281964357
+          }
+        },
+        "MLP": {
+          "score": 0.8397630299648889,
+          "at_fault_rate": 0.08333333333333333,
+          "at_fault_vru_rate": 0.08333333333333333,
+          "progress": 0.9780440567347916,
+          "harsh_braking_rate": 0.18055555555555555,
+          "near_miss_rate": 0.19444444444444445,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6625709922274928,
+            0.9846450617283947
+          ],
+          "no_band": {
+            "score": 0.9440565458344974,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9576351158354286
+          }
+        },
+        "ST-GAT (MHA)": {
+          "score": 0.8677649806529241,
+          "at_fault_rate": 0.027777777777777776,
+          "at_fault_vru_rate": 0.027777777777777776,
+          "progress": 0.9786436318419302,
+          "harsh_braking_rate": 0.23611111111111108,
+          "near_miss_rate": 0.22222222222222224,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7571506209425698,
+            0.9722222222222222
+          ],
+          "no_band": {
+            "score": 0.9648715173580406,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.961768731244473
+          }
+        },
+        "Map-free transformer": {
+          "score": 0.8946586635136485,
+          "at_fault_rate": 0.013888888888888888,
+          "at_fault_vru_rate": 0.013888888888888888,
+          "progress": 0.9770522609912341,
+          "harsh_braking_rate": 0.1875,
+          "near_miss_rate": 0.18055555555555555,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7773978313524228,
+            0.9969135802469136
+          ],
+          "no_band": {
+            "score": 0.9633722976610138,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9562923580120469
+          }
+        },
+        "K-mode (top-1)": {
+          "score": 0.8543164345185456,
+          "at_fault_rate": 0.027777777777777776,
+          "at_fault_vru_rate": 0.0,
+          "progress": 0.976658471022271,
+          "harsh_braking_rate": 0.2916666666666667,
+          "near_miss_rate": 0.20833333333333334,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7411222793100015,
+            0.9496820817830852
+          ],
+          "no_band": {
+            "score": 0.9359590937890484,
+            "at_fault_rate": 0.020833333333333332,
+            "at_fault_vru_rate": 0.006944444444444444,
+            "progress": 0.9611152577091762
+          }
+        },
+        "AgentFormer (most-likely)": {
+          "score": 0.8259807525136731,
+          "at_fault_rate": 0.06944444444444443,
+          "at_fault_vru_rate": 0.05555555555555555,
+          "progress": 0.9756542434135005,
+          "harsh_braking_rate": 0.2708333333333333,
+          "near_miss_rate": 0.20833333333333334,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6626843943484771,
+            0.9567901234567902
+          ],
+          "no_band": {
+            "score": 0.9676582173503324,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9584514578972648
+          }
+        },
+        "LED (mean-denoised)": {
+          "score": 0.8608114392929248,
+          "at_fault_rate": 0.05555555555555555,
+          "at_fault_vru_rate": 0.05555555555555555,
+          "progress": 0.9716828129494871,
+          "harsh_braking_rate": 0.19444444444444442,
+          "near_miss_rate": 0.16666666666666666,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6876394735116194,
+            1.0
+          ],
+          "no_band": {
+            "score": 0.9639332208081841,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9600797974547316
+          }
+        },
+        "Trajectron++ (most-likely)": {
+          "score": 0.8348530711239692,
+          "at_fault_rate": 0.08333333333333333,
+          "at_fault_vru_rate": 0.041666666666666664,
+          "progress": 0.9888466391342557,
+          "harsh_braking_rate": 0.20138888888888887,
+          "near_miss_rate": 0.23611111111111108,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6756623379961562,
+            0.9737654320987654
+          ],
+          "no_band": {
+            "score": 0.9505276608912151,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.963727567381965
+          }
+        },
+        "K-mode set (10 modes)": {
+          "score": 0.6576020262108742,
+          "at_fault_rate": 0.09722222222222221,
+          "at_fault_vru_rate": 0.06944444444444443,
+          "progress": 0.873523354500883,
+          "harsh_braking_rate": 0.75,
+          "near_miss_rate": 0.3055555555555556,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.4396791724189299,
+            0.8292991860329616
+          ],
+          "no_band": {
+            "score": 0.6381517284951121,
+            "at_fault_rate": 0.12500000000000003,
+            "at_fault_vru_rate": 0.11111111111111112,
+            "progress": 0.8401595884502395
+          }
+        },
+        "AgentFormer set (10 samples)": {
+          "score": 0.8802997771845725,
+          "at_fault_rate": 0.0,
+          "at_fault_vru_rate": 0.0,
+          "progress": 0.9567618211544525,
+          "harsh_braking_rate": 0.27777777777777785,
+          "near_miss_rate": 0.15277777777777776,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7870889227367424,
+            0.9691101228603021
+          ],
+          "no_band": {
+            "score": 0.9168546891403212,
+            "at_fault_rate": 0.027777777777777776,
+            "at_fault_vru_rate": 0.013888888888888888,
+            "progress": 0.9435602624618129
+          }
+        },
+        "LED set (10 samples)": {
+          "score": 0.8727279070578221,
+          "at_fault_rate": 0.027777777777777776,
+          "at_fault_vru_rate": 0.0,
+          "progress": 0.9764657882596354,
+          "harsh_braking_rate": 0.22222222222222224,
+          "near_miss_rate": 0.19444444444444445,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7690278891467135,
+            0.9643307083026286
+          ],
+          "no_band": {
+            "score": 0.9296910139545299,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9762216028959313
+          }
+        },
+        "Trajectron++ set (10 samples)": {
+          "score": 0.8766595396051539,
+          "at_fault_rate": 0.013888888888888888,
+          "at_fault_vru_rate": 0.013888888888888888,
+          "progress": 0.9743467187375615,
+          "harsh_braking_rate": 0.2916666666666667,
+          "near_miss_rate": 0.18055555555555555,
+          "n_episodes": 48,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.7889635715571663,
+            0.9629629629629629
+          ],
+          "no_band": {
+            "score": 0.9257871803508525,
+            "at_fault_rate": 0.0,
+            "at_fault_vru_rate": 0.0,
+            "progress": 0.9775280357426456
+          }
+        },
+        "Human driver (log replay)": {
+          "score": 0.9907407407407408,
+          "at_fault_rate": 0.0,
+          "at_fault_vru_rate": 0.0,
+          "progress": 1.0,
+          "harsh_braking_rate": 0.0,
+          "near_miss_rate": 0.041666666666666664,
+          "n_episodes": 48,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.9722222222222222,
+            1.0
+          ]
+        },
+        "Oracle (true future, no band)": {
+          "score": 0.9603671262366427,
+          "at_fault_rate": 0.0,
+          "at_fault_vru_rate": 0.0,
+          "progress": 0.9619941605592901,
+          "harsh_braking_rate": 0.0,
+          "near_miss_rate": 0.08333333333333333,
+          "n_episodes": 48,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.9299529646679479,
+            0.984517279479055
+          ]
+        },
+        "No prediction (ignore agents)": {
+          "score": 0.9225783199444617,
+          "at_fault_rate": 0.041666666666666664,
+          "at_fault_vru_rate": 0.0,
+          "progress": 0.9606409759000312,
+          "harsh_braking_rate": 0.0,
+          "near_miss_rate": 0.10416666666666667,
+          "n_episodes": 48,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.8286757745240317,
+            0.9806706505813165
+          ]
+        }
+      },
+      "decision": {
+        "leader": "Map-free transformer",
+        "vs_leader": [
+          {
+            "a": "Map-free transformer",
+            "b": "CV (vel_k=5)",
+            "diff": 0.037703301684063106,
+            "ci95": [
+              -0.05555555555555547,
+              0.1620370370370371
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "MLP",
+            "diff": 0.05489563354875959,
+            "ci95": [
+              -0.012258719032528835,
+              0.17012709611434904
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "ST-GAT (MHA)",
+            "diff": 0.026893682860724466,
+            "ci95": [
+              -0.03395246847897866,
+              0.10034722222222202
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "K-mode (top-1)",
+            "diff": 0.04034222899510298,
+            "ci95": [
+              -0.039932364487203185,
+              0.15740740740740755
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "AgentFormer (most-likely)",
+            "diff": 0.06867791099997544,
+            "ci95": [
+              -0.005024466068381361,
+              0.19481256113916437
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "LED (mean-denoised)",
+            "diff": 0.033847224220723726,
+            "ci95": [
+              -0.015278989225846702,
+              0.13583204247606642
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "Trajectron++ (most-likely)",
+            "diff": 0.05980559238967931,
+            "ci95": [
+              -0.01123149266118673,
+              0.14076922993999064
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "K-mode set (10 modes)",
+            "diff": 0.23705663730277438,
+            "ci95": [
+              0.05145954186260038,
+              0.4702247280104762
+            ],
+            "tied": false
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "AgentFormer set (10 samples)",
+            "diff": 0.014358886329076004,
+            "ci95": [
+              -0.03820162685522342,
+              0.07480192724830494
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "LED set (10 samples)",
+            "diff": 0.021930756455826428,
+            "ci95": [
+              -0.05682529245967408,
+              0.13275107760187788
+            ],
+            "tied": true
+          },
+          {
+            "a": "Map-free transformer",
+            "b": "Trajectron++ set (10 samples)",
+            "diff": 0.017999123908494674,
+            "ci95": [
+              -0.05600185961381732,
+              0.10977836456606696
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_score": [
+          "Map-free transformer",
+          "CV (vel_k=5)",
+          "MLP",
+          "ST-GAT (MHA)",
+          "K-mode (top-1)",
+          "AgentFormer (most-likely)",
+          "LED (mean-denoised)",
+          "Trajectron++ (most-likely)",
+          "AgentFormer set (10 samples)",
+          "LED set (10 samples)",
+          "Trajectron++ set (10 samples)"
+        ],
+        "vru_pairs": [
+          {
+            "a": "CV (vel_k=5)",
+            "b": "Map-free transformer",
+            "diff": -0.013888888888888888,
+            "ci95": [
+              -0.05555555555555555,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "MLP",
+            "diff": -0.08333333333333333,
+            "ci95": [
+              -0.25,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "ST-GAT (MHA)",
+            "diff": -0.027777777777777776,
+            "ci95": [
+              -0.08333333333333333,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "K-mode (top-1)",
+            "diff": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "AgentFormer (most-likely)",
+            "diff": -0.05555555555555555,
+            "ci95": [
+              -0.16666666666666666,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "LED (mean-denoised)",
+            "diff": -0.05555555555555555,
+            "ci95": [
+              -0.16666666666666666,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "Trajectron++ (most-likely)",
+            "diff": -0.041666666666666664,
+            "ci95": [
+              -0.16666666666666666,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "AgentFormer set (10 samples)",
+            "diff": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "LED set (10 samples)",
+            "diff": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "tied": true
+          },
+          {
+            "a": "CV (vel_k=5)",
+            "b": "Trajectron++ set (10 samples)",
+            "diff": -0.013888888888888888,
+            "ci95": [
+              -0.08333333333333333,
+              0.0
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_vru": [
+          "CV (vel_k=5)",
+          "Map-free transformer",
+          "MLP",
+          "ST-GAT (MHA)",
+          "K-mode (top-1)",
+          "AgentFormer (most-likely)",
+          "LED (mean-denoised)",
+          "Trajectron++ (most-likely)",
+          "AgentFormer set (10 samples)",
+          "LED set (10 samples)",
+          "Trajectron++ set (10 samples)"
+        ],
+        "pick": "CV (vel_k=5)",
+        "steps": [
+          "Leader on the episode score: Map-free transformer (0.895).",
+          "Tied with the leader (paired 95% CI includes 0): CV (vel_k=5), MLP, ST-GAT (MHA), K-mode (top-1), AgentFormer (most-likely), LED (mean-denoised), Trajectron++ (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).",
+          "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best CV (vel_k=5) (0.000); still tied: Map-free transformer, MLP, ST-GAT (MHA), K-mode (top-1), AgentFormer (most-likely), LED (mean-denoised), Trajectron++ (most-likely), AgentFormer set (10 samples), LED set (10 samples), Trajectron++ set (10 samples).",
+          "Tie-break 2 (latency): CV (vel_k=5)."
+        ]
+      },
+      "at_fault_vs_ignore": {
+        "CV (vel_k=5)": {
+          "at_fault_diff": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "MLP": {
+          "at_fault_diff": 0.041666666666666664,
+          "ci95": [
+            -0.125,
+            0.25
+          ]
+        },
+        "ST-GAT (MHA)": {
+          "at_fault_diff": -0.013888888888888888,
+          "ci95": [
+            -0.08333333333333334,
+            0.05555555555555555
+          ]
+        },
+        "Map-free transformer": {
+          "at_fault_diff": -0.027777777777777776,
+          "ci95": [
+            -0.125,
+            0.05555555555555555
+          ]
+        },
+        "K-mode (top-1)": {
+          "at_fault_diff": -0.013888888888888888,
+          "ci95": [
+            -0.08333333333333333,
+            0.041666666666666664
+          ]
+        },
+        "AgentFormer (most-likely)": {
+          "at_fault_diff": 0.02777777777777777,
+          "ci95": [
+            -0.05555555555555555,
+            0.12500000000000003
+          ]
+        },
+        "LED (mean-denoised)": {
+          "at_fault_diff": 0.013888888888888888,
+          "ci95": [
+            -0.125,
+            0.16666666666666666
+          ]
+        },
+        "Trajectron++ (most-likely)": {
+          "at_fault_diff": 0.041666666666666664,
+          "ci95": [
+            -0.06944444444444445,
+            0.18090277777777589
+          ]
+        },
+        "K-mode set (10 modes)": {
+          "at_fault_diff": 0.055555555555555546,
+          "ci95": [
+            -0.041666666666666664,
+            0.20833333333333334
+          ]
+        },
+        "AgentFormer set (10 samples)": {
+          "at_fault_diff": -0.041666666666666664,
+          "ci95": [
+            -0.125,
+            0.0
+          ]
+        },
+        "LED set (10 samples)": {
+          "at_fault_diff": -0.013888888888888888,
+          "ci95": [
+            -0.08333333333333333,
+            0.041666666666666664
+          ]
+        },
+        "Trajectron++ set (10 samples)": {
+          "at_fault_diff": -0.027777777777777776,
+          "ci95": [
+            -0.08333333333333334,
+            0.0
+          ]
+        }
+      }
+    },
+    "flagged": {
+      "n_scenes": 16,
+      "packages": {
+        "CV (vel_k=5)": {
+          "score": 0.6866000398457454,
+          "at_fault_rate": 0.15625,
+          "at_fault_vru_rate": 0.140625,
+          "progress": 0.8169131277021942,
+          "harsh_braking_rate": 0.5234375,
+          "near_miss_rate": 0.21875,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.520139293335117,
+            0.8351192517433238
+          ],
+          "no_band": {
+            "score": 0.744430029148942,
+            "at_fault_rate": 0.1484375,
+            "at_fault_vru_rate": 0.125,
+            "progress": 0.8846912995571423
+          }
+        },
+        "MLP": {
+          "score": 0.6544561849472688,
+          "at_fault_rate": 0.15104166666666666,
+          "at_fault_vru_rate": 0.140625,
+          "progress": 0.8058599082899972,
+          "harsh_braking_rate": 0.5442708333333334,
+          "near_miss_rate": 0.2760416666666667,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.48587707753747056,
+            0.8069353257167132
+          ],
+          "no_band": {
+            "score": 0.7602840423934173,
+            "at_fault_rate": 0.125,
+            "at_fault_vru_rate": 0.10677083333333333,
+            "progress": 0.8788117063442723
+          }
+        },
+        "ST-GAT (MHA)": {
+          "score": 0.6984770461933079,
+          "at_fault_rate": 0.15625,
+          "at_fault_vru_rate": 0.10677083333333333,
+          "progress": 0.8291410447775421,
+          "harsh_braking_rate": 0.4609375,
+          "near_miss_rate": 0.22916666666666666,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.521871337295449,
+            0.8503066201303766
+          ],
+          "no_band": {
+            "score": 0.7724922179677748,
+            "at_fault_rate": 0.13020833333333334,
+            "at_fault_vru_rate": 0.11979166666666667,
+            "progress": 0.8805078904049847
+          }
+        },
+        "Map-free transformer": {
+          "score": 0.6805118795511622,
+          "at_fault_rate": 0.13541666666666666,
+          "at_fault_vru_rate": 0.11979166666666667,
+          "progress": 0.8135337869310785,
+          "harsh_braking_rate": 0.4817708333333333,
+          "near_miss_rate": 0.28125,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5123551837136725,
+            0.8292254344211235
+          ],
+          "no_band": {
+            "score": 0.7643936134790795,
+            "at_fault_rate": 0.13020833333333334,
+            "at_fault_vru_rate": 0.11197916666666667,
+            "progress": 0.873955882556829
+          }
+        },
+        "K-mode (top-1)": {
+          "score": 0.649934772928861,
+          "at_fault_rate": 0.171875,
+          "at_fault_vru_rate": 0.1328125,
+          "progress": 0.7881970194717688,
+          "harsh_braking_rate": 0.5651041666666666,
+          "near_miss_rate": 0.22395833333333334,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.478372009863771,
+            0.8051214300505445
+          ],
+          "no_band": {
+            "score": 0.7528434594050003,
+            "at_fault_rate": 0.15364583333333334,
+            "at_fault_vru_rate": 0.13541666666666666,
+            "progress": 0.8816292624774175
+          }
+        },
+        "AgentFormer (most-likely)": {
+          "score": 0.6851477175008518,
+          "at_fault_rate": 0.16666666666666666,
+          "at_fault_vru_rate": 0.140625,
+          "progress": 0.834411384725903,
+          "harsh_braking_rate": 0.4791666666666667,
+          "near_miss_rate": 0.2604166666666667,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5102966105066498,
+            0.8391756824200659
+          ],
+          "no_band": {
+            "score": 0.7495141860308171,
+            "at_fault_rate": 0.1484375,
+            "at_fault_vru_rate": 0.1328125,
+            "progress": 0.8831251490383721
+          }
+        },
+        "LED (mean-denoised)": {
+          "score": 0.7018824447730655,
+          "at_fault_rate": 0.125,
+          "at_fault_vru_rate": 0.09635416666666667,
+          "progress": 0.8179255803875337,
+          "harsh_braking_rate": 0.4348958333333333,
+          "near_miss_rate": 0.2604166666666667,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5322912772204068,
+            0.8579265316288339
+          ],
+          "no_band": {
+            "score": 0.7809594256152718,
+            "at_fault_rate": 0.11979166666666667,
+            "at_fault_vru_rate": 0.11197916666666667,
+            "progress": 0.8826877198536006
+          }
+        },
+        "Trajectron++ (most-likely)": {
+          "score": 0.6699520401516935,
+          "at_fault_rate": 0.16666666666666666,
+          "at_fault_vru_rate": 0.09895833333333333,
+          "progress": 0.8150556167620864,
+          "harsh_braking_rate": 0.5442708333333334,
+          "near_miss_rate": 0.22916666666666666,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.4941093066774437,
+            0.8254320033280362
+          ],
+          "no_band": {
+            "score": 0.7425223865330711,
+            "at_fault_rate": 0.17447916666666666,
+            "at_fault_vru_rate": 0.16927083333333334,
+            "progress": 0.8869358280462957
+          }
+        },
+        "K-mode set (10 modes)": {
+          "score": 0.47408548983612553,
+          "at_fault_rate": 0.2708333333333333,
+          "at_fault_vru_rate": 0.1953125,
+          "progress": 0.6810983244210579,
+          "harsh_braking_rate": 0.8385416666666666,
+          "near_miss_rate": 0.3958333333333333,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.31552941125479006,
+            0.6247069593216953
+          ],
+          "no_band": {
+            "score": 0.4602507523018767,
+            "at_fault_rate": 0.28125,
+            "at_fault_vru_rate": 0.19791666666666666,
+            "progress": 0.6667859032254589
+          }
+        },
+        "AgentFormer set (10 samples)": {
+          "score": 0.6375114193319857,
+          "at_fault_rate": 0.18489583333333334,
+          "at_fault_vru_rate": 0.15625,
+          "progress": 0.7746016821400948,
+          "harsh_braking_rate": 0.5286458333333334,
+          "near_miss_rate": 0.2708333333333333,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.4571118943558974,
+            0.7945937724165678
+          ],
+          "no_band": {
+            "score": 0.6872028594633482,
+            "at_fault_rate": 0.19791666666666666,
+            "at_fault_vru_rate": 0.17447916666666666,
+            "progress": 0.8373298389748064
+          }
+        },
+        "LED set (10 samples)": {
+          "score": 0.6252281259438225,
+          "at_fault_rate": 0.203125,
+          "at_fault_vru_rate": 0.18229166666666666,
+          "progress": 0.7774802106642884,
+          "harsh_braking_rate": 0.5989583333333334,
+          "near_miss_rate": 0.265625,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.46142210946939444,
+            0.7777788335431741
+          ],
+          "no_band": {
+            "score": 0.6650284998210464,
+            "at_fault_rate": 0.19010416666666666,
+            "at_fault_vru_rate": 0.17447916666666666,
+            "progress": 0.8207357255623201
+          }
+        },
+        "Trajectron++ set (10 samples)": {
+          "score": 0.625460555954085,
+          "at_fault_rate": 0.203125,
+          "at_fault_vru_rate": 0.13541666666666666,
+          "progress": 0.7909701520564921,
+          "harsh_braking_rate": 0.6119791666666666,
+          "near_miss_rate": 0.2708333333333333,
+          "n_episodes": 128,
+          "seeds": [
+            0,
+            1,
+            2
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.44720131243486677,
+            0.7800975363649438
+          ],
+          "no_band": {
+            "score": 0.6690486943472121,
+            "at_fault_rate": 0.1875,
+            "at_fault_vru_rate": 0.16145833333333334,
+            "progress": 0.8409144434965317
+          }
+        },
+        "Human driver (log replay)": {
+          "score": 0.904513888888889,
+          "at_fault_rate": 0.078125,
+          "at_fault_vru_rate": 0.03125,
+          "progress": 1.0,
+          "harsh_braking_rate": 0.0,
+          "near_miss_rate": 0.15625,
+          "n_episodes": 128,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.791623263888889,
+            0.9930555555555556
+          ]
+        },
+        "Oracle (true future, no band)": {
+          "score": 0.8059491398097993,
+          "at_fault_rate": 0.0859375,
+          "at_fault_vru_rate": 0.0859375,
+          "progress": 0.8804496432799256,
+          "harsh_braking_rate": 0.0859375,
+          "near_miss_rate": 0.328125,
+          "n_episodes": 128,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.6647539057909911,
+            0.9204226786426007
+          ]
+        },
+        "No prediction (ignore agents)": {
+          "score": 0.7465123743014469,
+          "at_fault_rate": 0.203125,
+          "at_fault_vru_rate": 0.1953125,
+          "progress": 0.9050705373846865,
+          "harsh_braking_rate": 0.0234375,
+          "near_miss_rate": 0.3125,
+          "n_episodes": 128,
+          "seeds": [
+            0
+          ],
+          "band_scale": 1.0,
+          "score_ci95": [
+            0.5625011064753707,
+            0.9040971931175799
+          ]
+        }
+      },
+      "decision": {
+        "leader": "LED (mean-denoised)",
+        "vs_leader": [
+          {
+            "a": "LED (mean-denoised)",
+            "b": "CV (vel_k=5)",
+            "diff": 0.015282404927320137,
+            "ci95": [
+              -0.03915588998430687,
+              0.06467643758893271
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "MLP",
+            "diff": 0.047426259825796735,
+            "ci95": [
+              0.011868940646589912,
+              0.08429197158045082
+            ],
+            "tied": false
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "ST-GAT (MHA)",
+            "diff": 0.0034053985797576347,
+            "ci95": [
+              -0.07841233139787909,
+              0.07409115962985294
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Map-free transformer",
+            "diff": 0.02137056522190328,
+            "ci95": [
+              -0.0204254758027515,
+              0.06203862893619121
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "K-mode (top-1)",
+            "diff": 0.05194767184420446,
+            "ci95": [
+              -0.026899801318804272,
+              0.135297269897959
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "AgentFormer (most-likely)",
+            "diff": 0.0167347272722137,
+            "ci95": [
+              -0.049354245241951554,
+              0.06911118027047629
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Trajectron++ (most-likely)",
+            "diff": 0.03193040462137198,
+            "ci95": [
+              -0.03547081670142669,
+              0.10218420442016393
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "K-mode set (10 modes)",
+            "diff": 0.22779695493693997,
+            "ci95": [
+              0.13589620340533487,
+              0.33579415425879827
+            ],
+            "tied": false
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "AgentFormer set (10 samples)",
+            "diff": 0.06437102544107975,
+            "ci95": [
+              -0.027149031238613116,
+              0.17331316190757293
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "LED set (10 samples)",
+            "diff": 0.076654318829243,
+            "ci95": [
+              0.018714976341297245,
+              0.14481194260618996
+            ],
+            "tied": false
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Trajectron++ set (10 samples)",
+            "diff": 0.07642188881898049,
+            "ci95": [
+              -0.017430775838250916,
+              0.1737458208691683
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_score": [
+          "LED (mean-denoised)",
+          "CV (vel_k=5)",
+          "ST-GAT (MHA)",
+          "Map-free transformer",
+          "K-mode (top-1)",
+          "AgentFormer (most-likely)",
+          "Trajectron++ (most-likely)",
+          "AgentFormer set (10 samples)",
+          "Trajectron++ set (10 samples)"
+        ],
+        "vru_pairs": [
+          {
+            "a": "LED (mean-denoised)",
+            "b": "CV (vel_k=5)",
+            "diff": -0.04427083333333333,
+            "ci95": [
+              -0.11458333333333334,
+              0.005208333333333315
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "ST-GAT (MHA)",
+            "diff": -0.010416666666666657,
+            "ci95": [
+              -0.10677083333333331,
+              0.05729166666666667
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Map-free transformer",
+            "diff": -0.0234375,
+            "ci95": [
+              -0.08854166666666669,
+              0.026106770833332994
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "K-mode (top-1)",
+            "diff": -0.03645833333333333,
+            "ci95": [
+              -0.14062499999999997,
+              0.04694010416666632
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "AgentFormer (most-likely)",
+            "diff": -0.04427083333333333,
+            "ci95": [
+              -0.12506510416666655,
+              0.020833333333333336
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Trajectron++ (most-likely)",
+            "diff": -0.0026041666666666574,
+            "ci95": [
+              -0.13020833333333334,
+              0.109375
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "AgentFormer set (10 samples)",
+            "diff": -0.05989583333333333,
+            "ci95": [
+              -0.18229166666666666,
+              0.02350260416666631
+            ],
+            "tied": true
+          },
+          {
+            "a": "LED (mean-denoised)",
+            "b": "Trajectron++ set (10 samples)",
+            "diff": -0.039062499999999986,
+            "ci95": [
+              -0.16145833333333331,
+              0.05729166666666666
+            ],
+            "tied": true
+          }
+        ],
+        "tied_on_vru": [
+          "LED (mean-denoised)",
+          "CV (vel_k=5)",
+          "ST-GAT (MHA)",
+          "Map-free transformer",
+          "K-mode (top-1)",
+          "AgentFormer (most-likely)",
+          "Trajectron++ (most-likely)",
+          "AgentFormer set (10 samples)",
+          "Trajectron++ set (10 samples)"
+        ],
+        "pick": "CV (vel_k=5)",
+        "steps": [
+          "Leader on the episode score: LED (mean-denoised) (0.702).",
+          "Tied with the leader (paired 95% CI includes 0): CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), Trajectron++ (most-likely), AgentFormer set (10 samples), Trajectron++ set (10 samples).",
+          "Tie-break 1 (at-fault collisions with pedestrians / two-wheelers, lower is better): best LED (mean-denoised) (0.096); still tied: CV (vel_k=5), ST-GAT (MHA), Map-free transformer, K-mode (top-1), AgentFormer (most-likely), Trajectron++ (most-likely), AgentFormer set (10 samples), Trajectron++ set (10 samples).",
+          "Tie-break 2 (latency): CV (vel_k=5)."
+        ]
+      },
+      "at_fault_vs_ignore": {
+        "CV (vel_k=5)": {
+          "at_fault_diff": -0.046875,
+          "ci95": [
+            -0.140625,
+            0.015625
+          ]
+        },
+        "MLP": {
+          "at_fault_diff": -0.05208333333333334,
+          "ci95": [
+            -0.171875,
+            0.05729166666666666
+          ]
+        },
+        "ST-GAT (MHA)": {
+          "at_fault_diff": -0.046875,
+          "ci95": [
+            -0.10937500000000003,
+            0.005208333333333315
+          ]
+        },
+        "Map-free transformer": {
+          "at_fault_diff": -0.06770833333333334,
+          "ci95": [
+            -0.1824218749999998,
+            0.04166666666666666
+          ]
+        },
+        "K-mode (top-1)": {
+          "at_fault_diff": -0.03125,
+          "ci95": [
+            -0.10416666666666669,
+            0.026041666666666657
+          ]
+        },
+        "AgentFormer (most-likely)": {
+          "at_fault_diff": -0.03645833333333334,
+          "ci95": [
+            -0.125,
+            0.052083333333333315
+          ]
+        },
+        "LED (mean-denoised)": {
+          "at_fault_diff": -0.078125,
+          "ci95": [
+            -0.19791666666666669,
+            0.015625
+          ]
+        },
+        "Trajectron++ (most-likely)": {
+          "at_fault_diff": -0.03645833333333334,
+          "ci95": [
+            -0.109375,
+            0.03125
+          ]
+        },
+        "K-mode set (10 modes)": {
+          "at_fault_diff": 0.06770833333333331,
+          "ci95": [
+            -0.07298177083333324,
+            0.21614583333333331
+          ]
+        },
+        "AgentFormer set (10 samples)": {
+          "at_fault_diff": -0.018229166666666657,
+          "ci95": [
+            -0.13020833333333334,
+            0.08854166666666666
+          ]
+        },
+        "LED set (10 samples)": {
+          "at_fault_diff": 0.0,
+          "ci95": [
+            -0.07291666666666669,
+            0.078125
+          ]
+        },
+        "Trajectron++ set (10 samples)": {
+          "at_fault_diff": 0.0,
+          "ci95": [
+            -0.08333333333333334,
+            0.078125
+          ]
+        }
+      }
+    }
+  },
+  "plan": "docs/wiki/ego-quality-sensitivity.md",
+  "clean_scenes": [
+    "20220118103308_seq_20",
+    "20220118103308_seq_4",
+    "20220118103308_seq_5",
+    "20220118103808_seq_0",
+    "20220118103808_seq_1",
+    "20220118103808_seq_2",
+    "20220118103808_seq_20",
+    "20220118103808_seq_3",
+    "20220118105838_seq_10",
+    "20220118105838_seq_9",
+    "20220118110338_seq_10",
+    "20220118110338_seq_11",
+    "20220118110338_seq_12",
+    "20220118110338_seq_13",
+    "20220118110338_seq_15",
+    "20220118110338_seq_18",
+    "20220118111739_seq_15",
+    "20220118111739_seq_16",
+    "20220118111739_seq_17",
+    "20220118111739_seq_18",
+    "20220118111739_seq_19",
+    "20220118111739_seq_20",
+    "20220118111739_seq_21",
+    "20220118111739_seq_24",
+    "20220118112945_seq_22",
+    "20220118112945_seq_23",
+    "20220118112945_seq_24",
+    "20220118112945_seq_25",
+    "20220118112945_seq_26",
+    "20220118112945_seq_28",
+    "20220118115526_seq_2",
+    "20220118115526_seq_3"
+  ],
+  "when": "2026-11-26T00:15:13"
+}

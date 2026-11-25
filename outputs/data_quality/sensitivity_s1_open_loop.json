@@ -1,0 +1,1831 @@
+{
+  "source": "bootstrap_ci.json (seed dumps)",
+  "subsets": {
+    "all": {
+      "n_scenes": 22,
+      "scenes": [
+        "20220118103308_seq_19",
+        "20220118103308_seq_20",
+        "20220118103308_seq_21",
+        "20220118103308_seq_28",
+        "20220118103308_seq_6",
+        "20220118103808_seq_11",
+        "20220118103808_seq_18",
+        "20220118103808_seq_22",
+        "20220118103808_seq_25",
+        "20220118103808_seq_28",
+        "20220118103808_seq_8",
+        "20220118104308_seq_13",
+        "20220118105341_seq_0",
+        "20220118110338_seq_11",
+        "20220118110338_seq_12",
+        "20220118110338_seq_14",
+        "20220118110338_seq_16",
+        "20220118110338_seq_17",
+        "20220118111338_seq_4",
+        "20220118112945_seq_22",
+        "20220118112945_seq_24",
+        "20220118115526_seq_2"
+      ],
+      "ranking_by_ade": [
+        "ST-GAT-inspired (MHA)",
+        "map-free transformer",
+        "LED (most-likely)",
+        "AgentFormer (most-likely)",
+        "Trajectron++ (most-likely, canonical windows)",
+        "MLP",
+        "K-mode decoder (top-1-sel)",
+        "CV (vel_k=5)"
+      ],
+      "models": {
+        "CV (vel_k=5)": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 4.359299903823241,
+          "ade_ci95": [
+            2.572819854136091,
+            6.797550710119005
+          ],
+          "fde": 9.77513313293457,
+          "fde_ci95": [
+            5.923694042141729,
+            14.991891237962527
+          ]
+        },
+        "MLP": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 3.9626280728205403,
+          "ade_ci95": [
+            2.494848586744146,
+            5.934047504632708
+          ],
+          "fde": 8.623577117919922,
+          "fde_ci95": [
+            5.498718283994819,
+            12.828493423495805
+          ]
+        },
+        "AgentFormer (most-likely)": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 3.745762367306668,
+          "ade_ci95": [
+            2.4080684828220282,
+            5.54387684464134
+          ],
+          "fde": 8.34365177154541,
+          "fde_ci95": [
+            5.269176518726973,
+            12.40779412456595
+          ]
+        },
+        "LED (most-likely)": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 3.7395097200093543,
+          "ade_ci95": [
+            2.3312686230032074,
+            5.651358494981605
+          ],
+          "fde": 8.091004371643066,
+          "fde_ci95": [
+            4.995355882853831,
+            12.255381984878245
+          ]
+        },
+        "K-mode decoder (top-1-sel)": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 4.045617053690393,
+          "ade_ci95": [
+            2.6251808249172583,
+            6.075816441830691
+          ],
+          "fde": 9.046404838562012,
+          "fde_ci95": [
+            5.799541285616842,
+            13.348522319096897
+          ]
+        },
+        "ST-GAT-inspired (MHA)": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 3.3293410470715994,
+          "ade_ci95": [
+            2.1609538156266512,
+            4.9796600507907876
+          ],
+          "fde": 7.160333633422852,
+          "fde_ci95": [
+            4.625967199054295,
+            10.62091917981709
+          ]
+        },
+        "Trajectron++ (most-likely, canonical windows)": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 3.891852525744707,
+          "ade_ci95": [
+            2.4030084112869847,
+            5.913911717492917
+          ],
+          "fde": 8.407113075256348,
+          "fde_ci95": [
+            5.320852931640039,
+            12.619971465362983
+          ]
+        },
+        "map-free transformer": {
+          "n_rows": 2177,
+          "n_scenes": 22,
+          "ade": 3.4274009794969325,
+          "ade_ci95": [
+            2.19016638665807,
+            5.095884462447435
+          ],
+          "fde": 7.615113258361816,
+          "fde_ci95": [
+            4.85592180823548,
+            11.238452417687256
+          ]
+        }
+      },
+      "adjacent_pairs": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "map-free transformer",
+          "ade_diff_a_minus_b": -0.09805993242533306,
+          "ci95": [
+            -0.3616484742367103,
+            0.13318844037739022
+          ],
+          "p_a_not_better": 0.2238
+        },
+        {
+          "a": "map-free transformer",
+          "b": "LED (most-likely)",
+          "ade_diff_a_minus_b": -0.3121087405124219,
+          "ci95": [
+            -0.6563129979481489,
+            -0.08145276538413775
+          ],
+          "p_a_not_better": 0.0006
+        },
+        {
+          "a": "LED (most-likely)",
+          "b": "AgentFormer (most-likely)",
+          "ade_diff_a_minus_b": -0.006252647297313452,
+          "ci95": [
+            -0.3100827183178824,
+            0.30473168709757387
+          ],
+          "p_a_not_better": 0.4851
+        },
+        {
+          "a": "AgentFormer (most-likely)",
+          "b": "Trajectron++ (most-likely, canonical windows)",
+          "ade_diff_a_minus_b": -0.14609015843803919,
+          "ci95": [
+            -0.6284672772824516,
+            0.22867900808682115
+          ],
+          "p_a_not_better": 0.2511
+        },
+        {
+          "a": "Trajectron++ (most-likely, canonical windows)",
+          "b": "MLP",
+          "ade_diff_a_minus_b": -0.07077554707583333,
+          "ci95": [
+            -0.3562008509216367,
+            0.23993812114045687
+          ],
+          "p_a_not_better": 0.3254
+        },
+        {
+          "a": "MLP",
+          "b": "K-mode decoder (top-1-sel)",
+          "ade_diff_a_minus_b": -0.08298898086985229,
+          "ci95": [
+            -0.6350971608076325,
+            0.4904520896892049
+          ],
+          "p_a_not_better": 0.3698
+        },
+        {
+          "a": "K-mode decoder (top-1-sel)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.3136828501328486,
+          "ci95": [
+            -0.9933554548594283,
+            0.20668050014963327
+          ],
+          "p_a_not_better": 0.1399
+        }
+      ],
+      "vs_best": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "map-free transformer",
+          "ade_diff_a_minus_b": -0.09805993242533306,
+          "ci95": [
+            -0.3616484742367103,
+            0.13318844037739022
+          ],
+          "p_a_not_better": 0.2238
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "LED (most-likely)",
+          "ade_diff_a_minus_b": -0.41016867293775494,
+          "ci95": [
+            -0.7675290391020253,
+            -0.11903596593552487
+          ],
+          "p_a_not_better": 0.0011
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "AgentFormer (most-likely)",
+          "ade_diff_a_minus_b": -0.4164213202350684,
+          "ci95": [
+            -0.8213750851025972,
+            -0.04739693511624528
+          ],
+          "p_a_not_better": 0.0134
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "Trajectron++ (most-likely, canonical windows)",
+          "ade_diff_a_minus_b": -0.5625114786731076,
+          "ci95": [
+            -1.1780932863818072,
+            -0.10916126829488883
+          ],
+          "p_a_not_better": 0.0047
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "MLP",
+          "ade_diff_a_minus_b": -0.6332870257489409,
+          "ci95": [
+            -1.071716123108414,
+            -0.27899689673073197
+          ],
+          "p_a_not_better": 0.0
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "K-mode decoder (top-1-sel)",
+          "ade_diff_a_minus_b": -0.7162760066187932,
+          "ci95": [
+            -1.3501289317778866,
+            -0.2045565806811137
+          ],
+          "p_a_not_better": 0.0026
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.0299588567516418,
+          "ci95": [
+            -1.9587517587728738,
+            -0.31981522056582073
+          ],
+          "p_a_not_better": 0.0011
+        }
+      ],
+      "vs_cv": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.0299588567516418,
+          "ci95": [
+            -1.9587517587728738,
+            -0.31981522056582073
+          ],
+          "p_a_not_better": 0.0011
+        },
+        {
+          "a": "map-free transformer",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.9318989243263087,
+          "ci95": [
+            -1.917985546439025,
+            -0.24514971341756492
+          ],
+          "p_a_not_better": 0.0012
+        },
+        {
+          "a": "LED (most-likely)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.6197901838138868,
+          "ci95": [
+            -1.322333610587615,
+            -0.10296036947976443
+          ],
+          "p_a_not_better": 0.0079
+        },
+        {
+          "a": "AgentFormer (most-likely)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.6135375365165734,
+          "ci95": [
+            -1.465425611542484,
+            -0.011609824589430578
+          ],
+          "p_a_not_better": 0.0229
+        },
+        {
+          "a": "Trajectron++ (most-likely, canonical windows)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.4674473780785342,
+          "ci95": [
+            -1.0786057034012513,
+            -0.03367664619039868
+          ],
+          "p_a_not_better": 0.0151
+        },
+        {
+          "a": "MLP",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.39667183100270087,
+          "ci95": [
+            -0.9734640232292573,
+            0.022029840981007437
+          ],
+          "p_a_not_better": 0.0326
+        },
+        {
+          "a": "K-mode decoder (top-1-sel)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.3136828501328486,
+          "ci95": [
+            -0.9933554548594283,
+            0.20668050014963327
+          ],
+          "p_a_not_better": 0.1399
+        }
+      ],
+      "mlp_3seed_ade": 3.9684424095309967,
+      "seed_pooled": {
+        "ranking_by_ade": [
+          "ST-GAT-inspired (MHA)",
+          "map-free transformer",
+          "LED (most-likely)",
+          "AgentFormer (most-likely)",
+          "Trajectron++ (most-likely, canonical windows)",
+          "K-mode decoder (top-1-sel)"
+        ],
+        "models": {
+          "ST-GAT-inspired (MHA)": {
+            "ade_seed_mean": 3.4066115035766154,
+            "per_seed_ade": [
+              3.3293410470715994,
+              3.3877757444415706,
+              3.5027177192166765
+            ],
+            "ade_ci95_scene_seed": [
+              2.244738048462105,
+              5.033509485408802
+            ]
+          },
+          "map-free transformer": {
+            "ade_seed_mean": 3.5723128078785176,
+            "per_seed_ade": [
+              3.4274009794969316,
+              3.705195502468771,
+              3.5843419416698503
+            ],
+            "ade_ci95_scene_seed": [
+              2.314578324399921,
+              5.291496671690247
+            ]
+          },
+          "LED (most-likely)": {
+            "ade_seed_mean": 3.7461263545609094,
+            "per_seed_ade": [
+              3.7395097200093543,
+              3.735934802884089,
+              3.7629345407892845
+            ],
+            "ade_ci95_scene_seed": [
+              2.3101107270839516,
+              5.698878785051062
+            ]
+          },
+          "AgentFormer (most-likely)": {
+            "ade_seed_mean": 3.7463796735870205,
+            "per_seed_ade": [
+              3.7457623673066673,
+              3.747236661537071,
+              3.7461399919173233
+            ],
+            "ade_ci95_scene_seed": [
+              2.3614594878387423,
+              5.634068598920152
+            ]
+          },
+          "Trajectron++ (most-likely, canonical windows)": {
+            "ade_seed_mean": 3.9138351575644954,
+            "per_seed_ade": [
+              3.891852525744706,
+              4.023962884094386,
+              3.8256900628543926
+            ],
+            "ade_ci95_scene_seed": [
+              2.4411098123276735,
+              5.919941554720972
+            ]
+          },
+          "K-mode decoder (top-1-sel)": {
+            "ade_seed_mean": 4.153258029304973,
+            "per_seed_ade": [
+              4.045617053690393,
+              4.282113331329524,
+              4.132043702895003
+            ],
+            "ade_ci95_scene_seed": [
+              2.687092929979516,
+              6.178582609994398
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "map-free transformer",
+            "ade_diff_a_minus_b": -0.16570130430190222,
+            "ci95": [
+              -0.47918102430348936,
+              0.12577373180043513
+            ],
+            "p_a_not_better": 0.1381
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "LED (most-likely)",
+            "ade_diff_a_minus_b": -0.339514850984294,
+            "ci95": [
+              -0.7703287260674163,
+              0.009641036251866707
+            ],
+            "p_a_not_better": 0.0289
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.33976817001040516,
+            "ci95": [
+              -0.7120641334941099,
+              -0.014437430728187779
+            ],
+            "p_a_not_better": 0.0205
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.50722365398788,
+            "ci95": [
+              -1.082466312980216,
+              -0.05866495540885754
+            ],
+            "p_a_not_better": 0.0109
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.7466465257283574,
+            "ci95": [
+              -1.3635309007993022,
+              -0.2762661418862887
+            ],
+            "p_a_not_better": 0.0005
+          },
+          {
+            "a": "map-free transformer",
+            "b": "LED (most-likely)",
+            "ade_diff_a_minus_b": -0.1738135466823918,
+            "ci95": [
+              -0.5311084067212936,
+              0.09735941206292874
+            ],
+            "p_a_not_better": 0.1178
+          },
+          {
+            "a": "map-free transformer",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.17406686570850294,
+            "ci95": [
+              -0.5637618182759206,
+              0.14411833835067786
+            ],
+            "p_a_not_better": 0.1497
+          },
+          {
+            "a": "map-free transformer",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.34152234968597783,
+            "ci95": [
+              -0.8988279381059191,
+              0.09050644172121453
+            ],
+            "p_a_not_better": 0.0684
+          },
+          {
+            "a": "map-free transformer",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.5809452214264552,
+            "ci95": [
+              -1.2949638201083646,
+              -0.034472680282402204
+            ],
+            "p_a_not_better": 0.0169
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.0002533190261111429,
+            "ci95": [
+              -0.2544981140669382,
+              0.24842910128691412
+            ],
+            "p_a_not_better": 0.4975
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.16770880300358604,
+            "ci95": [
+              -0.5400492215224066,
+              0.17114774603700608
+            ],
+            "p_a_not_better": 0.1683
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.4071316747440634,
+            "ci95": [
+              -0.9337838845083667,
+              0.062383471563560805
+            ],
+            "p_a_not_better": 0.0464
+          },
+          {
+            "a": "AgentFormer (most-likely)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.1674554839774749,
+            "ci95": [
+              -0.5417537140009545,
+              0.10807100326283403
+            ],
+            "p_a_not_better": 0.132
+          },
+          {
+            "a": "AgentFormer (most-likely)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.4068783557179523,
+            "ci95": [
+              -0.931407758149459,
+              0.014805641321380193
+            ],
+            "p_a_not_better": 0.0278
+          },
+          {
+            "a": "Trajectron++ (most-likely, canonical windows)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.23942287174047738,
+            "ci95": [
+              -0.6743175074114445,
+              0.15445395307771786
+            ],
+            "p_a_not_better": 0.11
+          }
+        ]
+      }
+    },
+    "clean": {
+      "n_scenes": 6,
+      "scenes": [
+        "20220118103308_seq_20",
+        "20220118110338_seq_11",
+        "20220118110338_seq_12",
+        "20220118112945_seq_22",
+        "20220118112945_seq_24",
+        "20220118115526_seq_2"
+      ],
+      "ranking_by_ade": [
+        "ST-GAT-inspired (MHA)",
+        "CV (vel_k=5)",
+        "LED (most-likely)",
+        "map-free transformer",
+        "Trajectron++ (most-likely, canonical windows)",
+        "MLP",
+        "AgentFormer (most-likely)",
+        "K-mode decoder (top-1-sel)"
+      ],
+      "models": {
+        "CV (vel_k=5)": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.3850534311743854,
+          "ade_ci95": [
+            0.8826332339687825,
+            2.040436684526228
+          ],
+          "fde": 3.272956609725952,
+          "fde_ci95": [
+            1.9407986213923616,
+            4.938485615319814
+          ]
+        },
+        "MLP": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.5517399829716771,
+          "ade_ci95": [
+            1.132480506628419,
+            2.078441050605537
+          ],
+          "fde": 3.5175681114196777,
+          "fde_ci95": [
+            2.48331636711253,
+            4.8210325258630276
+          ]
+        },
+        "AgentFormer (most-likely)": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.6148358793937463,
+          "ade_ci95": [
+            0.9662172505821783,
+            2.362026199221652
+          ],
+          "fde": 3.8285422325134277,
+          "fde_ci95": [
+            1.8973423963589928,
+            6.096943849247346
+          ]
+        },
+        "LED (most-likely)": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.4141771993156456,
+          "ade_ci95": [
+            1.0510145003037012,
+            1.8465033062329177
+          ],
+          "fde": 3.1050336360931396,
+          "fde_ci95": [
+            2.1990736962457325,
+            4.18606693269996
+          ]
+        },
+        "K-mode decoder (top-1-sel)": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.8451607726893846,
+          "ade_ci95": [
+            1.2519948186787544,
+            2.54184555066384
+          ],
+          "fde": 3.9852821826934814,
+          "fde_ci95": [
+            2.5858752022369322,
+            5.719380853778749
+          ]
+        },
+        "ST-GAT-inspired (MHA)": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.3717806976486704,
+          "ade_ci95": [
+            1.0040933811983486,
+            1.8060547659347967
+          ],
+          "fde": 2.915492057800293,
+          "fde_ci95": [
+            2.1296622434681423,
+            4.010548213827465
+          ]
+        },
+        "Trajectron++ (most-likely, canonical windows)": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.442729810657549,
+          "ade_ci95": [
+            0.8821308176696617,
+            2.058428918865381
+          ],
+          "fde": 3.33579158782959,
+          "fde_ci95": [
+            1.9967531243471126,
+            4.825821903835357
+          ]
+        },
+        "map-free transformer": {
+          "n_rows": 927,
+          "n_scenes": 6,
+          "ade": 1.421343599691281,
+          "ade_ci95": [
+            1.0130715502693244,
+            1.9545595180079893
+          ],
+          "fde": 3.2018513679504395,
+          "fde_ci95": [
+            2.258438084919545,
+            4.4320147095702405
+          ]
+        }
+      },
+      "adjacent_pairs": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.013272733525715008,
+          "ci95": [
+            -0.4035054362613144,
+            0.25290736472436914
+          ],
+          "p_a_not_better": 0.4592
+        },
+        {
+          "a": "CV (vel_k=5)",
+          "b": "LED (most-likely)",
+          "ade_diff_a_minus_b": -0.029123768141260165,
+          "ci95": [
+            -0.3727009881156026,
+            0.40197170338661126
+          ],
+          "p_a_not_better": 0.4527
+        },
+        {
+          "a": "LED (most-likely)",
+          "b": "map-free transformer",
+          "ade_diff_a_minus_b": -0.00716640037563554,
+          "ci95": [
+            -0.13151781693349984,
+            0.08407756473046724
+          ],
+          "p_a_not_better": 0.4286
+        },
+        {
+          "a": "map-free transformer",
+          "b": "Trajectron++ (most-likely, canonical windows)",
+          "ade_diff_a_minus_b": -0.021386210966267916,
+          "ci95": [
+            -0.2751489510470446,
+            0.2373522691160932
+          ],
+          "p_a_not_better": 0.4335
+        },
+        {
+          "a": "Trajectron++ (most-likely, canonical windows)",
+          "b": "MLP",
+          "ade_diff_a_minus_b": -0.10901017231412813,
+          "ci95": [
+            -0.33254420176979194,
+            0.10488923137735058
+          ],
+          "p_a_not_better": 0.2084
+        },
+        {
+          "a": "MLP",
+          "b": "AgentFormer (most-likely)",
+          "ade_diff_a_minus_b": -0.06309589642206914,
+          "ci95": [
+            -0.47434071434831515,
+            0.34872515479744215
+          ],
+          "p_a_not_better": 0.3763
+        },
+        {
+          "a": "AgentFormer (most-likely)",
+          "b": "K-mode decoder (top-1-sel)",
+          "ade_diff_a_minus_b": -0.23032489329563832,
+          "ci95": [
+            -0.5598230334294214,
+            0.02462933656361166
+          ],
+          "p_a_not_better": 0.0387
+        }
+      ],
+      "vs_best": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.013272733525715008,
+          "ci95": [
+            -0.4035054362613144,
+            0.25290736472436914
+          ],
+          "p_a_not_better": 0.4592
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "LED (most-likely)",
+          "ade_diff_a_minus_b": -0.04239650166697517,
+          "ci95": [
+            -0.13925420526966037,
+            0.05308814489204616
+          ],
+          "p_a_not_better": 0.2085
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "map-free transformer",
+          "ade_diff_a_minus_b": -0.04956290204261071,
+          "ci95": [
+            -0.16175009454507933,
+            0.024517847275557836
+          ],
+          "p_a_not_better": 0.1162
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "Trajectron++ (most-likely, canonical windows)",
+          "ade_diff_a_minus_b": -0.07094911300887863,
+          "ci95": [
+            -0.3108001532202611,
+            0.18379126824117198
+          ],
+          "p_a_not_better": 0.2916
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "MLP",
+          "ade_diff_a_minus_b": -0.17995928532300676,
+          "ci95": [
+            -0.27747586951309344,
+            -0.11301858444075874
+          ],
+          "p_a_not_better": 0.0
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "AgentFormer (most-likely)",
+          "ade_diff_a_minus_b": -0.2430551817450759,
+          "ci95": [
+            -0.6930645772628905,
+            0.1545593956651301
+          ],
+          "p_a_not_better": 0.1278
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "K-mode decoder (top-1-sel)",
+          "ade_diff_a_minus_b": -0.4733800750407142,
+          "ci95": [
+            -0.7763659405394732,
+            -0.20387400344381867
+          ],
+          "p_a_not_better": 0.0
+        }
+      ],
+      "vs_cv": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.013272733525715008,
+          "ci95": [
+            -0.4035054362613144,
+            0.25290736472436914
+          ],
+          "p_a_not_better": 0.4592
+        },
+        {
+          "a": "LED (most-likely)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": 0.029123768141260165,
+          "ci95": [
+            -0.40197170338661126,
+            0.3727009881156026
+          ],
+          "p_a_not_better": 0.5473
+        },
+        {
+          "a": "map-free transformer",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": 0.036290168516895704,
+          "ci95": [
+            -0.31549343265660634,
+            0.33258249004429596
+          ],
+          "p_a_not_better": 0.5744
+        },
+        {
+          "a": "Trajectron++ (most-likely, canonical windows)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": 0.05767637948316362,
+          "ci95": [
+            -0.1811280498770549,
+            0.2539355717150824
+          ],
+          "p_a_not_better": 0.6821
+        },
+        {
+          "a": "MLP",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": 0.16668655179729175,
+          "ci95": [
+            -0.18215399763822826,
+            0.4350371625672549
+          ],
+          "p_a_not_better": 0.85
+        },
+        {
+          "a": "AgentFormer (most-likely)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": 0.2297824482193609,
+          "ci95": [
+            0.019529159384856554,
+            0.44283358774398995
+          ],
+          "p_a_not_better": 0.9827
+        },
+        {
+          "a": "K-mode decoder (top-1-sel)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": 0.4601073415149992,
+          "ci95": [
+            0.22525831340808766,
+            0.688924483183633
+          ],
+          "p_a_not_better": 1.0
+        }
+      ],
+      "mlp_3seed_ade": 1.5817889272354837,
+      "seed_pooled": {
+        "ranking_by_ade": [
+          "LED (most-likely)",
+          "ST-GAT-inspired (MHA)",
+          "map-free transformer",
+          "Trajectron++ (most-likely, canonical windows)",
+          "AgentFormer (most-likely)",
+          "K-mode decoder (top-1-sel)"
+        ],
+        "models": {
+          "LED (most-likely)": {
+            "ade_seed_mean": 1.388072519351596,
+            "per_seed_ade": [
+              1.4141771993156456,
+              1.4079523837594021,
+              1.3420879749797403
+            ],
+            "ade_ci95_scene_seed": [
+              0.9962167169576767,
+              1.8432168733510537
+            ]
+          },
+          "ST-GAT-inspired (MHA)": {
+            "ade_seed_mean": 1.4755063319917403,
+            "per_seed_ade": [
+              1.3717806976486704,
+              1.456098404299075,
+              1.5986398940274753
+            ],
+            "ade_ci95_scene_seed": [
+              1.055203330591187,
+              1.9659322167078492
+            ]
+          },
+          "map-free transformer": {
+            "ade_seed_mean": 1.4845110403433732,
+            "per_seed_ade": [
+              1.421343599691281,
+              1.579690976142942,
+              1.4524985451958967
+            ],
+            "ade_ci95_scene_seed": [
+              1.0701507112436386,
+              1.9898080647758114
+            ]
+          },
+          "Trajectron++ (most-likely, canonical windows)": {
+            "ade_seed_mean": 1.4862537576048156,
+            "per_seed_ade": [
+              1.4427298106575488,
+              1.4966992776824435,
+              1.5193321844744543
+            ],
+            "ade_ci95_scene_seed": [
+              0.901717776524035,
+              2.171335947674145
+            ]
+          },
+          "AgentFormer (most-likely)": {
+            "ade_seed_mean": 1.5057960826230499,
+            "per_seed_ade": [
+              1.6148358793937463,
+              1.5198080481375267,
+              1.3827443203378773
+            ],
+            "ade_ci95_scene_seed": [
+              0.9179660197966142,
+              2.154195881012839
+            ]
+          },
+          "K-mode decoder (top-1-sel)": {
+            "ade_seed_mean": 1.7829974257728745,
+            "per_seed_ade": [
+              1.8451607726893842,
+              1.7089819287862695,
+              1.7948495758429694
+            ],
+            "ade_ci95_scene_seed": [
+              1.1322912728710781,
+              2.485481590445947
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "a": "LED (most-likely)",
+            "b": "ST-GAT-inspired (MHA)",
+            "ade_diff_a_minus_b": -0.08743381264014438,
+            "ci95": [
+              -0.27330898655801206,
+              0.0978601020793126
+            ],
+            "p_a_not_better": 0.1745
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "map-free transformer",
+            "ade_diff_a_minus_b": -0.0964385209917773,
+            "ci95": [
+              -0.2566786246531971,
+              0.028901102993779255
+            ],
+            "p_a_not_better": 0.0721
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.09818123825321967,
+            "ci95": [
+              -0.47064788118321016,
+              0.24894032239316005
+            ],
+            "p_a_not_better": 0.2966
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.11772356327145395,
+            "ci95": [
+              -0.5387004561167397,
+              0.31078890848458857
+            ],
+            "p_a_not_better": 0.2943
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.39492490642127853,
+            "ci95": [
+              -0.7825686960265806,
+              -0.004287410488634933
+            ],
+            "p_a_not_better": 0.0229
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "map-free transformer",
+            "ade_diff_a_minus_b": -0.009004708351632917,
+            "ci95": [
+              -0.2538607979088477,
+              0.19544799926141682
+            ],
+            "p_a_not_better": 0.4671
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.01074742561307529,
+            "ci95": [
+              -0.3172677221526696,
+              0.2619270682532278
+            ],
+            "p_a_not_better": 0.4471
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.030289750631309564,
+            "ci95": [
+              -0.376180938155044,
+              0.29999611225889034
+            ],
+            "p_a_not_better": 0.4194
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.30749109378113415,
+            "ci95": [
+              -0.6435181502498085,
+              0.03136597805834729
+            ],
+            "p_a_not_better": 0.0397
+          },
+          {
+            "a": "map-free transformer",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.0017427172614423725,
+            "ci95": [
+              -0.37440279737570475,
+              0.33986508837735596
+            ],
+            "p_a_not_better": 0.4874
+          },
+          {
+            "a": "map-free transformer",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.021285042279676647,
+            "ci95": [
+              -0.44147304686870303,
+              0.42603201344033426
+            ],
+            "p_a_not_better": 0.4605
+          },
+          {
+            "a": "map-free transformer",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.29848638542950123,
+            "ci95": [
+              -0.6660517932603433,
+              0.056717650673279725
+            ],
+            "p_a_not_better": 0.0555
+          },
+          {
+            "a": "Trajectron++ (most-likely, canonical windows)",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.019542325018234274,
+            "ci95": [
+              -0.19110787982810912,
+              0.21814728607028377
+            ],
+            "p_a_not_better": 0.4262
+          },
+          {
+            "a": "Trajectron++ (most-likely, canonical windows)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.29674366816805886,
+            "ci95": [
+              -0.5072472866534714,
+              -0.034547924696593624
+            ],
+            "p_a_not_better": 0.0167
+          },
+          {
+            "a": "AgentFormer (most-likely)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.2772013431498246,
+            "ci95": [
+              -0.5990363965130121,
+              0.021969947824002745
+            ],
+            "p_a_not_better": 0.0317
+          }
+        ]
+      }
+    },
+    "flagged": {
+      "n_scenes": 16,
+      "scenes": [
+        "20220118103308_seq_19",
+        "20220118103308_seq_21",
+        "20220118103308_seq_28",
+        "20220118103308_seq_6",
+        "20220118103808_seq_11",
+        "20220118103808_seq_18",
+        "20220118103808_seq_22",
+        "20220118103808_seq_25",
+        "20220118103808_seq_28",
+        "20220118103808_seq_8",
+        "20220118104308_seq_13",
+        "20220118105341_seq_0",
+        "20220118110338_seq_14",
+        "20220118110338_seq_16",
+        "20220118110338_seq_17",
+        "20220118111338_seq_4"
+      ],
+      "ranking_by_ade": [
+        "ST-GAT-inspired (MHA)",
+        "map-free transformer",
+        "AgentFormer (most-likely)",
+        "LED (most-likely)",
+        "K-mode decoder (top-1-sel)",
+        "Trajectron++ (most-likely, canonical windows)",
+        "MLP",
+        "CV (vel_k=5)"
+      ],
+      "models": {
+        "CV (vel_k=5)": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 6.565001087939635,
+          "ade_ci95": [
+            3.9524918039012986,
+            9.824325857436047
+          ],
+          "fde": 14.597146987915039,
+          "fde_ci95": [
+            8.952874364888707,
+            21.385217932480813
+          ]
+        },
+        "MLP": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 5.750542680252457,
+          "ade_ci95": [
+            3.5644663083031998,
+            8.428969353527302
+          ],
+          "fde": 12.410192489624023,
+          "fde_ci95": [
+            7.785243815594916,
+            17.93735527961227
+          ]
+        },
+        "AgentFormer (most-likely)": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 5.32605745074289,
+          "ade_ci95": [
+            3.3301284165261875,
+            7.822576119332332
+          ],
+          "fde": 11.692057609558105,
+          "fde_ci95": [
+            7.116859071236553,
+            17.259831240706692
+          ]
+        },
+        "LED (most-likely)": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 5.463976317355809,
+          "ade_ci95": [
+            3.329090379116967,
+            8.110787316372052
+          ],
+          "fde": 11.788601875305176,
+          "fde_ci95": [
+            7.1385987992247495,
+            17.339994440629148
+          ]
+        },
+        "K-mode decoder (top-1-sel)": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 5.67747543168074,
+          "ade_ci95": [
+            3.4998096846614697,
+            8.50644524713039
+          ],
+          "fde": 12.79973316192627,
+          "fde_ci95": [
+            7.91225399936424,
+            18.616475627013546
+          ]
+        },
+        "ST-GAT-inspired (MHA)": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 4.781067802203644,
+          "ade_ci95": [
+            3.010517133889502,
+            7.108908819820406
+          ],
+          "fde": 10.308306694030762,
+          "fde_ci95": [
+            6.554116855225207,
+            14.96766499281778
+          ]
+        },
+        "Trajectron++ (most-likely, canonical windows)": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 5.708121931253341,
+          "ade_ci95": [
+            3.4989941883202444,
+            8.49411195918643
+          ],
+          "fde": 12.168004989624023,
+          "fde_ci95": [
+            7.606434653807792,
+            17.98025351727459
+          ]
+        },
+        "map-free transformer": {
+          "n_rows": 1250,
+          "n_scenes": 16,
+          "ade": 4.915093132360804,
+          "ade_ci95": [
+            3.06875459517093,
+            7.2033107937990835
+          ],
+          "fde": 10.887989044189453,
+          "fde_ci95": [
+            6.787311878392789,
+            15.603577293459754
+          ]
+        }
+      },
+      "adjacent_pairs": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "map-free transformer",
+          "ade_diff_a_minus_b": -0.13402533015715967,
+          "ci95": [
+            -0.5353014245301267,
+            0.2684290479965026
+          ],
+          "p_a_not_better": 0.2829
+        },
+        {
+          "a": "map-free transformer",
+          "b": "AgentFormer (most-likely)",
+          "ade_diff_a_minus_b": -0.4109643183820859,
+          "ci95": [
+            -1.0027877526191538,
+            -0.006744311718111779
+          ],
+          "p_a_not_better": 0.0227
+        },
+        {
+          "a": "AgentFormer (most-likely)",
+          "b": "LED (most-likely)",
+          "ade_diff_a_minus_b": -0.1379188666129192,
+          "ci95": [
+            -0.5025413621491556,
+            0.16375870705206183
+          ],
+          "p_a_not_better": 0.2081
+        },
+        {
+          "a": "LED (most-likely)",
+          "b": "K-mode decoder (top-1-sel)",
+          "ade_diff_a_minus_b": -0.2134991143249314,
+          "ci95": [
+            -1.2210337260982098,
+            0.7405095068956207
+          ],
+          "p_a_not_better": 0.3302
+        },
+        {
+          "a": "K-mode decoder (top-1-sel)",
+          "b": "Trajectron++ (most-likely, canonical windows)",
+          "ade_diff_a_minus_b": -0.030646499572601016,
+          "ci95": [
+            -0.9118743838365574,
+            0.8742763048326074
+          ],
+          "p_a_not_better": 0.4635
+        },
+        {
+          "a": "Trajectron++ (most-likely, canonical windows)",
+          "b": "MLP",
+          "ade_diff_a_minus_b": -0.042420748999115965,
+          "ci95": [
+            -0.5073239124752501,
+            0.45926192824678813
+          ],
+          "p_a_not_better": 0.4257
+        },
+        {
+          "a": "MLP",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.8144584076871775,
+          "ci95": [
+            -1.6470301482488172,
+            -0.18216330757405533
+          ],
+          "p_a_not_better": 0.0043
+        }
+      ],
+      "vs_best": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "map-free transformer",
+          "ade_diff_a_minus_b": -0.13402533015715967,
+          "ci95": [
+            -0.5353014245301267,
+            0.2684290479965026
+          ],
+          "p_a_not_better": 0.2829
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "AgentFormer (most-likely)",
+          "ade_diff_a_minus_b": -0.5449896485392456,
+          "ci95": [
+            -1.121559557634972,
+            0.023692154608924727
+          ],
+          "p_a_not_better": 0.0299
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "LED (most-likely)",
+          "ade_diff_a_minus_b": -0.6829085151521648,
+          "ci95": [
+            -1.1763389138705076,
+            -0.21298566943913746
+          ],
+          "p_a_not_better": 0.0004
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "K-mode decoder (top-1-sel)",
+          "ade_diff_a_minus_b": -0.8964076294770962,
+          "ci95": [
+            -1.8983560266142434,
+            -0.012083764572231601
+          ],
+          "p_a_not_better": 0.0233
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "Trajectron++ (most-likely, canonical windows)",
+          "ade_diff_a_minus_b": -0.9270541290496972,
+          "ci95": [
+            -1.8568321636095568,
+            -0.18889949986541138
+          ],
+          "p_a_not_better": 0.003
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "MLP",
+          "ade_diff_a_minus_b": -0.9694748780488132,
+          "ci95": [
+            -1.5919424222050533,
+            -0.38783559722258976
+          ],
+          "p_a_not_better": 0.0
+        },
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.7839332857359906,
+          "ci95": [
+            -3.0401614799993832,
+            -0.7003497187442989
+          ],
+          "p_a_not_better": 0.0001
+        }
+      ],
+      "vs_cv": [
+        {
+          "a": "ST-GAT-inspired (MHA)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.7839332857359906,
+          "ci95": [
+            -3.0401614799993832,
+            -0.7003497187442989
+          ],
+          "p_a_not_better": 0.0001
+        },
+        {
+          "a": "map-free transformer",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.649907955578831,
+          "ci95": [
+            -3.0721524320010976,
+            -0.5762317271785337
+          ],
+          "p_a_not_better": 0.0001
+        },
+        {
+          "a": "AgentFormer (most-likely)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.238943637196745,
+          "ci95": [
+            -2.506480686413711,
+            -0.2946513573746926
+          ],
+          "p_a_not_better": 0.0025
+        },
+        {
+          "a": "LED (most-likely)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -1.1010247705838259,
+          "ci95": [
+            -2.124269710601644,
+            -0.309452240595643
+          ],
+          "p_a_not_better": 0.0016
+        },
+        {
+          "a": "K-mode decoder (top-1-sel)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.8875256562588945,
+          "ci95": [
+            -1.8569371840958246,
+            -0.10913001257347225
+          ],
+          "p_a_not_better": 0.0127
+        },
+        {
+          "a": "Trajectron++ (most-likely, canonical windows)",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.8568791566862934,
+          "ci95": [
+            -1.73480832578257,
+            -0.17220339087601688
+          ],
+          "p_a_not_better": 0.0049
+        },
+        {
+          "a": "MLP",
+          "b": "CV (vel_k=5)",
+          "ade_diff_a_minus_b": -0.8144584076871775,
+          "ci95": [
+            -1.6470301482488172,
+            -0.18216330757405533
+          ],
+          "p_a_not_better": 0.0043
+        }
+      ],
+      "mlp_3seed_ade": 5.738384632001349,
+      "seed_pooled": {
+        "ranking_by_ade": [
+          "ST-GAT-inspired (MHA)",
+          "map-free transformer",
+          "AgentFormer (most-likely)",
+          "LED (most-likely)",
+          "Trajectron++ (most-likely, canonical windows)",
+          "K-mode decoder (top-1-sel)"
+        ],
+        "models": {
+          "ST-GAT-inspired (MHA)": {
+            "ade_seed_mean": 4.838719098823959,
+            "per_seed_ade": [
+              4.781067802203644,
+              4.820307659891244,
+              4.914781834376989
+            ],
+            "ade_ci95_scene_seed": [
+              3.09208575040456,
+              7.106602891821578
+            ]
+          },
+          "map-free transformer": {
+            "ade_seed_mean": 5.1206265986825805,
+            "per_seed_ade": [
+              4.915093132360804,
+              5.2814696591920045,
+              5.165317004494935
+            ],
+            "ade_ci95_scene_seed": [
+              3.250246085341696,
+              7.464369881773642
+            ]
+          },
+          "AgentFormer (most-likely)": {
+            "ade_seed_mean": 5.4079964646459,
+            "per_seed_ade": [
+              5.32605745074289,
+              5.399097721234172,
+              5.4988342219606405
+            ],
+            "ade_ci95_scene_seed": [
+              3.3317033679370196,
+              8.020219548246608
+            ]
+          },
+          "LED (most-likely)": {
+            "ade_seed_mean": 5.494859078752135,
+            "per_seed_ade": [
+              5.46397631735581,
+              5.462366564906957,
+              5.558234353993642
+            ],
+            "ade_ci95_scene_seed": [
+              3.329600526585591,
+              8.190216937731135
+            ]
+          },
+          "Trajectron++ (most-likely, canonical windows)": {
+            "ade_seed_mean": 5.714129523774592,
+            "per_seed_ade": [
+              5.708121931253341,
+              5.898181574609481,
+              5.536085065460955
+            ],
+            "ade_ci95_scene_seed": [
+              3.5257229941083197,
+              8.446497526309251
+            ]
+          },
+          "K-mode decoder (top-1-sel)": {
+            "ade_seed_mean": 5.911043292884379,
+            "per_seed_ade": [
+              5.67747543168074,
+              6.1903475794556035,
+              5.865306867516791
+            ],
+            "ade_ci95_scene_seed": [
+              3.719435095776737,
+              8.751259217892121
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "map-free transformer",
+            "ade_diff_a_minus_b": -0.2819074998586215,
+            "ci95": [
+              -0.7041540039535609,
+              0.16576938910871802
+            ],
+            "p_a_not_better": 0.1169
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.5692773658219412,
+            "ci95": [
+              -1.0894342584311363,
+              -0.07105100294238954
+            ],
+            "p_a_not_better": 0.011
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "LED (most-likely)",
+            "ade_diff_a_minus_b": -0.6561399799281764,
+            "ci95": [
+              -1.2670947304460562,
+              -0.11052691332659645
+            ],
+            "p_a_not_better": 0.0078
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.8754104249506334,
+            "ci95": [
+              -1.7059498564588635,
+              -0.17424607540174225
+            ],
+            "p_a_not_better": 0.005
+          },
+          {
+            "a": "ST-GAT-inspired (MHA)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -1.0723241940604202,
+            "ci95": [
+              -2.0263366753251573,
+              -0.28983644919296303
+            ],
+            "p_a_not_better": 0.0022
+          },
+          {
+            "a": "map-free transformer",
+            "b": "AgentFormer (most-likely)",
+            "ade_diff_a_minus_b": -0.2873698659633197,
+            "ci95": [
+              -0.8939152333618091,
+              0.1596705285344562
+            ],
+            "p_a_not_better": 0.1149
+          },
+          {
+            "a": "map-free transformer",
+            "b": "LED (most-likely)",
+            "ade_diff_a_minus_b": -0.3742324800695549,
+            "ci95": [
+              -0.9663001619256815,
+              0.05852208844899802
+            ],
+            "p_a_not_better": 0.0482
+          },
+          {
+            "a": "map-free transformer",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.5935029250920119,
+            "ci95": [
+              -1.4720820385784659,
+              0.10297301187143676
+            ],
+            "p_a_not_better": 0.0547
+          },
+          {
+            "a": "map-free transformer",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.7904166942017987,
+            "ci95": [
+              -1.9128226081509259,
+              0.13773644588119033
+            ],
+            "p_a_not_better": 0.048
+          },
+          {
+            "a": "AgentFormer (most-likely)",
+            "b": "LED (most-likely)",
+            "ade_diff_a_minus_b": -0.08686261410623519,
+            "ci95": [
+              -0.4193807223356043,
+              0.2087238094068966
+            ],
+            "p_a_not_better": 0.2828
+          },
+          {
+            "a": "AgentFormer (most-likely)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.30613305912869215,
+            "ci95": [
+              -0.8990612676558408,
+              0.16113619633816229
+            ],
+            "p_a_not_better": 0.1117
+          },
+          {
+            "a": "AgentFormer (most-likely)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.503046828238479,
+            "ci95": [
+              -1.3794496203094058,
+              0.20381951754687083
+            ],
+            "p_a_not_better": 0.0829
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "Trajectron++ (most-likely, canonical windows)",
+            "ade_diff_a_minus_b": -0.21927044502245696,
+            "ci95": [
+              -0.794192361340514,
+              0.30651376956575965
+            ],
+            "p_a_not_better": 0.2243
+          },
+          {
+            "a": "LED (most-likely)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.4161842141322438,
+            "ci95": [
+              -1.2709403615343178,
+              0.3678901726968819
+            ],
+            "p_a_not_better": 0.143
+          },
+          {
+            "a": "Trajectron++ (most-likely, canonical windows)",
+            "b": "K-mode decoder (top-1-sel)",
+            "ade_diff_a_minus_b": -0.19691376910978686,
+            "ci95": [
+              -0.9827498584191311,
+              0.4799941868341441
+            ],
+            "p_a_not_better": 0.2803
+          }
+        ]
+      }
+    }
+  },
+  "plan": "docs/wiki/ego-quality-sensitivity.md",
+  "clean_scenes": [
+    "20220118103308_seq_20",
+    "20220118103308_seq_4",
+    "20220118103308_seq_5",
+    "20220118103808_seq_0",
+    "20220118103808_seq_1",
+    "20220118103808_seq_2",
+    "20220118103808_seq_20",
+    "20220118103808_seq_3",
+    "20220118105838_seq_10",
+    "20220118105838_seq_9",
+    "20220118110338_seq_10",
+    "20220118110338_seq_11",
+    "20220118110338_seq_12",
+    "20220118110338_seq_13",
+    "20220118110338_seq_15",
+    "20220118110338_seq_18",
+    "20220118111739_seq_15",
+    "20220118111739_seq_16",
+    "20220118111739_seq_17",
+    "20220118111739_seq_18",
+    "20220118111739_seq_19",
+    "20220118111739_seq_20",
+    "20220118111739_seq_21",
+    "20220118111739_seq_24",
+    "20220118112945_seq_22",
+    "20220118112945_seq_23",
+    "20220118112945_seq_24",
+    "20220118112945_seq_25",
+    "20220118112945_seq_26",
+    "20220118112945_seq_28",
+    "20220118115526_seq_2",
+    "20220118115526_seq_3"
+  ],
+  "when": "2026-11-26T00:15:00"
+}

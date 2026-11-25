@@ -1,0 +1,187 @@
+{
+  "source": "agent_windows_canonical_obs20_pred60.npz and the gate files",
+  "splits": {
+    "dev": {
+      "all": {
+        "n_scenes": 82,
+        "road_users": 8399,
+        "road_users_per_scene_median": 72.5,
+        "road_users_per_scene_range": [
+          6,
+          387
+        ],
+        "class_share": {
+          "vehicle": 0.4346946065007739,
+          "two_wheeler": 0.3501607334206453,
+          "ped": 0.20133349208239076,
+          "other": 0.013811167996190022
+        },
+        "affected_by_defect": {
+          "moving_share_world_frame": 0.7112751518037862,
+          "median_speed_of_moving_world_frame": 3.6206446593044586,
+          "ego_path_m_estimated_median": 46.35
+        },
+        "gate_failures": {
+          "fallback": 28,
+          "jump": 44,
+          "reversed": 19
+        }
+      },
+      "clean": {
+        "n_scenes": 26,
+        "road_users": 4737,
+        "road_users_per_scene_median": 163.5,
+        "road_users_per_scene_range": [
+          55,
+          387
+        ],
+        "class_share": {
+          "vehicle": 0.3799873337555415,
+          "two_wheeler": 0.31517838294279077,
+          "ped": 0.2811906269791007,
+          "other": 0.023643656322567024
+        },
+        "affected_by_defect": {
+          "moving_share_world_frame": 0.6020688199282246,
+          "median_speed_of_moving_world_frame": 2.5449636834364364,
+          "ego_path_m_estimated_median": 30.700000000000003
+        },
+        "gate_failures": {}
+      },
+      "flagged": {
+        "n_scenes": 56,
+        "road_users": 3662,
+        "road_users_per_scene_median": 47.0,
+        "road_users_per_scene_range": [
+          6,
+          207
+        ],
+        "class_share": {
+          "vehicle": 0.5054614964500274,
+          "two_wheeler": 0.3954123429819771,
+          "ped": 0.09803386127799017,
+          "other": 0.0010922992900054614
+        },
+        "affected_by_defect": {
+          "moving_share_world_frame": 0.8525395958492626,
+          "median_speed_of_moving_world_frame": 4.995118655805212,
+          "ego_path_m_estimated_median": 58.099999999999994
+        },
+        "gate_failures": {
+          "fallback": 28,
+          "jump": 44,
+          "reversed": 19
+        }
+      }
+    },
+    "test": {
+      "all": {
+        "n_scenes": 22,
+        "road_users": 2177,
+        "road_users_per_scene_median": 99.0,
+        "road_users_per_scene_range": [
+          6,
+          236
+        ],
+        "class_share": {
+          "vehicle": 0.41754708314193845,
+          "two_wheeler": 0.3803399173174093,
+          "ped": 0.1731740927882407,
+          "other": 0.028938906752411574
+        },
+        "affected_by_defect": {
+          "moving_share_world_frame": 0.6839687643546164,
+          "median_speed_of_moving_world_frame": 5.191934935874091,
+          "ego_path_m_estimated_median": 64.55
+        },
+        "gate_failures": {
+          "fallback": 6,
+          "jump": 14,
+          "reversed": 2
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "road_users": 927,
+        "road_users_per_scene_median": 134.0,
+        "road_users_per_scene_range": [
+          95,
+          236
+        ],
+        "class_share": {
+          "vehicle": 0.3451995685005394,
+          "two_wheeler": 0.3354908306364617,
+          "ped": 0.26105717367853293,
+          "other": 0.05825242718446602
+        },
+        "affected_by_defect": {
+          "moving_share_world_frame": 0.5717367853290184,
+          "median_speed_of_moving_world_frame": 5.142709484919882,
+          "ego_path_m_estimated_median": 63.849999999999994
+        },
+        "gate_failures": {}
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "road_users": 1250,
+        "road_users_per_scene_median": 71.0,
+        "road_users_per_scene_range": [
+          6,
+          171
+        ],
+        "class_share": {
+          "vehicle": 0.4712,
+          "two_wheeler": 0.4136,
+          "ped": 0.108,
+          "other": 0.0072
+        },
+        "affected_by_defect": {
+          "moving_share_world_frame": 0.7672,
+          "median_speed_of_moving_world_frame": 5.217584165573641,
+          "ego_path_m_estimated_median": 66.35
+        },
+        "gate_failures": {
+          "fallback": 6,
+          "jump": 14,
+          "reversed": 2
+        }
+      }
+    }
+  },
+  "plan": "docs/wiki/ego-quality-sensitivity.md",
+  "clean_scenes": [
+    "20220118103308_seq_20",
+    "20220118103308_seq_4",
+    "20220118103308_seq_5",
+    "20220118103808_seq_0",
+    "20220118103808_seq_1",
+    "20220118103808_seq_2",
+    "20220118103808_seq_20",
+    "20220118103808_seq_3",
+    "20220118105838_seq_10",
+    "20220118105838_seq_9",
+    "20220118110338_seq_10",
+    "20220118110338_seq_11",
+    "20220118110338_seq_12",
+    "20220118110338_seq_13",
+    "20220118110338_seq_15",
+    "20220118110338_seq_18",
+    "20220118111739_seq_15",
+    "20220118111739_seq_16",
+    "20220118111739_seq_17",
+    "20220118111739_seq_18",
+    "20220118111739_seq_19",
+    "20220118111739_seq_20",
+    "20220118111739_seq_21",
+    "20220118111739_seq_24",
+    "20220118112945_seq_22",
+    "20220118112945_seq_23",
+    "20220118112945_seq_24",
+    "20220118112945_seq_25",
+    "20220118112945_seq_26",
+    "20220118112945_seq_28",
+    "20220118115526_seq_2",
+    "20220118115526_seq_3"
+  ],
+  "when": "2026-11-26T00:16:11"
+}

@@ -47,3 +47,10 @@ Review1-phase3_ppt*.pdf
 data_external/
 # Rendered visualization frames/videos (large; regenerate with scripts/viz_*)
 outputs/viz/
+
+# Trajectron++ exports and logs of the CV fold models (data derived from IDD-3D; regenerate with closed_loop_cv.py)
+outputs/cv_folds/*/tpp_data/
+# Sensitivity run logs and re-simulated episodes (regenerate with scripts/ego_sensitivity.py)
+outputs/data_quality/*.log
+outputs/data_quality/episodes_*.json
+docs/wiki/chaos-gap-roadmap.md

@@ -1,0 +1,866 @@
+{
+  "source": "conformal_metrics.json, regime A (calibrated on all of val, as reported)",
+  "target": 0.9,
+  "models": {
+    "CV (vel_k=5)": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.7383684978604467,
+        "step_coverage_ci95": [
+          0.577225133648394,
+          0.8707600219478945
+        ],
+        "trajectory_coverage_per_step_band": 0.5525953146531924,
+        "class_conditional_step_coverage": 0.7453807910163497,
+        "simultaneous_trajectory_coverage": 0.6559485530546624,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.4702685906819111,
+          0.8011078931790803
+        ],
+        "per_class_step_coverage": {
+          "Animal": 0.9979674796747967,
+          "BicycleGroup": 0.9733333333333334,
+          "BicycleRider": 0.75,
+          "Bus": 0.4153498871331828,
+          "Car": 0.6108893501516846,
+          "Child": 1.0,
+          "Crane": 0.22727272727272727,
+          "Misc": 0.993368700265252,
+          "Motorcycle": 0.8733431516936672,
+          "MotorcyleRider": 0.6853894102335777,
+          "Pedestrian": 0.9268710550045086,
+          "PoliceCar": 0.2571428571428571,
+          "Scooter": 0.957983193277311,
+          "ScooterRider": 0.684889354458557,
+          "TourCar": 0.7472910216718266,
+          "Truck": 0.7386815684788786,
+          "Unknown": 0.991864406779661,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9620903770165483,
+        "step_coverage_ci95": [
+          0.9239358271525314,
+          0.9851613890163684
+        ],
+        "trajectory_coverage_per_step_band": 0.8381877022653722,
+        "class_conditional_step_coverage": 0.9455123443952583,
+        "simultaneous_trajectory_coverage": 0.9158576051779935,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.872996300863132,
+          0.9498399146211313
+        ],
+        "per_class_step_coverage": {
+          "Animal": 0.9979674796747967,
+          "BicycleGroup": 0.9733333333333334,
+          "BicycleRider": 0.75,
+          "Car": 0.9776295133437991,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.903182125930941,
+          "Pedestrian": 0.9975762760193898,
+          "Scooter": 0.9988636363636364,
+          "ScooterRider": 0.9327647758825863,
+          "TourCar": 0.9529895025102693,
+          "Truck": 0.9866030881017257,
+          "Unknown": 0.991864406779661,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.5788258225809869,
+        "step_coverage_ci95": [
+          0.4170178636836354,
+          0.7451702468796765
+        ],
+        "trajectory_coverage_per_step_band": 0.3408,
+        "class_conditional_step_coverage": 0.6026610733278247,
+        "simultaneous_trajectory_coverage": 0.4632,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.27336853976857967,
+          0.6431637289738015
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.4153498871331828,
+          "Car": 0.5172379234315494,
+          "Child": 1.0,
+          "Crane": 0.22727272727272727,
+          "Misc": 0.9907407407407407,
+          "Motorcycle": 0.7760416666666666,
+          "MotorcyleRider": 0.5373374755494189,
+          "Pedestrian": 0.8052011776251227,
+          "PoliceCar": 0.2571428571428571,
+          "Scooter": 0.8419354838709677,
+          "ScooterRider": 0.5627443315089914,
+          "TourCar": 0.5959019146792073,
+          "Truck": 0.5612609684757881,
+          "Van": 1.0
+        }
+      }
+    },
+    "MLP": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.7406688268322243,
+        "step_coverage_ci95": [
+          0.5932838465033394,
+          0.8646866807234528
+        ],
+        "trajectory_coverage_per_step_band": 0.4813964170877354,
+        "class_conditional_step_coverage": 0.7351777189641099,
+        "simultaneous_trajectory_coverage": 0.662379421221865,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.4856438121060332,
+          0.8011166837306339
+        ],
+        "per_class_step_coverage": {
+          "Animal": 0.9979674796747967,
+          "BicycleGroup": 0.96,
+          "BicycleRider": 0.45,
+          "Bus": 0.49887133182844245,
+          "Car": 0.6162382244930544,
+          "Child": 0.9803921568627451,
+          "Crane": 0.3409090909090909,
+          "Misc": 0.9986737400530504,
+          "Motorcycle": 0.8939617083946981,
+          "MotorcyleRider": 0.6907322419343791,
+          "Pedestrian": 0.9269612263300271,
+          "PoliceCar": 0.22857142857142856,
+          "Scooter": 0.9663865546218487,
+          "ScooterRider": 0.6706822050543407,
+          "TourCar": 0.7464202786377709,
+          "Truck": 0.7613184315211214,
+          "Unknown": 0.984406779661017,
+          "Van": 0.990185387131952
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9398972043138536,
+        "step_coverage_ci95": [
+          0.8954335102763032,
+          0.9743474822040601
+        ],
+        "trajectory_coverage_per_step_band": 0.7313915857605178,
+        "class_conditional_step_coverage": 0.9034136486526635,
+        "simultaneous_trajectory_coverage": 0.9007551240560949,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.8456140350877193,
+          0.9508687061855582
+        ],
+        "per_class_step_coverage": {
+          "Animal": 0.9979674796747967,
+          "BicycleGroup": 0.96,
+          "BicycleRider": 0.45,
+          "Car": 0.9556514913657771,
+          "Child": 0.98,
+          "Misc": 1.0,
+          "Motorcycle": 0.9966101694915255,
+          "MotorcyleRider": 0.8508801624915369,
+          "Pedestrian": 0.9954376960364985,
+          "Scooter": 0.9988636363636364,
+          "ScooterRider": 0.8776279254264181,
+          "TourCar": 0.9395253308991328,
+          "Truck": 0.9877384196185286,
+          "Unknown": 0.984406779661017,
+          "Van": 0.9892857142857143
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.5985931905336977,
+        "step_coverage_ci95": [
+          0.44011644496046876,
+          0.7574341983875229
+        ],
+        "trajectory_coverage_per_step_band": 0.296,
+        "class_conditional_step_coverage": 0.6152037119430497,
+        "simultaneous_trajectory_coverage": 0.4856,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.29053479138492266,
+          0.6694270979511646
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.49887133182844245,
+          "Car": 0.5295650430948086,
+          "Child": 1.0,
+          "Crane": 0.3409090909090909,
+          "Misc": 0.9981481481481481,
+          "Motorcycle": 0.8151041666666666,
+          "MotorcyleRider": 0.5818662984696813,
+          "Pedestrian": 0.8091265947006869,
+          "PoliceCar": 0.22857142857142856,
+          "Scooter": 0.8741935483870967,
+          "ScooterRider": 0.5687060203283816,
+          "TourCar": 0.6042996305005038,
+          "Truck": 0.5992850178745531,
+          "Van": 1.0
+        }
+      }
+    },
+    "AgentFormer (most-likely)": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.7565485171535284,
+        "step_coverage_ci95": [
+          0.6159490404778759,
+          0.8733553455314351
+        ],
+        "trajectory_coverage_per_step_band": 0.5562700964630225,
+        "class_conditional_step_coverage": 0.7734175962798981,
+        "simultaneous_trajectory_coverage": 0.7464400551217272,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.5790981348678287,
+          0.8778262703444961
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.825,
+          "Bus": 0.48081264108352145,
+          "Car": 0.6384320613124701,
+          "Child": 1.0,
+          "Crane": 0.6818181818181818,
+          "Misc": 1.0,
+          "Motorcycle": 0.8733431516936672,
+          "MotorcyleRider": 0.715733954380437,
+          "Pedestrian": 0.9344454463480614,
+          "PoliceCar": 0.3492063492063492,
+          "Scooter": 0.9521008403361344,
+          "ScooterRider": 0.7027628649993453,
+          "TourCar": 0.7500967492260062,
+          "Truck": 0.757908694828566,
+          "Unknown": 0.9993220338983051,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9427493389583766,
+        "step_coverage_ci95": [
+          0.9160980402860418,
+          0.9715163731289033
+        ],
+        "trajectory_coverage_per_step_band": 0.7950377562028047,
+        "class_conditional_step_coverage": 0.9376986838587005,
+        "simultaneous_trajectory_coverage": 0.941747572815534,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.9042834687703898,
+          0.9759786476868327
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.825,
+          "Car": 0.9631083202511774,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.8559580230196344,
+          "Pedestrian": 0.9997148560022812,
+          "Scooter": 1.0,
+          "ScooterRider": 0.9097580325267751,
+          "TourCar": 0.9078046554084893,
+          "Truck": 0.9743415077202543,
+          "Unknown": 0.9993220338983051,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.6237632153223586,
+        "step_coverage_ci95": [
+          0.46879904953136864,
+          0.7798427651658045
+        ],
+        "trajectory_coverage_per_step_band": 0.3792,
+        "class_conditional_step_coverage": 0.656263903896269,
+        "simultaneous_trajectory_coverage": 0.6016,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.3956977830364928,
+          0.7946842624328414
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.48081264108352145,
+          "Car": 0.5555221487271998,
+          "Child": 1.0,
+          "Crane": 0.6818181818181818,
+          "Misc": 1.0,
+          "Motorcycle": 0.7760416666666666,
+          "MotorcyleRider": 0.6204119203774019,
+          "Pedestrian": 0.8221295387634936,
+          "PoliceCar": 0.3492063492063492,
+          "Scooter": 0.8161290322580645,
+          "ScooterRider": 0.6007623143080532,
+          "TourCar": 0.6340275445078939,
+          "Truck": 0.603022424439389,
+          "Van": 1.0
+        }
+      }
+    },
+    "LED (most-likely)": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.7328773899923322,
+        "step_coverage_ci95": [
+          0.5781758825352372,
+          0.8618170241545539
+        ],
+        "trajectory_coverage_per_step_band": 0.5314653192466697,
+        "class_conditional_step_coverage": 0.7246283608300972,
+        "simultaneous_trajectory_coverage": 0.686724850711989,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.5052066708779105,
+          0.8281912348272642
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.325,
+          "Bus": 0.5711060948081265,
+          "Car": 0.5931662142743095,
+          "Child": 1.0,
+          "Crane": 0.36363636363636365,
+          "Misc": 0.9946949602122016,
+          "Motorcycle": 0.882179675994109,
+          "MotorcyleRider": 0.6951161038427289,
+          "Pedestrian": 0.9281334535617674,
+          "PoliceCar": 0.25396825396825395,
+          "Scooter": 0.9672268907563025,
+          "ScooterRider": 0.65948670944088,
+          "TourCar": 0.7319078947368421,
+          "Truck": 0.7466376207615079,
+          "Unknown": 0.9966101694915255,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9412638521643543,
+        "step_coverage_ci95": [
+          0.9024701253278927,
+          0.9687582388610598
+        ],
+        "trajectory_coverage_per_step_band": 0.7961165048543689,
+        "class_conditional_step_coverage": 0.8960456341543124,
+        "simultaneous_trajectory_coverage": 0.9352750809061489,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.8905013192612137,
+          0.96875
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.325,
+          "Car": 0.9803767660910518,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.8451252538930264,
+          "Pedestrian": 0.9984317080125463,
+          "Scooter": 1.0,
+          "ScooterRider": 0.868702895676319,
+          "TourCar": 0.9406663623916021,
+          "Truck": 0.9893278837420527,
+          "Unknown": 0.9966101694915255,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.5842708531960423,
+        "step_coverage_ci95": [
+          0.41925055853912346,
+          0.746029267303864
+        ],
+        "trajectory_coverage_per_step_band": 0.3352,
+        "class_conditional_step_coverage": 0.602385643763639,
+        "simultaneous_trajectory_coverage": 0.5024,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.30301854855772625,
+          0.6883550217348195
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.5711060948081265,
+          "Car": 0.49428743235117256,
+          "Child": 1.0,
+          "Crane": 0.36363636363636365,
+          "Misc": 0.9925925925925926,
+          "Motorcycle": 0.7916666666666666,
+          "MotorcyleRider": 0.5931423311471637,
+          "Pedestrian": 0.8071638861629048,
+          "PoliceCar": 0.25396825396825395,
+          "Scooter": 0.8741935483870967,
+          "ScooterRider": 0.556391712275215,
+          "TourCar": 0.5782667114544844,
+          "Truck": 0.5729606759831004,
+          "Van": 1.0
+        }
+      }
+    },
+    "K-mode decoder (top-1-sel)": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.7571792525167578,
+        "step_coverage_ci95": [
+          0.6326269935450871,
+          0.8534268414047569
+        ],
+        "trajectory_coverage_per_step_band": 0.5898024804777217,
+        "class_conditional_step_coverage": 0.7597021939696752,
+        "simultaneous_trajectory_coverage": 0.7142857142857143,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.5634260654461438,
+          0.8311427466868117
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.325,
+          "Bus": 0.9616252821670429,
+          "Car": 0.624141785087019,
+          "Child": 1.0,
+          "Crane": 0.7045454545454546,
+          "Misc": 1.0,
+          "Motorcycle": 0.9852724594992637,
+          "MotorcyleRider": 0.6712103568737585,
+          "Pedestrian": 0.955004508566276,
+          "PoliceCar": 0.3968253968253968,
+          "Scooter": 1.0,
+          "ScooterRider": 0.6753306272096373,
+          "TourCar": 0.7167182662538699,
+          "Truck": 0.859632506156469,
+          "Unknown": 0.9993220338983051,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.898214444873585,
+        "step_coverage_ci95": [
+          0.8397585954645208,
+          0.9441697132825553
+        ],
+        "trajectory_coverage_per_step_band": 0.7864077669902912,
+        "class_conditional_step_coverage": 0.8794676015330224,
+        "simultaneous_trajectory_coverage": 0.8942826321467098,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.8360318917717469,
+          0.9461606354810238
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.325,
+          "Car": 0.8402668759811617,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.8053486797562627,
+          "Pedestrian": 0.9994297120045623,
+          "Scooter": 1.0,
+          "ScooterRider": 0.767750892502975,
+          "TourCar": 0.865814696485623,
+          "Truck": 0.9822888283378747,
+          "Unknown": 0.9993220338983051,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.6566028941291129,
+        "step_coverage_ci95": [
+          0.5065552489975983,
+          0.790364683308437
+        ],
+        "trajectory_coverage_per_step_band": 0.444,
+        "class_conditional_step_coverage": 0.6742939469056548,
+        "simultaneous_trajectory_coverage": 0.5808,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.3909443622710206,
+          0.7420955882352941
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.9616252821670429,
+          "Car": 0.5689516937261976,
+          "Child": 1.0,
+          "Crane": 0.7045454545454546,
+          "Misc": 1.0,
+          "Motorcycle": 0.9739583333333334,
+          "MotorcyleRider": 0.5800253135427453,
+          "Pedestrian": 0.8785574092247301,
+          "PoliceCar": 0.3968253968253968,
+          "Scooter": 1.0,
+          "ScooterRider": 0.6297888975762315,
+          "TourCar": 0.6069868995633187,
+          "Truck": 0.7718557036074098,
+          "Van": 1.0
+        }
+      }
+    },
+    "ST-GAT-inspired (MHA)": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.7934032501422247,
+        "step_coverage_ci95": [
+          0.6679966807873163,
+          0.8911563880040864
+        ],
+        "trajectory_coverage_per_step_band": 0.583371612310519,
+        "class_conditional_step_coverage": 0.7913255336515868,
+        "simultaneous_trajectory_coverage": 0.7276067983463482,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.5680685812198317,
+          0.8509846029398683
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.85,
+          "Bus": 0.8803611738148984,
+          "Car": 0.6604662302410985,
+          "Child": 1.0,
+          "Crane": 0.36363636363636365,
+          "Misc": 1.0,
+          "Motorcycle": 0.9234167893961709,
+          "MotorcyleRider": 0.7638879375299678,
+          "Pedestrian": 0.9356176735798016,
+          "PoliceCar": 0.546031746031746,
+          "Scooter": 0.9831932773109243,
+          "ScooterRider": 0.7612937017153333,
+          "TourCar": 0.7694465944272446,
+          "Truck": 0.8146429247963629,
+          "Unknown": 0.9979661016949153,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9656852550580826,
+        "step_coverage_ci95": [
+          0.9473254389546754,
+          0.985044837376662
+        ],
+        "trajectory_coverage_per_step_band": 0.8295577130528586,
+        "class_conditional_step_coverage": 0.933361062420155,
+        "simultaneous_trajectory_coverage": 0.9341963322545846,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.9045454545454545,
+          0.9609856262833676
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.85,
+          "Car": 0.9811616954474097,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.9097833446174678,
+          "Pedestrian": 0.999001996007984,
+          "Scooter": 0.9988636363636364,
+          "ScooterRider": 0.9327647758825863,
+          "TourCar": 0.9580100410771337,
+          "Truck": 0.9922797456857403,
+          "Unknown": 0.9979661016949153,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.670543867454819,
+        "step_coverage_ci95": [
+          0.5293610088090721,
+          0.7947265587348743
+        ],
+        "trajectory_coverage_per_step_band": 0.4008,
+        "class_conditional_step_coverage": 0.6900358058433441,
+        "simultaneous_trajectory_coverage": 0.5744,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.3694701485151006,
+          0.7432276746151147
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.8803611738148984,
+          "Car": 0.5785728602926438,
+          "Child": 1.0,
+          "Crane": 0.36363636363636365,
+          "Misc": 1.0,
+          "Motorcycle": 0.8645833333333334,
+          "MotorcyleRider": 0.6647106201817973,
+          "Pedestrian": 0.8265456329735035,
+          "PoliceCar": 0.546031746031746,
+          "Scooter": 0.9387096774193548,
+          "ScooterRider": 0.6767982799061767,
+          "TourCar": 0.6306684581793752,
+          "Truck": 0.6875203119922002,
+          "Van": 1.0
+        }
+      }
+    },
+    "Trajectron++ (most-likely, canonical windows)": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.778883969427886,
+        "step_coverage_ci95": [
+          0.6420179558487874,
+          0.8913186121576256
+        ],
+        "trajectory_coverage_per_step_band": 0.6256316031235646,
+        "class_conditional_step_coverage": 0.8064879170892182,
+        "simultaneous_trajectory_coverage": 0.7666513550757924,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.6209926240204066,
+          0.8794064101097169
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.05,
+          "Bus": 0.5959367945823928,
+          "Car": 0.6989461919208048,
+          "Child": 1.0,
+          "Crane": 0.6590909090909091,
+          "Misc": 1.0,
+          "Motorcycle": 0.9013254786450663,
+          "MotorcyleRider": 0.742859099938352,
+          "Pedestrian": 0.9447249774571687,
+          "PoliceCar": 0.12698412698412698,
+          "Scooter": 0.9705882352941176,
+          "ScooterRider": 0.732617519968574,
+          "TourCar": 0.7345201238390093,
+          "Truck": 0.7818715665845805,
+          "Unknown": 0.9993220338983051,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9544846846311537,
+        "step_coverage_ci95": [
+          0.9263097996179328,
+          0.9769683070241784
+        ],
+        "trajectory_coverage_per_step_band": 0.8522114347357066,
+        "class_conditional_step_coverage": 0.9524050031195223,
+        "simultaneous_trajectory_coverage": 0.9428263214670982,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.9129287598944591,
+          0.97
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.05,
+          "Car": 0.9831240188383046,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.9087677725118484,
+          "Pedestrian": 0.9997148560022812,
+          "Scooter": 1.0,
+          "ScooterRider": 0.9367314557715193,
+          "TourCar": 0.8735737106344135,
+          "Truck": 0.9918256130790191,
+          "Unknown": 0.9993220338983051,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.6536579164812814,
+        "step_coverage_ci95": [
+          0.49652723583872505,
+          0.8025581150679969
+        ],
+        "trajectory_coverage_per_step_band": 0.4576,
+        "class_conditional_step_coverage": 0.7024301362316998,
+        "simultaneous_trajectory_coverage": 0.636,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.45288747714586486,
+          0.7971755290427336
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.5959367945823928,
+          "Car": 0.6263780316696733,
+          "Child": 1.0,
+          "Crane": 0.6590909090909091,
+          "Misc": 1.0,
+          "Motorcycle": 0.8255208333333334,
+          "MotorcyleRider": 0.6300770912438154,
+          "Pedestrian": 0.8500981354268891,
+          "PoliceCar": 0.12698412698412698,
+          "Scooter": 0.8870967741935484,
+          "ScooterRider": 0.6320367474589523,
+          "TourCar": 0.6321800470272086,
+          "Truck": 0.6316217094572636,
+          "Van": 1.0
+        }
+      }
+    },
+    "map-free transformer": {
+      "all": {
+        "n_scenes": 22,
+        "n_agents": 2177,
+        "step_coverage": 0.8075515100546637,
+        "step_coverage_ci95": [
+          0.6776721214940371,
+          0.9121035476231055
+        ],
+        "trajectory_coverage_per_step_band": 0.6104731281580156,
+        "class_conditional_step_coverage": 0.7972247644017908,
+        "simultaneous_trajectory_coverage": 0.731740927882407,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.5645705441267417,
+          0.8624165327143196
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.7,
+          "Bus": 0.8058690744920993,
+          "Car": 0.6888072808558199,
+          "Child": 1.0,
+          "Crane": 0.5909090909090909,
+          "Misc": 1.0,
+          "Motorcycle": 0.9322533136966127,
+          "MotorcyleRider": 0.7706007260771286,
+          "Pedestrian": 0.9573489630297566,
+          "PoliceCar": 0.473015873015873,
+          "Scooter": 0.9798319327731092,
+          "ScooterRider": 0.7612282309807517,
+          "TourCar": 0.8101780185758514,
+          "Truck": 0.822220117446486,
+          "Unknown": 0.9979661016949153,
+          "Van": 1.0
+        }
+      },
+      "clean": {
+        "n_scenes": 6,
+        "n_agents": 927,
+        "step_coverage": 0.9722511066876616,
+        "step_coverage_ci95": [
+          0.9496994116142236,
+          0.9871078302135513
+        ],
+        "trajectory_coverage_per_step_band": 0.8597626752966558,
+        "class_conditional_step_coverage": 0.9283995365281202,
+        "simultaneous_trajectory_coverage": 0.9385113268608414,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.9097222222222222,
+          0.96045197740113
+        ],
+        "per_class_step_coverage": {
+          "Animal": 1.0,
+          "BicycleGroup": 1.0,
+          "BicycleRider": 0.7,
+          "Car": 0.9862637362637363,
+          "Child": 1.0,
+          "Misc": 1.0,
+          "Motorcycle": 1.0,
+          "MotorcyleRider": 0.9258632362897766,
+          "Pedestrian": 0.9994297120045623,
+          "Scooter": 1.0,
+          "ScooterRider": 0.9631098770329234,
+          "TourCar": 0.9513920584208124,
+          "Truck": 0.990236148955495,
+          "Unknown": 0.9979661016949153,
+          "Van": 1.0
+        }
+      },
+      "flagged": {
+        "n_scenes": 16,
+        "n_agents": 1250,
+        "step_coverage": 0.6900993665120023,
+        "step_coverage_ci95": [
+          0.5398538165477117,
+          0.8303724720843583
+        ],
+        "trajectory_coverage_per_step_band": 0.4256,
+        "class_conditional_step_coverage": 0.7036801627153118,
+        "simultaneous_trajectory_coverage": 0.5784,
+        "simultaneous_trajectory_coverage_ci95": [
+          0.37146248443337493,
+          0.7628805564024825
+        ],
+        "per_class_step_coverage": {
+          "Bus": 0.8058690744920993,
+          "Car": 0.6128482661856084,
+          "Child": 1.0,
+          "Crane": 0.5909090909090909,
+          "Misc": 1.0,
+          "Motorcycle": 0.8802083333333334,
+          "MotorcyleRider": 0.6650558048555978,
+          "Pedestrian": 0.884936211972522,
+          "PoliceCar": 0.473015873015873,
+          "Scooter": 0.9225806451612903,
+          "ScooterRider": 0.6617474589523065,
+          "TourCar": 0.7062479005710447,
+          "Truck": 0.7019824504387391,
+          "Van": 1.0
+        }
+      }
+    }
+  },
+  "plan": "docs/wiki/ego-quality-sensitivity.md",
+  "clean_scenes": [
+    "20220118103308_seq_20",
+    "20220118103308_seq_4",
+    "20220118103308_seq_5",
+    "20220118103808_seq_0",
+    "20220118103808_seq_1",
+    "20220118103808_seq_2",
+    "20220118103808_seq_20",
+    "20220118103808_seq_3",
+    "20220118105838_seq_10",
+    "20220118105838_seq_9",
+    "20220118110338_seq_10",
+    "20220118110338_seq_11",
+    "20220118110338_seq_12",
+    "20220118110338_seq_13",
+    "20220118110338_seq_15",
+    "20220118110338_seq_18",
+    "20220118111739_seq_15",
+    "20220118111739_seq_16",
+    "20220118111739_seq_17",
+    "20220118111739_seq_18",
+    "20220118111739_seq_19",
+    "20220118111739_seq_20",
+    "20220118111739_seq_21",
+    "20220118111739_seq_24",
+    "20220118112945_seq_22",
+    "20220118112945_seq_23",
+    "20220118112945_seq_24",
+    "20220118112945_seq_25",
+    "20220118112945_seq_26",
+    "20220118112945_seq_28",
+    "20220118115526_seq_2",
+    "20220118115526_seq_3"
+  ],
+  "when": "2026-11-26T00:15:12"
+}

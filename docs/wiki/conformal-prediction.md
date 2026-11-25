@@ -2,6 +2,14 @@
 
 ## Status: ✅ Done — revised Oct 2026 (scene-level folds, trajectory coverage, simultaneous bands)
 
+> **Data-quality note (2026-11-26):** regime A (bands calibrated on val, applied to test) gives step coverage of:
+> - 0.73–0.81 on all 22 test scenes;
+> - 0.90–0.97 on the 6 test scenes whose ego-motion estimate passes the quality check;
+> - 0.58–0.69 on the 16 that fail it.
+>
+> The reported val→test drop sits in the flagged scenes. 7 of the 10 calibration scenes are flagged too. Details:
+> [[ego-quality-sensitivity]].
+
 ## What It Does
 
 Post-hoc wrapper (`scripts/conformal_wrapper.py`) that turns each deployable point predictor

@@ -1,0 +1,1798 @@
+{
+  "rule": "holds / not determinable / changes, as fixed in the plan",
+  "lines": [
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs map-free transformer (3-seed means)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.166 -> -0.009 [-0.254, +0.195]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs map-free transformer (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.166 -> -0.282 [-0.704, +0.166]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs LED (most-likely) (3-seed means)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.340 -> +0.087 [-0.098, +0.273]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs LED (most-likely) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "not determinable",
+      "detail": "-0.340 -> -0.656 [-1.267, -0.111]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs AgentFormer (most-likely) (3-seed means)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "-0.340 -> -0.030 [-0.376, +0.300]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs AgentFormer (most-likely) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.340 -> -0.569 [-1.089, -0.071]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.507 -> -0.011 [-0.317, +0.262]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.507 -> -0.875 [-1.706, -0.174]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.747 -> -0.307 [-0.644, +0.031]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.747 -> -1.072 [-2.026, -0.290]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs LED (most-likely) (3-seed means)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.174 -> +0.096 [-0.029, +0.257]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs LED (most-likely) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.174 -> -0.374 [-0.966, +0.059]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs AgentFormer (most-likely) (3-seed means)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.174 -> -0.021 [-0.441, +0.426]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs AgentFormer (most-likely) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.174 -> -0.287 [-0.894, +0.160]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.342 -> -0.002 [-0.374, +0.340]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.342 -> -0.594 [-1.472, +0.103]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "-0.581 -> -0.298 [-0.666, +0.057]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "not determinable",
+      "detail": "-0.581 -> -0.790 [-1.913, +0.138]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs AgentFormer (most-likely) (3-seed means)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.000 -> -0.118 [-0.539, +0.311]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs AgentFormer (most-likely) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.000 -> +0.087 [-0.209, +0.419]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.168 -> -0.098 [-0.471, +0.249]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.168 -> -0.219 [-0.794, +0.307]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "-0.407 -> -0.395 [-0.783, -0.004]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.407 -> -0.416 [-1.271, +0.368]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE AgentFormer (most-likely) vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.167 -> +0.020 [-0.218, +0.191]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE AgentFormer (most-likely) vs Trajectron++ (most-likely, canonical windows) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.167 -> -0.306 [-0.899, +0.161]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE AgentFormer (most-likely) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.407 -> -0.277 [-0.599, +0.022]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE AgentFormer (most-likely) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.407 -> -0.503 [-1.379, +0.204]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE Trajectron++ (most-likely, canonical windows) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "-0.239 -> -0.297 [-0.507, -0.035]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE Trajectron++ (most-likely, canonical windows) vs K-mode decoder (top-1-sel) (3-seed means)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.239 -> -0.197 [-0.983, +0.480]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-1.030 -> -0.013 [-0.404, +0.253]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE ST-GAT-inspired (MHA) vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-1.030 -> -1.784 [-3.040, -0.700]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.932 -> +0.036 [-0.315, +0.333]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE map-free transformer vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.932 -> -1.650 [-3.072, -0.576]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.620 -> +0.029 [-0.402, +0.373]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE LED (most-likely) vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.620 -> -1.101 [-2.124, -0.309]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE AgentFormer (most-likely) vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.614 -> +0.230 [+0.020, +0.443]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE AgentFormer (most-likely) vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.614 -> -1.239 [-2.506, -0.295]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE Trajectron++ (most-likely, canonical windows) vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.467 -> +0.058 [-0.181, +0.254]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE Trajectron++ (most-likely, canonical windows) vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.467 -> -0.857 [-1.735, -0.172]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE MLP vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.397 -> +0.167 [-0.182, +0.435]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE MLP vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "not determinable",
+      "detail": "-0.397 -> -0.814 [-1.647, -0.182]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE K-mode decoder (top-1-sel) vs CV (seed 0)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.314 -> +0.460 [+0.225, +0.689]"
+    },
+    {
+      "part": "S1",
+      "claim": "ADE K-mode decoder (top-1-sel) vs CV (seed 0)",
+      "subset": "flagged",
+      "verdict": "not determinable",
+      "detail": "-0.314 -> -0.888 [-1.857, -0.109]"
+    },
+    {
+      "part": "S2",
+      "claim": "CV (vel_k=5): regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.738 -> 0.962 [0.924, 0.985]"
+    },
+    {
+      "part": "S2",
+      "claim": "CV (vel_k=5): regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.738 -> 0.579 [0.417, 0.745]"
+    },
+    {
+      "part": "S2",
+      "claim": "MLP: regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.741 -> 0.940 [0.895, 0.974]"
+    },
+    {
+      "part": "S2",
+      "claim": "MLP: regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.741 -> 0.599 [0.440, 0.757]"
+    },
+    {
+      "part": "S2",
+      "claim": "AgentFormer (most-likely): regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.757 -> 0.943 [0.916, 0.972]"
+    },
+    {
+      "part": "S2",
+      "claim": "AgentFormer (most-likely): regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.757 -> 0.624 [0.469, 0.780]"
+    },
+    {
+      "part": "S2",
+      "claim": "LED (most-likely): regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.733 -> 0.941 [0.902, 0.969]"
+    },
+    {
+      "part": "S2",
+      "claim": "LED (most-likely): regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.733 -> 0.584 [0.419, 0.746]"
+    },
+    {
+      "part": "S2",
+      "claim": "K-mode decoder (top-1-sel): regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.757 -> 0.898 [0.840, 0.944]"
+    },
+    {
+      "part": "S2",
+      "claim": "K-mode decoder (top-1-sel): regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.757 -> 0.657 [0.507, 0.790]"
+    },
+    {
+      "part": "S2",
+      "claim": "ST-GAT-inspired (MHA): regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.793 -> 0.966 [0.947, 0.985]"
+    },
+    {
+      "part": "S2",
+      "claim": "ST-GAT-inspired (MHA): regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.793 -> 0.671 [0.529, 0.795]"
+    },
+    {
+      "part": "S2",
+      "claim": "Trajectron++ (most-likely, canonical windows): regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.779 -> 0.954 [0.926, 0.977]"
+    },
+    {
+      "part": "S2",
+      "claim": "Trajectron++ (most-likely, canonical windows): regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "0.779 -> 0.654 [0.497, 0.803]"
+    },
+    {
+      "part": "S2",
+      "claim": "map-free transformer: regime-A step coverage below the 90% target (shift)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "0.808 -> 0.972 [0.950, 0.987]"
+    },
+    {
+      "part": "S2",
+      "claim": "map-free transformer: regime-A step coverage below the 90% target (shift)",
+      "subset": "flagged",
+      "verdict": "not determinable",
+      "detail": "0.808 -> 0.690 [0.540, 0.830]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: the pre-registered pick",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5) (tied with leader: 11 of 12)"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: CV (vel_k=5) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.034 -> +0.000 [+0.000, +0.000]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: MLP at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.027 -> +0.042 [-0.125, +0.250]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: ST-GAT (MHA) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.038 -> -0.014 [-0.083, +0.056]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: Map-free transformer at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.057 -> -0.028 [-0.125, +0.056]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: K-mode (top-1) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.027 -> -0.014 [-0.083, +0.042]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: AgentFormer (most-likely) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.019 -> +0.028 [-0.056, +0.125]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: LED (mean-denoised) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.053 -> +0.014 [-0.125, +0.167]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: Trajectron++ (most-likely) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.015 -> +0.042 [-0.069, +0.181]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: K-mode set (10 modes) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.064 -> +0.056 [-0.042, +0.208]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: AgentFormer set (10 samples) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.025 -> -0.042 [-0.125, +0.000]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: LED set (10 samples) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.004 -> -0.014 [-0.083, +0.042]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: Trajectron++ set (10 samples) at-fault vs ignoring agents (exploratory)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.008 -> -0.028 [-0.083, +0.000]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: the pre-registered pick",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5) (tied with leader: 9 of 12)"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: CV (vel_k=5) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.034 -> -0.047 [-0.141, +0.016]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: MLP at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.027 -> -0.052 [-0.172, +0.057]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: ST-GAT (MHA) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.038 -> -0.047 [-0.109, +0.005]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: Map-free transformer at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.057 -> -0.068 [-0.182, +0.042]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: K-mode (top-1) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.027 -> -0.031 [-0.104, +0.026]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: AgentFormer (most-likely) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.019 -> -0.036 [-0.125, +0.052]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: LED (mean-denoised) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.053 -> -0.078 [-0.198, +0.016]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: Trajectron++ (most-likely) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.015 -> -0.036 [-0.109, +0.031]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: K-mode set (10 modes) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.064 -> +0.068 [-0.073, +0.216]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: AgentFormer set (10 samples) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.025 -> -0.018 [-0.130, +0.089]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: LED set (10 samples) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.004 -> +0.000 [-0.073, +0.078]"
+    },
+    {
+      "part": "S3",
+      "claim": "closed-loop test: Trajectron++ set (10 samples) at-fault vs ignoring agents (exploratory)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.008 -> +0.000 [-0.083, +0.078]"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: pick",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5)"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1 ST-GAT (MHA) higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.004 -> -0.024 [-0.043, -0.002]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1b ST-GAT (MHA) fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "+0.004 -> -0.011 [-0.027, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1 Map-free transformer higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.001 -> -0.005 [-0.031, +0.021]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1b Map-free transformer fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.004 -> -0.011 [-0.027, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1 LED (mean-denoised) higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.009 -> -0.014 [-0.034, +0.005]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1b LED (mean-denoised) fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.010 -> -0.005 [-0.016, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.139 -> +0.239 [+0.130, +0.359]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 MLP fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.130 -> +0.228 [+0.120, +0.348]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.143 -> +0.228 [+0.120, +0.348]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 Map-free transformer fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.135 -> +0.228 [+0.120, +0.348]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.130 -> +0.234 [+0.125, +0.353]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.145 -> +0.116 [+0.055, +0.177]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 MLP chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.133 -> +0.087 [+0.023, +0.142]; p_holm 0.000 -> 0.036"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.145 -> +0.108 [+0.039, +0.178]; p_holm 0.000 -> 0.009"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 Map-free transformer chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.133 -> +0.105 [+0.037, +0.171]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.121 -> +0.092 [+0.023, +0.157]; p_holm 0.000 -> 0.036"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S1 K-mode set (10 modes) higher score than K-mode (top-1)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.165 -> -0.222 [-0.320, -0.125]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.088 -> -0.152 [-0.250, -0.071]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S1 LED set (10 samples) higher score than LED (mean-denoised)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.111 -> -0.143 [-0.220, -0.072]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.040 -> -0.082 [-0.163, -0.022]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: pick",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5)"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1 ST-GAT (MHA) higher score than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.004 -> +0.007 [-0.012, +0.026]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1b ST-GAT (MHA) fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.004 -> +0.012 [-0.016, +0.045]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1 Map-free transformer higher score than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.001 -> +0.001 [-0.018, +0.019]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1b Map-free transformer fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.004 -> +0.000 [-0.020, +0.019]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1 LED (mean-denoised) higher score than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.009 -> -0.006 [-0.021, +0.011]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H1b LED (mean-denoised) fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.010 -> -0.012 [-0.035, +0.009]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.139 -> +0.085 [+0.042, +0.140]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 MLP fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.130 -> +0.076 [+0.030, +0.133]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.143 -> +0.097 [+0.045, +0.159]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 Map-free transformer fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.135 -> +0.085 [+0.036, +0.144]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "+0.130 -> +0.074 [+0.025, +0.129]; p_holm 0.000 -> 0.007"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.145 -> +0.161 [+0.119, +0.204]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 MLP chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.133 -> +0.158 [+0.116, +0.200]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.145 -> +0.165 [+0.124, +0.205]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 Map-free transformer chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.133 -> +0.148 [+0.105, +0.192]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.121 -> +0.137 [+0.093, +0.180]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S1 K-mode set (10 modes) higher score than K-mode (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.165 -> -0.134 [-0.196, -0.077]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.088 -> -0.053 [-0.107, -0.006]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S1 LED set (10 samples) higher score than LED (mean-denoised)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.111 -> -0.094 [-0.134, -0.056]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary: S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.040 -> -0.018 [-0.038, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: pick",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5)"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1 ST-GAT (MHA) higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.001 -> -0.039 [-0.121, +0.003]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1b ST-GAT (MHA) fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.009 -> -0.056 [-0.167, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1 Map-free transformer higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.006 -> -0.016 [-0.056, +0.013]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1b Map-free transformer fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.004 -> -0.028 [-0.083, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1 LED (mean-denoised) higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.004 -> +0.002 [-0.008, +0.013]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1b LED (mean-denoised) fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.004 -> +0.014 [+0.000, +0.042]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.027 -> +0.028 [+0.000, +0.069]; p_holm 0.170 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 MLP fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.027 -> +0.028 [+0.000, +0.069]; p_holm 0.170 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "+0.018 -> -0.028 [-0.125, +0.042]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 Map-free transformer fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "+0.022 -> +0.000 [-0.042, +0.042]; p_holm 0.584 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.031 -> +0.042 [+0.000, +0.111]; p_holm 0.170 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.213 -> +0.273 [+0.168, +0.376]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 MLP chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.179 -> +0.188 [+0.105, +0.275]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.201 -> +0.222 [+0.120, +0.334]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 Map-free transformer chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.191 -> +0.230 [+0.119, +0.341]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.206 -> +0.261 [+0.157, +0.380]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S1 K-mode set (10 modes) higher score than K-mode (top-1)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.207 -> -0.183 [-0.309, -0.060]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.085 -> +0.014 [-0.056, +0.125]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S1 LED set (10 samples) higher score than LED (mean-denoised)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.077 -> -0.097 [-0.210, -0.018]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.040 -> -0.056 [-0.167, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: pick",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "CV (vel_k=5) -> MLP"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1 ST-GAT (MHA) higher score than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.001 -> +0.016 [+0.002, +0.037]; p_holm 1.000 -> 0.022"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1b ST-GAT (MHA) fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.009 -> +0.013 [+0.000, +0.044]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1 Map-free transformer higher score than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.006 -> -0.001 [-0.029, +0.030]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1b Map-free transformer fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.004 -> +0.007 [-0.020, +0.040]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1 LED (mean-denoised) higher score than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.004 -> +0.005 [-0.006, +0.018]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H1b LED (mean-denoised) fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "+0.004 -> +0.000 [+0.000, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.027 -> +0.026 [+0.000, +0.068]; p_holm 0.170 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 MLP fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.027 -> +0.026 [+0.000, +0.068]; p_holm 0.170 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.018 -> +0.039 [+0.000, +0.091]; p_holm 1.000 -> 0.430"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 Map-free transformer fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.022 -> +0.033 [+0.000, +0.076]; p_holm 0.584 -> 0.430"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.031 -> +0.026 [+0.000, +0.068]; p_holm 0.170 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.213 -> +0.185 [+0.092, +0.287]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 MLP chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.179 -> +0.175 [+0.080, +0.280]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.201 -> +0.191 [+0.098, +0.289]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 Map-free transformer chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.191 -> +0.172 [+0.091, +0.259]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.206 -> +0.180 [+0.087, +0.278]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S1 K-mode set (10 modes) higher score than K-mode (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.207 -> -0.219 [-0.320, -0.127]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.085 -> -0.132 [-0.234, -0.045]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S1 LED set (10 samples) higher score than LED (mean-denoised)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.077 -> -0.067 [-0.155, -0.003]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV development: S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.040 -> -0.033 [-0.125, +0.030]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: pick",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5)"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1 ST-GAT (MHA) higher score than CV",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.003 -> -0.028 [-0.057, -0.005]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1b ST-GAT (MHA) fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "+0.000 -> -0.023 [-0.059, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1 Map-free transformer higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.003 -> -0.008 [-0.029, +0.015]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1b Map-free transformer fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.004 -> -0.016 [-0.035, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1 LED (mean-denoised) higher score than CV",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.005 -> -0.009 [-0.024, +0.003]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1b LED (mean-denoised) fewer at-fault collisions than CV",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.005 -> +0.000 [-0.012, +0.012]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.106 -> +0.180 [+0.094, +0.273]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 MLP fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.099 -> +0.172 [+0.086, +0.266]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.106 -> +0.156 [+0.066, +0.254]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 Map-free transformer fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.102 -> +0.164 [+0.078, +0.262]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.100 -> +0.180 [+0.094, +0.273]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.166 -> +0.160 [+0.107, +0.220]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 MLP chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.147 -> +0.115 [+0.066, +0.166]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.162 -> +0.140 [+0.080, +0.202]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 Map-free transformer chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.150 -> +0.140 [+0.079, +0.202]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.147 -> +0.140 [+0.076, +0.206]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S1 K-mode set (10 modes) higher score than K-mode (top-1)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.178 -> -0.211 [-0.289, -0.132]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.087 -> -0.105 [-0.188, -0.035]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S1 LED set (10 samples) higher score than LED (mean-denoised)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.101 -> -0.130 [-0.192, -0.075]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.040 -> -0.074 [-0.133, -0.023]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: pick",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "CV (vel_k=5) -> CV (vel_k=5)"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1 ST-GAT (MHA) higher score than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.003 -> +0.010 [-0.005, +0.025]; p_holm 1.000 -> 0.594"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1b ST-GAT (MHA) fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "+0.000 -> +0.012 [-0.008, +0.036]; p_holm 1.000 -> 0.820"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1 Map-free transformer higher score than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.003 -> +0.000 [-0.015, +0.016]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1b Map-free transformer fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "-0.004 -> +0.002 [-0.013, +0.018]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1 LED (mean-denoised) higher score than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.005 -> -0.002 [-0.014, +0.010]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H1b LED (mean-denoised) fewer at-fault collisions than CV",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.005 -> -0.008 [-0.023, +0.006]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 CV (vel_k=5) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.106 -> +0.067 [+0.033, +0.107]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 MLP fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.099 -> +0.061 [+0.027, +0.106]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 ST-GAT (MHA) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.106 -> +0.079 [+0.039, +0.127]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 Map-free transformer fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.102 -> +0.069 [+0.033, +0.114]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H2 LED (mean-denoised) fewer at-fault collisions than ignoring agents",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.100 -> +0.059 [+0.024, +0.101]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 CV (vel_k=5) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.166 -> +0.168 [+0.128, +0.210]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 MLP chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.147 -> +0.163 [+0.124, +0.206]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 ST-GAT (MHA) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.162 -> +0.173 [+0.133, +0.212]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 Map-free transformer chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.150 -> +0.155 [+0.118, +0.195]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: H3 LED (mean-denoised) chosen band setting (x0) scores higher than x1",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.147 -> +0.150 [+0.110, +0.191]; p_holm 0.000 -> 0.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S1 K-mode set (10 modes) higher score than K-mode (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.178 -> -0.161 [-0.214, -0.112]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S2 K-mode set (10 modes) fewer at-fault collisions than K-mode (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.087 -> -0.077 [-0.126, -0.035]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S1 LED set (10 samples) higher score than LED (mean-denoised)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.101 -> -0.085 [-0.123, -0.051]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV all 105 scenes: S2 LED set (10 samples) fewer at-fault collisions than LED (mean-denoised)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.040 -> -0.022 [-0.056, +0.002]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S1 MF transformer set (10 modes) higher score than MF transformer (top-1)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.353 -> -0.474 [-0.568, -0.372]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S2 MF transformer set (10 modes) fewer at-fault collisions than MF transformer (top-1)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.156 -> -0.272 [-0.386, -0.163]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S1 AgentFormer set (10 samples) higher score than AgentFormer (most-likely)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.007 -> -0.006 [-0.032, +0.020]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S2 AgentFormer set (10 samples) fewer at-fault collisions than AgentFormer (most-likely)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.006 -> -0.005 [-0.016, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S1 Trajectron++ set (10 samples) higher score than Trajectron++ (most-likely)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.047 -> -0.034 [-0.080, +0.005]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S2 Trajectron++ set (10 samples) fewer at-fault collisions than Trajectron++ (most-likely)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.010 -> +0.016 [+0.000, +0.049]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: T1 MF transformer (top-1) higher score than Map-free transformer",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "-0.010 -> -0.000 [-0.027, +0.024]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: T2 MF transformer (top-1) fewer at-fault collisions than Map-free transformer",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "-0.008 -> +0.000 [+0.000, +0.000]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S1 MF transformer set (10 modes) higher score than MF transformer (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.353 -> -0.287 [-0.355, -0.220]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S2 MF transformer set (10 modes) fewer at-fault collisions than MF transformer (top-1)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.156 -> -0.094 [-0.176, -0.018]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S1 AgentFormer set (10 samples) higher score than AgentFormer (most-likely)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.007 -> -0.008 [-0.027, +0.009]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S2 AgentFormer set (10 samples) fewer at-fault collisions than AgentFormer (most-likely)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.006 -> -0.006 [-0.021, +0.006]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S1 Trajectron++ set (10 samples) higher score than Trajectron++ (most-likely)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.047 -> -0.054 [-0.083, -0.024]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: S2 Trajectron++ set (10 samples) fewer at-fault collisions than Trajectron++ (most-likely)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.010 -> -0.024 [-0.050, -0.003]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: T1 MF transformer (top-1) higher score than Map-free transformer",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.010 -> -0.016 [-0.036, +0.002]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S4",
+      "claim": "CV primary amendment 3: T2 MF transformer (top-1) fewer at-fault collisions than Map-free transformer",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "-0.008 -> -0.012 [-0.031, +0.003]; p_holm 1.000 -> 1.000"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Branch oracle",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.042 -> +0.039 [+0.022, +0.055]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Ideal single (mean)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.042 -> +0.046 [+0.027, +0.066]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Ideal single (most likely)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.043 -> +0.046 [+0.026, +0.067]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Ideal set",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.050 -> +0.059 [+0.026, +0.105]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: Ideal set vs best ideal single under v2 (score)",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "+0.000 -> -0.001 [-0.016, +0.011]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: Ideal set vs best ideal single under proposal (score)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.008 -> +0.012 [-0.003, +0.029]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: G2-matched (public planners) does not pass",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "passes False -> False"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal | Branch oracle (score)",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "+0.001 -> +0.006 [-0.000, +0.013]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal | Ideal single (mean) (score)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "+0.003 -> +0.008 [+0.002, +0.016]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal | Ideal single (most likely) (score)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "+0.002 -> +0.008 [+0.001, +0.015]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal+margin | Ideal single (mean) (score)",
+      "subset": "clean",
+      "verdict": "not determinable",
+      "detail": "-0.013 -> -0.014 [-0.034, +0.007]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Branch oracle",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.042 -> +0.044 [+0.026, +0.066]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Ideal single (mean)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.042 -> +0.040 [+0.024, +0.058]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Ideal single (most likely)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.043 -> +0.041 [+0.024, +0.061]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: proposal planner beats v2 on score, Ideal set",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.050 -> +0.043 [+0.026, +0.066]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: Ideal set vs best ideal single under v2 (score)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.000 -> +0.000 [-0.009, +0.009]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: Ideal set vs best ideal single under proposal (score)",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "+0.008 -> +0.003 [-0.005, +0.011]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom: G2-matched (public planners) does not pass",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "passes False -> False"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal | Branch oracle (score)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "+0.001 -> -0.002 [-0.010, +0.004]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal | Ideal single (mean) (score)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "+0.003 -> -0.001 [-0.008, +0.005]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal | Ideal single (most likely) (score)",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "+0.002 -> -0.003 [-0.011, +0.005]"
+    },
+    {
+      "part": "S5",
+      "claim": "headroom confirm: Ideal set vs proposal+margin | Ideal single (mean) (score)",
+      "subset": "flagged",
+      "verdict": "not determinable",
+      "detail": "-0.013 -> -0.012 [-0.024, +0.000]"
+    },
+    {
+      "part": "S6",
+      "claim": "multi-future: best model on min_ade",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "K-mode decoder -> LED"
+    },
+    {
+      "part": "S6",
+      "claim": "multi-future: best model on min_ade",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "K-mode decoder -> K-mode decoder"
+    },
+    {
+      "part": "S6",
+      "claim": "multi-future: best model on miss_rate",
+      "subset": "clean",
+      "verdict": "holds",
+      "detail": "LED -> LED"
+    },
+    {
+      "part": "S6",
+      "claim": "multi-future: best model on miss_rate",
+      "subset": "flagged",
+      "verdict": "changes",
+      "detail": "LED -> AgentFormer"
+    },
+    {
+      "part": "S6",
+      "claim": "multi-future: best model on energy_score",
+      "subset": "clean",
+      "verdict": "changes",
+      "detail": "K-mode decoder -> Trajectron++"
+    },
+    {
+      "part": "S6",
+      "claim": "multi-future: best model on energy_score",
+      "subset": "flagged",
+      "verdict": "holds",
+      "detail": "K-mode decoder -> K-mode decoder"
+    }
+  ],
+  "when": "2026-11-26T00:22:49"
+}

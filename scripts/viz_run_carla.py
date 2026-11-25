@@ -52,6 +52,9 @@ def main() -> int:
     ap.add_argument("--carla", default=str(DEFAULT_CARLA))
     ap.add_argument("--port", type=int, default=2000)
     ap.add_argument("--quality", default="Epic", choices=["Low", "Epic"])
+    ap.add_argument("--replay-args", default="", help="extra viz_carla_replay.py options, e.g. \"--line-scale 0.5\"")
+    ap.add_argument("--title", default=None, help="passed to viz_compose.py")
+    ap.add_argument("--subtitle", default=None, help="passed to viz_compose.py")
     args = ap.parse_args()
 
     check_directx_runtime()
@@ -61,12 +64,14 @@ def main() -> int:
         wait_for_server(args.port, 300.0)
         stems = sorted({s for pair in args.pair for s in pair})
         subprocess.run([sys.executable, str(REPO / "scripts" / "viz_carla_replay.py"),
-                        *[str(PACKS / f"{s}.npz") for s in stems], "--port", str(args.port)],
+                        *[str(PACKS / f"{s}.npz") for s in stems], "--port", str(args.port), *args.replay_args.split()],
                        check=True)
         for idd, av2 in args.pair:
             for view in ("chase", "bev"):
+                extra = [*(["--title", args.title] if args.title else []),
+                         *(["--subtitle", args.subtitle] if args.subtitle else [])]
                 subprocess.run([sys.executable, str(REPO / "scripts" / "viz_compose.py"),
-                                "--pair", idd, av2, "--view", view], check=True)
+                                "--pair", idd, av2, "--view", view, *extra], check=True)
     finally:
         server.terminate()
         try:

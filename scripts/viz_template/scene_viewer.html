@@ -1,0 +1,882 @@
+<!-- DreamDrive trajectory scene viewer. Filled in by scripts/viz_render.py: Plotly.js and the scene
+     bundles (scripts/viz_scene_bundle.py) are inlined, so the file works offline. Everything drawn
+     comes from the bundle; the viewer computes nothing but geometry for display. -->
+<title>DreamDrive scene viewer</title>
+<meta charset="utf-8">
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1d2733; --muted: #5f6b7a; --line: #dfe3e8; --accent: #e3171b;
+  --chip: #eef1f5; --warn: #b45309; --ok: #12813f;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f14; --panel: #121821; --ink: #e6ebf1; --muted: #93a0b0; --line: #243040; --accent: #ff4d4d;
+  --chip: #1b2430; --warn: #f0a04b; --ok: #3ddc84;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+#app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; }
+header { display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+header h1 { font-size: 15px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+header .scene { color: var(--muted); }
+.tabs { display: flex; gap: 2px; background: var(--chip); padding: 2px; border-radius: 8px; }
+.tabs button { border: 0; background: transparent; color: var(--muted); padding: 5px 10px; border-radius: 6px; cursor: pointer; font: inherit; }
+.tabs button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+.tabs button:disabled { opacity: .45; cursor: not-allowed; }
+.spacer { flex: 1; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 5px 10px; border-radius: 6px; cursor: pointer; font: inherit; }
+.btn:hover { border-color: var(--muted); }
+.badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; background: var(--chip); color: var(--muted); }
+.badge.offline { background: #fff1d6; color: #8a5300; }
+:root[data-theme="dark"] .badge.offline { background: #3a2a10; color: #f0b45a; }
+main { display: grid; grid-template-columns: 1fr 330px; min-height: 0; }
+#plot { min-height: 0; background: var(--panel); }
+aside { border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto; padding: 10px 14px 20px; }
+aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 16px 0 6px; font-weight: 650; }
+aside h2:first-child { margin-top: 4px; }
+select { width: 100%; padding: 5px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font: inherit; }
+.model-meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+.model-meta .caveat { color: var(--warn); }
+.layers label { display: flex; align-items: center; gap: 7px; padding: 2px 0; cursor: pointer; }
+.layers .sw { width: 18px; height: 3px; border-radius: 2px; flex: none; }
+.row { display: flex; gap: 6px; align-items: center; }
+.seg { display: flex; gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; border-right: 1px solid var(--line); background: var(--panel); color: var(--muted); padding: 3px 8px; cursor: pointer; font: inherit; }
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--ink); color: var(--panel); }
+#card { background: var(--chip); border-radius: 8px; padding: 8px 10px; }
+#card .k { color: var(--muted); }
+#card table { width: 100%; border-collapse: collapse; }
+#card td { padding: 1px 0; vertical-align: top; }
+#card td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+#agents { max-height: 260px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; }
+#agents div { display: grid; grid-template-columns: 12px 38px 1fr auto; gap: 6px; padding: 3px 8px; cursor: pointer; align-items: center; border-bottom: 1px solid var(--line); }
+#agents div:last-child { border-bottom: 0; }
+#agents div:hover { background: var(--chip); }
+#agents div.sel { background: var(--chip); box-shadow: inset 3px 0 0 var(--accent); }
+#agents .dot { width: 10px; height: 10px; border-radius: 50%; }
+#agents .flags { font-size: 11px; color: var(--muted); }
+.note { color: var(--muted); font-size: 12px; }
+details summary { cursor: pointer; color: var(--muted); }
+details ul { padding-left: 18px; margin: 6px 0; color: var(--muted); font-size: 12px; }
+footer { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-top: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+#timeline { position: relative; flex: 1; min-width: 260px; height: 30px; }
+#timeline input { width: 100%; position: absolute; top: 4px; margin: 0; accent-color: var(--accent); }
+#ticks { position: absolute; left: 0; right: 0; top: 22px; height: 8px; pointer-events: none; }
+#ticks span { position: absolute; width: 2px; height: 7px; background: var(--accent); opacity: .75; transform: translateX(-1px); }
+#clock { font-variant-numeric: tabular-nums; min-width: 230px; color: var(--muted); }
+#clock b { color: var(--ink); }
+</style>
+
+<div id="app">
+  <header>
+    <h1>DreamDrive scene viewer</h1>
+    <span class="scene" id="sceneTitle"></span>
+    <div class="tabs" id="modes"></div>
+    <span class="spacer"></span>
+    <span class="badge offline" id="offlineBadge" title="Ground-truth futures, oracle best-of-K, conflicts and coverage use the future: offline evaluation only">OFFLINE EVALUATION</span>
+    <span class="badge" title="Development results: not for publication before the IP review">dev only</span>
+    <button class="btn" id="themeBtn" title="Light / dark presentation theme">Theme</button>
+    <button class="btn" id="pngBtn" title="Export the current figure as PNG at 4x resolution">PNG ×4</button>
+    <button class="btn" id="svgBtn" title="Export the current figure as vector SVG">SVG</button>
+  </header>
+  <main>
+    <div id="plot"></div>
+    <aside>
+      <div id="sceneBox" hidden><h2>Scene</h2><select id="scenePick"></select></div>
+      <h2>Model</h2>
+      <select id="model"></select>
+      <div class="model-meta" id="modelMeta"></div>
+      <div id="compareBox" hidden>
+        <h2>Compare (mode D)</h2>
+        <select id="cmp1"></select><div style="height:4px"></div><select id="cmp2"></select><div style="height:4px"></div>
+        <select id="cmp3"></select><div style="height:4px"></div><select id="cmp4"></select>
+      </div>
+      <h2>Horizon</h2>
+      <div class="seg" id="horizon"></div>
+      <h2>Alternative futures shown</h2>
+      <div class="seg" id="topk"></div>
+      <h2>Layers</h2>
+      <div class="layers" id="layers"></div>
+      <h2>Selected agent</h2>
+      <div id="card"></div>
+      <h2>Agents at this time</h2>
+      <div id="agents"></div>
+      <h2>About this figure</h2>
+      <details><summary>Data, frames and definitions</summary><ul id="about"></ul></details>
+    </aside>
+  </main>
+  <footer>
+    <button class="btn" id="resetBtn" title="Reset to the first frame">⏮</button>
+    <button class="btn" id="prevBtn" title="Previous prediction issue time">◀ issue</button>
+    <button class="btn" id="playBtn" style="min-width:70px">▶ Play</button>
+    <button class="btn" id="nextBtn" title="Next prediction issue time">issue ▶</button>
+    <div class="seg" id="speeds"></div>
+    <div id="timeline"><input type="range" id="slider" min="0" max="99" step="0.1" value="0"><div id="ticks"></div></div>
+    <div id="clock"></div>
+  </footer>
+</div>
+
+<script>/*__PLOTLY__*/</script>
+<script>const BUNDLES = /*__BUNDLES__*/;</script>
+<script>
+"use strict";
+// ---------------------------------------------------------------- decoding
+function bytes(b64) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+function dec(p) {
+  const u = bytes(p.b64);
+  if (p.dt === "i2cm") { const v = new Int16Array(u.buffer), a = new Float64Array(v.length); for (let i = 0; i < v.length; i++) a[i] = v[i] === -32768 ? NaN : v[i] / 100; return a; }
+  if (p.dt === "f4") return Float64Array.from(new Float32Array(u.buffer));
+  if (p.dt === "bits") { const n = p.shape.reduce((x, y) => x * y, 1), a = new Uint8Array(n); for (let i = 0; i < n; i++) a[i] = (u[i >> 3] >> (7 - (i & 7))) & 1; return a; }
+  throw new Error("unknown dtype " + p.dt);
+}
+function decXY(p, origin) { const a = dec(p); for (let i = 0; i < a.length; i += 2) { a[i] += origin[0]; a[i + 1] += origin[1]; } return a; }
+function decRel(p, last) {           // first axis = agent; add that agent's last observed point to every (x, y)
+  const a = dec(p), per = p.shape.slice(1).reduce((x, y) => x * y, 1);
+  for (let i = 0; i < a.length; i += 2) { const n = Math.floor(i / per); a[i] += last[2 * n]; a[i + 1] += last[2 * n + 1]; }
+  return a;
+}
+
+// ---------------------------------------------------------------- scene model
+const OBS = 20, PRED = 60;
+// Display frame: the ego's initial pose (x forward, y left), a rigid transform of the dataset's world
+// frame, applied once at decode time so every drawn position goes through it. #frame=world keeps the
+// dataset frame. Distances and errors are unchanged.
+const WORLD_FRAME = new URLSearchParams(location.hash.slice(1)).get("frame") === "world";
+function toDisplay(S, a, angles) {
+  if (S.identity) return a;
+  const c = Math.cos(S.rot), s = Math.sin(S.rot), [ox, oy] = S.o0;
+  if (angles) { for (let i = 0; i < a.length; i++) a[i] += S.rot; return a; }
+  for (let i = 0; i < a.length; i += 2) { const x = a[i] - ox, y = a[i + 1] - oy; a[i] = c * x - s * y; a[i + 1] = s * x + c * y; }
+  return a;
+}
+function loadScene(B) {
+  const o = B.scene.origin, A = B.agents.ids.length, T = B.scene.n_frames;
+  const S = { B, A, T, fps: B.scene.fps, windows: B.windows.map(w => ({ raw: w })) };
+  const egoTrack = decXY(B.ego.track, o), egoHead = dec(B.ego.heading);
+  let f0 = 0; while (f0 < T && !(isFinite(egoTrack[2 * f0]) && isFinite(egoHead[f0]))) f0++;
+  S.identity = WORLD_FRAME || f0 >= T;
+  S.rot = S.identity ? 0 : -egoHead[f0]; S.o0 = S.identity ? [0, 0] : [egoTrack[2 * f0], egoTrack[2 * f0 + 1]];
+  S.frameLabel = S.identity ? ["x (m), dataset world frame", S.frameLabel[1]] : ["x (m): the ego's initial forward direction", "y (m): to its left"];
+  S.track = toDisplay(S, decXY(B.agents.track, o)); S.heading = toDisplay(S, dec(B.agents.heading), true);
+  S.ego = { track: toDisplay(S, egoTrack), heading: toDisplay(S, egoHead, true) };
+  S.extent = extentOf(S);
+  S.models = B.models; S.byKey = Object.fromEntries(B.models.map(m => [m.key, m]));
+  return S;
+}
+function win(S, i) {                  // decode a window lazily
+  const W = S.windows[i];
+  if (W.hist) return W;
+  const w = W.raw, n = w.agents.length;
+  W.t0 = w.t0; W.issue = w.issue_frame; W.agents = w.agents; W.cls = w.cls; W.n = n;
+  W.hist = decXY(w.hist, S.B.scene.origin);                // dataset frame first: relative arrays need its anchors
+  W.lastW = new Float64Array(2 * n); for (let k = 0; k < n; k++) { W.lastW[2 * k] = W.hist[(k * OBS + OBS - 1) * 2]; W.lastW[2 * k + 1] = W.hist[(k * OBS + OBS - 1) * 2 + 1]; }
+  W.gt = toDisplay(S, decRel(w.gt, W.lastW)); W.fm = dec(w.fm); W.egoFut = w.ego_fut ? toDisplay(S, decXY(w.ego_fut, S.B.scene.origin)) : null;
+  W.hist = toDisplay(S, W.hist); W.last = toDisplay(S, Float64Array.from(W.lastW));
+  W.conflict = w.conflict; W.kin = w.kin; W.pairsGt = w.pairs_gt; W.preds = {};
+  W.slot = Object.fromEntries(w.agents.map((a, k) => [a, k]));
+  return W;
+}
+function pred(S, W, key) {            // decode one model's predictions for a window lazily
+  if (W.preds[key]) return W.preds[key];
+  const e = W.raw.preds[key]; if (!e) return null;
+  const m = S.byKey[key], P = { ...e };
+  P.ml = toDisplay(S, decRel(e.ml, W.lastW)); P.rML = e.radii_ml ? dec(e.radii_ml) : null;   // public bundles carry no bands
+  if (e.set) { P.set = toDisplay(S, decRel(e.set, W.lastW)); P.K = e.set.shape[1]; P.rSet = e.radii_set ? dec(e.radii_set) : null; }
+  if (e.probs) P.probs = dec(e.probs);
+  P.kind = m.kind;
+  return (W.preds[key] = P);
+}
+function activeWindow(S, t) {         // the latest window issued at or before t
+  let k = -1;
+  for (let i = 0; i < S.windows.length; i++) if (S.windows[i].raw.issue_frame <= t + 1e-6) k = i;
+  return k < 0 ? null : win(S, k);
+}
+function extentOf(S) {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  const upd = (x, y) => { if (isFinite(x) && isFinite(y)) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } };
+  for (let i = 0; i < S.track.length; i += 2) upd(S.track[i], S.track[i + 1]);
+  for (let i = 0; i < S.ego.track.length; i += 2) upd(S.ego.track[i], S.ego.track[i + 1]);
+  const pad = 6; return [x0 - pad, x1 + pad, y0 - pad, y1 + pad];
+}
+function posAt(S, a, t) {             // recorded position at fractional frame t (interpolated), null if absent
+  const f = Math.floor(t), g = Math.min(f + 1, S.T - 1), w = t - f, A = S.A;
+  const ax = S.track[(f * A + a) * 2], ay = S.track[(f * A + a) * 2 + 1], bx = S.track[(g * A + a) * 2], by = S.track[(g * A + a) * 2 + 1];
+  if (isFinite(ax) && isFinite(bx)) return [ax + (bx - ax) * w, ay + (by - ay) * w];
+  if (isFinite(ax) && w < 0.5) return [ax, ay];
+  if (isFinite(bx) && w >= 0.5) return [bx, by];
+  return null;
+}
+function egoAt(S, t) {
+  const f = Math.floor(t), g = Math.min(f + 1, S.T - 1), w = t - f, e = S.ego.track;
+  if (!isFinite(e[2 * f]) || !isFinite(e[2 * g])) return isFinite(e[2 * f]) ? [e[2 * f], e[2 * f + 1]] : null;
+  return [e[2 * f] + (e[2 * g] - e[2 * f]) * w, e[2 * f + 1] + (e[2 * g + 1] - e[2 * f + 1]) * w];
+}
+const speedAt = (S, a, t) => { const f = Math.round(t); if (f < 10) return null; const p = posAt(S, a, f), q = posAt(S, a, f - 10); return p && q ? Math.hypot(p[0] - q[0], p[1] - q[1]) : null; };
+
+// ---------------------------------------------------------------- appearance
+const GROUPS = {
+  car:         { name: "Car / van / tour car",          L: 4.4,  W: 1.8, shape: "vehicle", c: "#a9b8c9", d: "#3e4d61" },
+  large:       { name: "Bus / truck",                   L: 10.0, W: 2.5, shape: "vehicle", c: "#7c8da6", d: "#2c3a4f" },
+  moto:        { name: "Motorcycle / scooter rider",    L: 2.0,  W: 0.8, shape: "twowheel", c: "#b9a3cf", d: "#4b3766", px: "diamond" },
+  moto_parked: { name: "Parked motorcycle / scooter",   L: 2.0,  W: 0.8, shape: "twowheel", c: "rgba(185,163,207,0.15)", d: "#7b6896", px: "diamond-open", hollow: true },
+  bike:        { name: "Bicycle rider",                 L: 1.8,  W: 0.6, shape: "twowheel", c: "#d6b4cf", d: "#6b3f63", px: "diamond-tall" },
+  bike_parked: { name: "Parked bicycle",                L: 1.8,  W: 0.6, shape: "twowheel", c: "rgba(214,180,207,0.15)", d: "#8f6a88", px: "diamond-tall-open", hollow: true },
+  ped:         { name: "Pedestrian",                    L: 0.6,  W: 0.6, shape: "ped", c: "#e3c27a", d: "#7a5a14", px: "circle" },
+  animal:      { name: "Animal",                        L: 1.3,  W: 0.5, shape: "twowheel", c: "#c9b79c", d: "#5e4f37", px: "triangle-up" },
+  other:       { name: "Other / unknown",               L: 1.0,  W: 1.0, shape: "diamond", c: "#bdbdbd", d: "#555", px: "x-thin" },
+};
+const THEMES = {
+  light: { bg: "#ffffff", grid: "#eceff3", axis: "#5f6b7a", ink: "#1d2733", pastSel: "#1d2733", pastOther: "#9aa3ad", gt: "#12a150",
+           ml: "#e3171b", mlOther: "rgba(227,23,27,0.42)", mode: ["#f28e2b", "#f6a54f", "#f9bb75", "#fbd09b", "#fde3c2"], sample: "rgba(58,120,201,0.38)",
+           oracle: "#7a3db8", band: "#c77c02", bandFill: "rgba(199,124,2,0.10)", density: "58,120,201", ego: "#111111", egoLine: "#ffffff",
+           conflict: "#d1001f", danger: "#e07a00", pairGt: "#7a3db8", pairPred: "#e3171b", foot: [[0, "rgba(120,130,145,0)"], [1, "rgba(120,130,145,0.35)"]], label: "#3e4d61" },
+  dark:  { bg: "#0f141a", grid: "#1c2531", axis: "#93a0b0", ink: "#e6ebf1", pastSel: "#e8edf2", pastOther: "#56616e", gt: "#3ddc84",
+           ml: "#ff4d4d", mlOther: "rgba(255,77,77,0.45)", mode: ["#ffa552", "#ffb873", "#ffca94", "#ffdbb5", "#ffead6"], sample: "rgba(111,168,255,0.42)",
+           oracle: "#c08bff", band: "#ffc857", bandFill: "rgba(255,200,87,0.10)", density: "111,168,255", ego: "#f5f7fa", egoLine: "#0f141a",
+           conflict: "#ff3355", danger: "#ffa000", pairGt: "#c08bff", pairPred: "#ff4d4d", foot: [[0, "rgba(140,155,175,0)"], [1, "rgba(140,155,175,0.30)"]], label: "#c3cdd8" },
+};
+function glyph(g, hasHeading) {      // outline in the agent frame (x forward, y left), metres
+  const G = GROUPS[g] || GROUPS.other, L = G.L, W = G.W;
+  if (!hasHeading && G.shape !== "ped") {        // orientation unknown: a symmetric octagon of similar area
+    const r = 0.5 * Math.sqrt(L * W) * 1.1, pts = [];
+    for (let k = 0; k < 8; k++) { const a = Math.PI / 8 + k * Math.PI / 4; pts.push([r * Math.cos(a), r * Math.sin(a)]); }
+    return pts;
+  }
+  if (G.shape === "vehicle") { const c = Math.min(0.8, 0.35 * W); return [[-L / 2, -W / 2], [L / 2 - c, -W / 2], [L / 2, -W / 2 + c], [L / 2, W / 2 - c], [L / 2 - c, W / 2], [-L / 2, W / 2]]; }
+  if (G.shape === "twowheel") return [[L / 2, 0], [L / 6, W / 2], [-L / 2, W / 3], [-L / 2, -W / 3], [L / 6, -W / 2]];
+  if (G.shape === "ped") return hasHeading ? [[0.38, 0], [0.1, 0.28], [-0.25, 0.28], [-0.25, -0.28], [0.1, -0.28]]
+                                           : [[0.3, 0], [0.21, 0.21], [0, 0.3], [-0.21, 0.21], [-0.3, 0], [-0.21, -0.21], [0, -0.3], [0.21, -0.21]];
+  return [[0.6, 0], [0, 0.6], [-0.6, 0], [0, -0.6]];
+}
+function place(pts, p, h) { const c = Math.cos(h), s = Math.sin(h); return pts.map(([x, y]) => [p[0] + c * x - s * y, p[1] + s * x + c * y]); }
+const EGO_GLYPH = [[-2.4, -0.95], [1.6, -0.95], [2.4, -0.4], [2.4, 0.4], [1.6, 0.95], [-2.4, 0.95]];
+const EGO_ARROW = [[0.9, 0], [-0.5, 0.55], [-0.15, 0], [-0.5, -0.55]];
+
+// ---------------------------------------------------------------- state
+const LAYERS = [
+  ["past", "Past trajectories", "pastSel"], ["future", "Actual future (offline)", "gt"], ["ml", "Most-likely prediction", "ml"],
+  ["mlAll", "Most-likely, every agent", "mlOther"], ["alts", "Alternative futures (top-K)", "mode"], ["oracle", "Oracle best-of-K (offline)", "oracle"],
+  ["density", "Probability: sample density", "density"], ["band", "90% conformal band", "band"], ["futureAll", "Actual future, every agent (offline)", "gt"],
+  ["safety", "Safety: conflicts, danger flags", "conflict"], ["kin", "Kinematic indicators (TTC, separation)", "danger"],
+  ["pairs", "Close pairs (interactions)", "pairGt"], ["footprint", "Observed traffic footprint (offline)", "axis"], ["ids", "Agent IDs", "label"],
+  ["follow", "Camera follows the selected agent", "axis"], ["offline", "Offline evaluation mode", "danger"],
+];
+const MODES = { A: "A · Scene", B: "B · Agent", C: "C · Interaction", D: "D · Compare", E: "E · Uncertainty", F: "F · Cross-domain" };
+const PRESETS = {
+  A: { past: 1, future: 1, ml: 1, mlAll: 1, alts: 1, oracle: 0, density: 0, band: 1, futureAll: 0, safety: 1, kin: 0, pairs: 0, footprint: 1, ids: 0, follow: 0 },
+  B: { past: 1, future: 1, ml: 1, mlAll: 0, alts: 1, oracle: 1, density: 1, band: 1, futureAll: 0, safety: 1, kin: 1, pairs: 0, footprint: 0, ids: 1, follow: 1 },
+  C: { past: 1, future: 1, ml: 1, mlAll: 1, alts: 0, oracle: 0, density: 0, band: 0, futureAll: 1, safety: 1, kin: 1, pairs: 1, footprint: 1, ids: 1, follow: 0 },
+  D: { past: 1, future: 1, ml: 1, mlAll: 0, alts: 1, oracle: 0, density: 0, band: 1, futureAll: 0, safety: 0, kin: 0, pairs: 0, footprint: 0, ids: 0, follow: 1 },
+  E: { past: 1, future: 1, ml: 1, mlAll: 0, alts: 1, oracle: 0, density: 1, band: 1, futureAll: 0, safety: 0, kin: 0, pairs: 0, footprint: 0, ids: 0, follow: 1 },
+};
+const st = { scene: 0, mode: "A", t: 0, playing: false, speed: 1, sel: null, model: null, cmp: [], h: 6, topk: 6, theme: "light",
+             on: { ...PRESETS.A, offline: 1 } };
+const scenes = BUNDLES.map(loadScene);
+let S = scenes[0];
+
+function parseHash() {
+  const q = new URLSearchParams(location.hash.slice(1));
+  if (q.has("scene")) switchScene(Math.max(0, scenes.findIndex(s => s.B.scene.id === q.get("scene"))));
+  if (q.has("mode") && MODES[q.get("mode")]) setMode(q.get("mode"), true);
+  if (q.has("t")) st.t = Math.min(S.T - 1, Math.max(0, parseFloat(q.get("t")) * S.fps));
+  if (q.has("model") && S.byKey[q.get("model")]?.available) st.model = q.get("model");
+  if (q.has("agent")) { const a = S.B.agents.ids.indexOf(parseInt(q.get("agent"))); if (a >= 0) st.sel = a; }
+  if (q.has("theme")) st.theme = q.get("theme") === "dark" ? "dark" : "light";
+  if (q.has("h")) st.h = Math.min(6, Math.max(1, parseInt(q.get("h"))));
+  if (q.has("topk")) st.topk = Math.max(1, parseInt(q.get("topk")));
+  if (q.has("offline")) st.on.offline = q.get("offline") === "1" ? 1 : 0;
+  for (const [k] of LAYERS) if (q.has(k)) st.on[k] = q.get(k) === "1" ? 1 : 0;
+}
+const PRIVATE_LAYERS = ["band", "safety", "kin", "pairs"];     // absent from public bundles
+function setMode(m, quiet) {
+  st.mode = m;
+  if (PRESETS[m]) Object.assign(st.on, PRESETS[m]);
+  if (S.B.public) PRIVATE_LAYERS.forEach(k => { st.on[k] = 0; });
+  if (!quiet) { buildControls(); render(true); }
+}
+
+// ---------------------------------------------------------------- geometry helpers
+const NaNpt = [null, null];
+function seg(xs, ys, pts) { for (const p of pts) { xs.push(p ? p[0] : null); ys.push(p ? p[1] : null); } xs.push(null); ys.push(null); }
+function pathPts(arr, k, steps, start, from = 0) {   // agent k's predicted points (step from .. steps-1), prefixed by start
+  const out = start ? [start] : [];
+  for (let s = from; s < steps; s++) { const x = arr[(k * PRED + s) * 2], y = arr[(k * PRED + s) * 2 + 1]; out.push(isFinite(x) ? [x, y] : null); }
+  return out;
+}
+function setPts(P, k, j, steps, start) {
+  const out = start ? [start] : [], K = P.K;
+  for (let s = 0; s < steps; s++) { const i = ((k * K + j) * PRED + s) * 2; out.push([P.set[i], P.set[i + 1]]); }
+  return out;
+}
+function gtPts(W, k, steps, withStart) {
+  const out = withStart ? [[W.last[2 * k], W.last[2 * k + 1]]] : [];
+  for (let s = 0; s < steps; s++) out.push(W.fm[k * PRED + s] ? [W.gt[(k * PRED + s) * 2], W.gt[(k * PRED + s) * 2 + 1]] : null);
+  return out;
+}
+function tube(pts, radii) {            // band outline: per-step radius around the path, round end caps
+  const n = pts.length; if (n < 2) return [];
+  const L = [], R = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+    let tx = b[0] - a[0], ty = b[1] - a[1], m = Math.hypot(tx, ty);
+    if (m < 1e-6) { tx = 1; ty = 0; m = 1; }
+    const nx = -ty / m, ny = tx / m, r = radii[i];
+    L.push([pts[i][0] + nx * r, pts[i][1] + ny * r]); R.push([pts[i][0] - nx * r, pts[i][1] - ny * r]);
+  }
+  // half-circle from angle a0 to a0 + pi (counter-clockwise); caps run left side -> right side around the outside
+  const cap = (c, r, a0) => { const o = []; for (let k = 0; k <= 12; k++) { const a = a0 + Math.PI * k / 12; o.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); } return o; };
+  const dir = (p, q) => Math.atan2(q[1] - p[1], q[0] - p[0]) || 0;
+  const de = dir(pts[n - 2], pts[n - 1]), d0 = dir(pts[0], pts[1]);
+  const endCap = cap(pts[n - 1], radii[n - 1], de - Math.PI / 2).reverse();      // left (de + 90) -> front -> right (de - 90)
+  const startCap = cap(pts[0], radii[0], d0 + Math.PI / 2).reverse();            // right (d0 - 90) -> back -> left (d0 + 90)
+  return [...L, ...endCap, ...R.reverse(), ...startCap];
+}
+const DISCS = new Map();
+function discUnion(key, centres, radii) {  // the band exactly: the union of discs, as max_t (r_t - |x - c_t|) > 0
+  if (DISCS.has(key)) return DISCS.get(key);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  centres.forEach((c, i) => { x0 = Math.min(x0, c[0] - radii[i]); x1 = Math.max(x1, c[0] + radii[i]); y0 = Math.min(y0, c[1] - radii[i]); y1 = Math.max(y1, c[1] + radii[i]); });
+  const pad = 0.5, cell = Math.max(0.15, Math.max(x1 - x0, y1 - y0) / 170);
+  const nx = Math.ceil((x1 - x0 + 2 * pad) / cell) + 1, ny = Math.ceil((y1 - y0 + 2 * pad) / cell) + 1;
+  const xs = Array.from({ length: nx }, (_, i) => x0 - pad + i * cell), ys = Array.from({ length: ny }, (_, j) => y0 - pad + j * cell);
+  const z = ys.map(y => xs.map(x => { let m = -Infinity; for (let t = 0; t < centres.length; t++) { const v = radii[t] - Math.hypot(x - centres[t][0], y - centres[t][1]); if (v > m) m = v; } return m; }));
+  const out = { xs, ys, z }; DISCS.set(key, out); return out;
+}
+function circle(c, r, n = 40) { const o = []; for (let k = 0; k <= n; k++) { const a = 2 * Math.PI * k / n; o.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); } return o; }
+function kde(points, weights, span) {  // 2-D Gaussian KDE on a grid (Scott bandwidth, floor 0.3 m)
+  const n = points.length; if (n < 2) return null;
+  let wx = 0, wy = 0, ws = 0; points.forEach((p, i) => { wx += weights[i] * p[0]; wy += weights[i] * p[1]; ws += weights[i]; });
+  const mx = wx / ws, my = wy / ws; let vx = 0, vy = 0;
+  points.forEach((p, i) => { vx += weights[i] * (p[0] - mx) ** 2; vy += weights[i] * (p[1] - my) ** 2; });
+  const f = Math.pow(n, -1 / 6), hx = Math.max(0.3, f * Math.sqrt(vx / ws)), hy = Math.max(0.3, f * Math.sqrt(vy / ws));
+  const x0 = Math.min(...points.map(p => p[0])) - 3 * hx, x1 = Math.max(...points.map(p => p[0])) + 3 * hx;
+  const y0 = Math.min(...points.map(p => p[1])) - 3 * hy, y1 = Math.max(...points.map(p => p[1])) + 3 * hy;
+  const N = 70, xs = [], ys = [], z = [];
+  for (let i = 0; i < N; i++) { xs.push(x0 + (x1 - x0) * i / (N - 1)); ys.push(y0 + (y1 - y0) * i / (N - 1)); }
+  let zmax = 0;
+  for (let j = 0; j < N; j++) { const row = []; for (let i = 0; i < N; i++) { let s = 0; points.forEach((p, k) => { s += weights[k] * Math.exp(-0.5 * (((xs[i] - p[0]) / hx) ** 2 + ((ys[j] - p[1]) / hy) ** 2)); }); row.push(s); zmax = Math.max(zmax, s); } z.push(row); }
+  return { xs, ys, z: z.map(r => r.map(v => v / zmax)) };
+}
+
+// ---------------------------------------------------------------- traces
+function modelLabel(key) { const m = S.byKey[key]; if (!m) return key; const d = m.domain.startsWith("IDD") ? "IDD-trained" : m.domain.includes("in-domain on AV2") ? "AV2-trained, in-domain" : m.domain.startsWith("Argoverse") ? "AV2-trained, zero-shot" : "no training"; return `${m.label} (${d})`; }
+function setOrder(P, k) {             // members to draw: modes by probability, samples in saved order
+  const idx = [...Array(P.K).keys()];
+  if (P.probs) idx.sort((a, b) => P.probs[k * P.K + b] - P.probs[k * P.K + a]);
+  return idx;
+}
+function panelTraces(model, ax, opts) {
+  const C = THEMES[st.theme], on = st.on, t = st.t, off = !!on.offline, xa = "x" + ax, ya = "y" + ax;
+  const tr = [], W = activeWindow(S, t), P = W && model ? pred(S, W, model) : null, H = st.h * 10;
+  const sel = st.sel, k = W && sel != null && W.slot[sel] != null ? W.slot[sel] : null;
+  const show = (name, legend) => ({ name, showlegend: !!(legend && opts.legend), legendgroup: name });
+  tr.push(...mapTraces(xa, ya, C));
+  // footprint (offline: it contains every recorded position, future included); only where no map exists
+  if (on.footprint && off && !S.B.map) tr.push(footprint(xa, ya, C));
+  // histories
+  if (on.past) {
+    const xs = [], ys = [], H0 = Math.max(0, Math.floor(t) - 30);
+    for (let a = 0; a < S.A; a++) { if (a === sel) continue; const pts = []; for (let f = H0; f <= Math.floor(t); f++) pts.push(posAt(S, a, f)); const p = posAt(S, a, t); if (p) pts.push(p); if (pts.filter(Boolean).length > 1) seg(xs, ys, pts); }
+    tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, xaxis: xa, yaxis: ya, line: { color: C.pastOther, width: 1 }, hoverinfo: "skip", ...show("Past 3 s, other agents", true) });
+    if (sel != null) {                // the selected agent's whole past, fading with age
+      const ages = [[0, 10, 1], [10, 30, 0.6], [30, 1e9, 0.28]];
+      ages.forEach(([a0, a1, op], i) => {
+        const pts = []; for (let f = Math.max(0, Math.floor(t) - a1); f <= Math.floor(t) - a0; f++) pts.push(posAt(S, sel, f));
+        if (i === 0) { const p = posAt(S, sel, t); if (p) pts.push(p); }
+        tr.push({ type: "scatter", mode: "lines", x: pts.map(p => p && p[0]), y: pts.map(p => p && p[1]), xaxis: xa, yaxis: ya, opacity: op,
+                  line: { color: C.pastSel, width: 2.4 }, hoverinfo: "skip", ...show("Past trajectory (selected; fades with age)", i === 0) });
+      });
+    }
+  }
+  if (W) {
+    const issue = W.issue, el = Math.max(0, t - issue);
+    // every agent's actual future (offline) and most-likely prediction
+    if (on.futureAll && off) { const xs = [], ys = []; for (let j = 0; j < W.n; j++) if (j !== k) seg(xs, ys, gtPts(W, j, H, true)); tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, xaxis: xa, yaxis: ya, line: { color: C.gt, width: 1.2 }, opacity: 0.7, hoverinfo: "skip", ...show("Actual future, other agents", true) }); }
+    if (P && on.mlAll) { const xs = [], ys = []; for (let j = 0; j < W.n; j++) if (j !== k) seg(xs, ys, pathPts(P.ml, j, H, [W.last[2 * j], W.last[2 * j + 1]])); tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, xaxis: xa, yaxis: ya, line: { color: C.mlOther, width: 1.3 }, hoverinfo: "skip", ...show("Most-likely, other agents", true) }); }
+    if (P && on.pairs && W.pairsGt) tr.push(...pairTraces(W, P, xa, ya, C, off, opts));
+    if (k != null && P) {
+      const start = [W.last[2 * k], W.last[2 * k + 1]];
+      // probability (model's own distribution) at the horizon
+      if (on.density && P.set) {
+        const s = H - 1, pts = [], w = [];
+        for (let j = 0; j < P.K; j++) { const i = ((k * P.K + j) * PRED + s) * 2; pts.push([P.set[i], P.set[i + 1]]); w.push(P.probs ? P.probs[k * P.K + j] : 1); }
+        const d = kde(pts, w);
+        if (d) tr.push({ type: "contour", x: d.xs, y: d.ys, z: d.z, xaxis: xa, yaxis: ya, showscale: false, hoverinfo: "skip", contours: { coloring: "fill", start: 0.08, end: 1, size: 0.18 },
+                         line: { width: 0.5, color: `rgba(${C.density},0.6)` }, colorscale: [[0, `rgba(${C.density},0)`], [1, `rgba(${C.density},0.55)`]],
+                         ...show(`Probability at +${st.h} s: ${P.probs ? "mode-probability-weighted" : "sample"} density (KDE of K = ${P.K})`, true) });
+      }
+      // calibrated band (coverage region, not a probability)
+      if (on.band && P.rML) {
+        const pts = pathPts(P.ml, k, H, null), r = Array.from({ length: H }, (_, s) => P.rML[k * PRED + s]);
+        const U = discUnion([st.scene, W.issue, model, sel, H, S.rot].join("|"), pts, r);
+        // a constraint contour shades the region that violates it: "z < 0" is violated inside the band
+        tr.push({ type: "contour", x: U.xs, y: U.ys, z: U.z, xaxis: xa, yaxis: ya, showscale: false, hoverinfo: "skip",
+                  contours: { type: "constraint", operation: "<", value: 0 }, fillcolor: C.bandFill.replace(/[\d.]+\)$/, "0.16)"),
+                  line: { color: C.band, width: 1.4 }, ...show("90% conformal band: union of per-step discs (calibrated region, not a probability)", true) });
+        const xs = [], ys = []; for (let s = 9; s < H; s += 10) seg(xs, ys, circle(pts[s], r[s]));
+        tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, xaxis: xa, yaxis: ya, line: { color: C.band, width: 1, dash: "dot" }, hoverinfo: "skip", showlegend: false });
+      }
+      // alternative futures
+      if (on.alts && P.set) {
+        const order = setOrder(P, k).slice(0, st.topk), ml_like = P.probs ? order[0] : -1;
+        order.forEach((j, r) => {
+          if (j === ml_like && P.kind === "modes") return;           // the top mode is the most-likely path itself
+          const pts = setPts(P, k, j, H, start), p = P.probs ? P.probs[k * P.K + j] : null;
+          const col = P.probs ? C.mode[Math.min(r, C.mode.length - 1)] : C.sample;
+          tr.push({ type: "scatter", mode: "lines", x: pts.map(q => q[0]), y: pts.map(q => q[1]), xaxis: xa, yaxis: ya, line: { color: col, width: P.probs ? 1.6 + 2 * p : 1.1 },
+                    hovertemplate: P.probs ? `mode ${j}, p = ${p.toFixed(2)}<extra></extra>` : `sample ${j}<extra></extra>`,
+                    ...show(P.probs ? "Alternative modes (ranked by the model's probability)" : "Samples (unordered draws, equally likely)", r === (P.kind === "modes" ? 1 : 0)) });
+          if (P.probs && r < 4) { const e = pts[pts.length - 1]; tr.push({ type: "scatter", mode: "text", x: [e[0]], y: [e[1]], xaxis: xa, yaxis: ya, text: [`p=${p.toFixed(2)}`], textposition: "middle right", textfont: { size: 10, color: col }, hoverinfo: "skip", showlegend: false }); }
+        });
+      }
+      // oracle best-of-K (offline; uses the future)
+      if (on.oracle && off && P.set && P.oracle_index && P.oracle_index[k] != null) {
+        const pts = setPts(P, k, P.oracle_index[k], H, start);
+        tr.push({ type: "scatter", mode: "lines", x: pts.map(q => q[0]), y: pts.map(q => q[1]), xaxis: xa, yaxis: ya, line: { color: C.oracle, width: 1.8, dash: "dash" },
+                  hovertemplate: `oracle best-of-${P.K}: chosen with the ground truth, not deployable<extra></extra>`, ...show(`Oracle best-of-K (uses the future; not deployable)`, true) });
+      }
+      // actual future of the selected agent (offline)
+      if (on.future && off) tr.push(...pathWithMarks(gtPts(W, k, H, true), C.gt, 2.6, "circle-open", "Actual future (ground truth)", xa, ya, opts, false));
+      // most-likely prediction
+      if (on.ml) tr.push(...pathWithMarks(pathPts(P.ml, k, H, start), C.ml, 2.8, "circle", opts.multi ? "Most-likely prediction (each panel's model)" : `Most-likely prediction (${S.byKey[model].family})`, xa, ya, opts, true));
+      // where the prediction says the agent is now, and the error to where it is (offline)
+      if (el > 0 && el <= H && on.ml) {
+        const s = Math.min(PRED - 1, Math.round(el) - 1), q = [P.ml[(k * PRED + s) * 2], P.ml[(k * PRED + s) * 2 + 1]], now = posAt(S, sel, t);
+        if (s >= 0) { tr.push({ type: "scatter", mode: "markers", x: [q[0]], y: [q[1]], xaxis: xa, yaxis: ya, marker: { symbol: "circle-open", size: 13, color: C.ml, line: { width: 2.2 } }, hovertemplate: "predicted position now<extra></extra>", showlegend: false });
+          if (now && off) tr.push({ type: "scatter", mode: "lines", x: [q[0], now[0]], y: [q[1], now[1]], xaxis: xa, yaxis: ya, line: { color: C.ml, width: 1, dash: "dot" }, hovertemplate: `error now ${Math.hypot(q[0] - now[0], q[1] - now[1]).toFixed(2)} m<extra></extra>`, showlegend: false }); }
+      }
+    }
+    if (on.safety && W.conflict) tr.push(...safetyTraces(W, P, xa, ya, C, off, opts));
+    if (on.kin && k != null && W.kin) tr.push(...kinTraces(W, k, xa, ya, C, off));
+  }
+  tr.push(...agentTraces(xa, ya, C, opts, W));
+  return tr;
+}
+function pathWithMarks(pts, color, width, sym, name, xa, ya, opts, arrows) {
+  const tr = [{ type: "scatter", mode: "lines", x: pts.map(p => p && p[0]), y: pts.map(p => p && p[1]), xaxis: xa, yaxis: ya, line: { color, width }, hoverinfo: "skip", name, showlegend: !!opts.legend, legendgroup: name }];
+  const mx = [], my = [], lab = [];
+  for (let s = 10; s < pts.length; s += 10) if (pts[s]) { mx.push(pts[s][0]); my.push(pts[s][1]); lab.push(`${s / 10}s`); }
+  tr.push({ type: "scatter", mode: "markers+text", x: mx, y: my, xaxis: xa, yaxis: ya, text: lab, textposition: "top right", textfont: { size: 9.5, color },
+            marker: { symbol: sym, size: 7, color, line: { width: 1.6, color } }, hovertemplate: `${name}: %{text}<extra></extra>`, showlegend: false, legendgroup: name });
+  const v = pts.filter(Boolean);
+  if (v.length >= 2) tr.push({ type: "scatter", mode: "markers", x: [v[v.length - 2][0], v[v.length - 1][0]], y: [v[v.length - 2][1], v[v.length - 1][1]], xaxis: xa, yaxis: ya,
+                                marker: { symbol: "arrow", angleref: "previous", size: [0, 12], color }, hoverinfo: "skip", showlegend: false, legendgroup: name });
+  return tr;
+}
+function agentTraces(xa, ya, C, opts, W) {
+  const tr = [], t = st.t, sel = st.sel, dim = st.mode === "B" || st.mode === "E" || st.mode === "D";
+  const groups = {};
+  const cx = [], cy = [], cd = [], ht = [];
+  for (let a = 0; a < S.A; a++) {
+    const p = posAt(S, a, t); if (!p) continue;
+    const g = S.B.agents.group[a], hh = S.B.agents.has_heading[a], h = S.heading[Math.round(t) * S.A + a];
+    (groups[g] ||= { xs: [], ys: [], px: [], py: [] });
+    seg(groups[g].xs, groups[g].ys, [...place(glyph(g, hh), p, hh ? h : 0), place(glyph(g, hh), p, hh ? h : 0)[0]]);
+    groups[g].px.push(p[0]); groups[g].py.push(p[1]);
+    cx.push(p[0]); cy.push(p[1]); cd.push(a);
+    const v = speedAt(S, a, t), k = W ? W.slot[a] : null;
+    ht.push(`<b>ID ${S.B.agents.ids[a]}</b> · ${S.B.agents.cls[a]}<br>speed ${v == null ? "n/a" : v.toFixed(1) + " m/s"}${hh ? "" : " · orientation unknown (never moved)"}<br>${k != null ? "prediction issued at " + (W.issue / S.fps).toFixed(1) + " s" : "no prediction in this window (needs 2 s of history)"}`);
+  }
+  for (const [g, d] of Object.entries(groups)) {
+    const G = GROUPS[g] || GROUPS.other;
+    tr.push({ type: "scatter", mode: "lines", x: d.xs, y: d.ys, xaxis: xa, yaxis: ya, fill: "toself", fillcolor: G.c, line: { color: G.d, width: 1 }, opacity: dim ? 0.45 : 1,
+              hoverinfo: "skip", name: G.name, showlegend: !!opts.legend, legendgroup: "cls-" + g });
+    if (G.px) tr.push({ type: "scatter", mode: "markers", x: d.px, y: d.py, xaxis: xa, yaxis: ya, marker: { symbol: G.px, size: 6, color: G.hollow ? G.d : G.c, line: { color: G.d, width: 1 } },
+                        opacity: dim ? 0.45 : 1, hoverinfo: "skip", showlegend: false, legendgroup: "cls-" + g });
+  }
+  // ego (estimated pose), drawn with its forward direction
+  const e = egoAt(S, t);
+  if (e) {
+    const h = S.ego.heading[Math.round(t)], body = place(EGO_GLYPH, e, h), arr = place(EGO_ARROW, e, h);
+    tr.push({ type: "scatter", mode: "lines", x: [...body.map(p => p[0]), body[0][0]], y: [...body.map(p => p[1]), body[0][1]], xaxis: xa, yaxis: ya, fill: "toself", fillcolor: C.ego, line: { color: C.egoLine, width: 1.5 },
+              hovertemplate: "<b>Ego vehicle</b><br>pose estimated from the annotations<extra></extra>", name: "Ego vehicle (estimated pose)", showlegend: !!opts.legend, legendgroup: "ego" });
+    tr.push({ type: "scatter", mode: "lines", x: [...arr.map(p => p[0]), arr[0][0]], y: [...arr.map(p => p[1]), arr[0][1]], xaxis: xa, yaxis: ya, fill: "toself", fillcolor: C.egoLine, line: { width: 0 }, hoverinfo: "skip", showlegend: false });
+    tr.push({ type: "scatter", mode: "text", x: [e[0]], y: [e[1]], xaxis: xa, yaxis: ya, text: ["EGO"], textposition: "bottom center", textfont: { size: 10, color: C.ink }, hoverinfo: "skip", showlegend: false });
+  }
+  // selection halo
+  if (sel != null) { const p = posAt(S, sel, t); if (p) tr.push({ type: "scatter", mode: "markers", x: [p[0]], y: [p[1]], xaxis: xa, yaxis: ya, marker: { size: 26, color: "rgba(0,0,0,0)", line: { color: C.ml, width: 2.5 } }, hoverinfo: "skip", showlegend: false }); }
+  // IDs
+  if (st.on.ids) { const xs = [], ys = [], tx = []; cd.forEach((a, i) => { if (!dim || a === sel) { xs.push(cx[i]); ys.push(cy[i]); tx.push(String(S.B.agents.ids[a])); } }); tr.push({ type: "scatter", mode: "text", x: xs, y: ys, xaxis: xa, yaxis: ya, text: tx, textposition: "top center", textfont: { size: 9, color: C.label }, hoverinfo: "skip", showlegend: false }); }
+  // click and hover targets (one per agent)
+  tr.push({ type: "scatter", mode: "markers", x: cx, y: cy, xaxis: xa, yaxis: ya, customdata: cd, text: ht, hovertemplate: "%{text}<extra></extra>", marker: { size: 16, color: "rgba(0,0,0,0.004)" }, showlegend: false, name: "agents" });
+  return tr;
+}
+function safetyTraces(W, P, xa, ya, C, off, opts) {
+  const tr = [], t = st.t;
+  const cur = j => posAt(S, W.agents[j], t);
+  if (off) {                          // conflicts use the true future: offline only
+    const xs = [], ys = [], names = [];
+    W.conflict.forEach((c, j) => { const p = cur(j); if (c && p) { seg(xs, ys, circle(p, 3.2, 28)); names.push(S.B.agents.ids[W.agents[j]]); } });
+    if (xs.length) tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, xaxis: xa, yaxis: ya, line: { color: C.conflict, width: 1.6, dash: "dash" }, hoverinfo: "skip",
+                             name: "Conflict: true path within 5 m of the ego at the same time (scorecard)", showlegend: !!opts.legend, legendgroup: "conflict" });
+  }
+  if (P) {                            // danger flags use the prediction, its band and the ego's own future path
+    const xs = [], ys = [], tx = [];
+    (P.danger_ml || []).forEach((d, j) => { const p = cur(j); if (d != null && d <= 1 && p) { xs.push(p[0]); ys.push(p[1] + 2.6); tx.push(`D = ${d.toFixed(2)}`); } });
+    if (xs.length) tr.push({ type: "scatter", mode: "markers", x: xs, y: ys, xaxis: xa, yaxis: ya, text: tx, hovertemplate: "danger flag: %{text} (D ≤ 1: the 90% band comes within 5 m of the ego's path)<extra></extra>",
+                             marker: { symbol: "triangle-down", size: 11, color: C.danger, line: { color: C.bg, width: 1 } }, name: "Danger flag D ≤ 1 (prediction + 90% band; scorecard)", showlegend: !!opts.legend, legendgroup: "danger" });
+    const e0 = egoAt(S, W.issue), e = e0 ? [e0] : [];
+    for (let s = 0; s < st.h * 10; s++) e.push([W.egoFut[2 * s], W.egoFut[2 * s + 1]]);
+    tr.push({ type: "scatter", mode: "lines", x: e.map(p => p[0]), y: e.map(p => p[1]), xaxis: xa, yaxis: ya,
+              line: { color: C.ink, width: 1.3, dash: "dash" }, opacity: 0.55, hoverinfo: "skip", name: "Ego's logged future path (the scorecard's plan)", showlegend: !!opts.legend, legendgroup: "egofut" });
+  }
+  return tr;
+}
+function kinTraces(W, k, xa, ya, C, off) {
+  const tr = [], ttc = W.kin.ttc_cv_s[k];
+  const p = [W.last[2 * k], W.last[2 * k + 1]];
+  if (ttc != null) tr.push({ type: "scatter", mode: "text", x: [p[0]], y: [p[1]], xaxis: xa, yaxis: ya, text: [`TTC(CV, 5 m) ${ttc.toFixed(1)} s`], textposition: "bottom right", textfont: { size: 10, color: C.danger }, hoverinfo: "skip", showlegend: false });
+  const s = W.kin.min_sep_gt_step[k];
+  if (off && s != null) {
+    const a = [W.gt[(k * PRED + s) * 2], W.gt[(k * PRED + s) * 2 + 1]], e = [W.egoFut[2 * s], W.egoFut[2 * s + 1]];
+    tr.push({ type: "scatter", mode: "lines+text", x: [a[0], e[0]], y: [a[1], e[1]], xaxis: xa, yaxis: ya, text: ["", `min sep. ${W.kin.min_sep_gt_m[k].toFixed(1)} m at +${((s + 1) / 10).toFixed(1)} s`],
+              textposition: "top center", textfont: { size: 10, color: C.danger }, line: { color: C.danger, width: 1.2, dash: "dot" }, hoverinfo: "skip", showlegend: false });
+  }
+  return tr;
+}
+function pairTraces(W, P, xa, ya, C, off, opts) {
+  const tr = [], H = st.h * 10;
+  const draw = (pairs, arr, color, name, isGt) => {
+    const xs = [], ys = [], tx = [], lx = [], ly = [];
+    const keep = [...pairs].filter(p => p[3] < H).sort((p, q) => p[2] - q[2]), labelled = new Set(keep.slice(0, 8));   // label the 8 closest
+    for (const pr of keep) { const [i, j, d, s] = pr;
+      const a = [arr[(i * PRED + s) * 2], arr[(i * PRED + s) * 2 + 1]], b = [arr[(j * PRED + s) * 2], arr[(j * PRED + s) * 2 + 1]];
+      if (!isFinite(a[0]) || !isFinite(b[0])) continue;
+      seg(xs, ys, [a, b]); if (labelled.has(pr)) { lx.push((a[0] + b[0]) / 2); ly.push((a[1] + b[1]) / 2); tx.push(`${d.toFixed(1)} m @+${((s + 1) / 10).toFixed(1)} s`); } }
+    if (!xs.length) return;
+    tr.push({ type: "scatter", mode: "lines+markers", x: xs, y: ys, xaxis: xa, yaxis: ya, line: { color, width: 1.6, dash: isGt ? "solid" : "dash" }, marker: { size: 5, color }, hoverinfo: "skip", name, showlegend: !!opts.legend, legendgroup: name });
+    tr.push({ type: "scatter", mode: "text", x: lx, y: ly, xaxis: xa, yaxis: ya, text: tx, textfont: { size: 9.5, color }, textposition: "middle right", hoverinfo: "skip", showlegend: false });
+  };
+  if (off) draw(W.pairsGt, W.gt, C.pairGt, "Close pair, recorded (centres ≤ 3 m at the same time)", true);
+  draw(P.pairs_pred, P.ml, C.pairPred, "Close pair, predicted (most-likely paths ≤ 3 m)", false);
+  return tr;
+}
+function mapTraces(xa, ya, C) {      // Argoverse 2 vector map: lane surfaces, markings by type, crosswalks
+  const M = S.B.map; if (!M) return [];
+  if (!S.mapCache) {
+    const lanes = M.lanes.map(l => ({ p: toDisplay(S, decXY(l.pts, S.B.scene.origin)), mark: l.mark }));
+    const xs = (a) => Array.from({ length: a.length / 2 }, (_, i) => [a[2 * i], a[2 * i + 1]]);
+    const surf = { x: [], y: [] }, solid = { x: [], y: [] }, dashed = { x: [], y: [] }, ysolid = { x: [], y: [] }, ydash = { x: [], y: [] }, none = { x: [], y: [] };
+    for (let i = 0; i + 1 < lanes.length; i += 2) {   // the bundle stores each segment's left then right boundary
+      const L = xs(lanes[i].p), R = xs(lanes[i + 1].p).reverse(); seg(surf.x, surf.y, [...L, ...R, L[0]]);
+    }
+    for (const l of lanes) {
+      const m = l.mark.toUpperCase(), tgt = m === "NONE" || m === "UNKNOWN" ? none : m.includes("YELLOW") ? (m.includes("DASH") ? ydash : ysolid) : (m.includes("DASH") ? dashed : solid);
+      seg(tgt.x, tgt.y, xs(l.p));
+    }
+    const cw = { x: [], y: [] }; for (const c of M.crossings) { const p = xs(toDisplay(S, decXY(c, S.B.scene.origin))); seg(cw.x, cw.y, [...p, p[0]]); }
+    S.mapCache = { surf, solid, dashed, ysolid, ydash, none, cw };
+  }
+  const K = S.mapCache, dark = st.theme === "dark", paint = dark ? "#c9d1db" : "#8e99a6", yellow = dark ? "#e9b949" : "#c9961a";
+  const ln = (d, color, width, dash, name, legend) => ({ type: "scatter", mode: "lines", x: d.x, y: d.y, xaxis: xa, yaxis: ya, line: { color, width, dash }, hoverinfo: "skip", name, showlegend: legend, legendgroup: name });
+  return [
+    { type: "scatter", mode: "lines", x: K.surf.x, y: K.surf.y, xaxis: xa, yaxis: ya, fill: "toself", fillcolor: dark ? "#19212b" : "#eef1f4", line: { width: 0 }, hoverinfo: "skip", name: "Lanes (Argoverse 2 map)", showlegend: true },
+    { type: "scatter", mode: "lines", x: K.cw.x, y: K.cw.y, xaxis: xa, yaxis: ya, fill: "toself", fillcolor: dark ? "rgba(201,209,219,0.10)" : "rgba(142,153,166,0.12)",
+      fillpattern: { shape: "|", fgcolor: paint, size: 5, solidity: 0.3 }, line: { color: paint, width: 0.8 }, hoverinfo: "skip", name: "Crosswalk", showlegend: true },
+    ln(K.none, dark ? "#2a3440" : "#dde1e6", 0.6, "dot", "Lane boundary without paint", false),
+    ln(K.solid, paint, 1.1, "solid", "Lane marking, solid / dashed", true), ln(K.dashed, paint, 1.1, "dash", "Lane marking, solid / dashed", false),
+    ln(K.ysolid, yellow, 1.3, "solid", "Yellow marking", true), ln(K.ydash, yellow, 1.3, "dash", "Yellow marking", false),
+  ];
+}
+let FOOT = {};
+function footprint(xa, ya, C) {      // where any agent was recorded during the scene (not a map)
+  const key = S.B.scene.id + st.theme;
+  if (!FOOT[key]) {
+    const [x0, x1, y0, y1] = S.extent, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), z = Array.from({ length: ny }, () => new Float64Array(nx));
+    for (let i = 0; i < S.track.length; i += 2) { const x = S.track[i], y = S.track[i + 1]; if (isFinite(x)) { const a = Math.floor(x - x0), b = Math.floor(y - y0); if (a >= 0 && a < nx && b >= 0 && b < ny) z[b][a] += 1; } }
+    FOOT[key] = { x: Array.from({ length: nx }, (_, i) => x0 + i + 0.5), y: Array.from({ length: ny }, (_, j) => y0 + j + 0.5), z: z.map(r => Array.from(r, v => v > 0 ? Math.log1p(v) : null)) };
+  }
+  const F = FOOT[key];
+  return { type: "heatmap", x: F.x, y: F.y, z: F.z, xaxis: xa, yaxis: ya, colorscale: C.foot, showscale: false, hoverinfo: "skip", zsmooth: "best",
+           name: "Observed traffic footprint (all recorded positions, 0–10 s; not a map)", showlegend: true };
+}
+
+// ---------------------------------------------------------------- layout and render
+function viewRange(S, t, span) {
+  if (!(st.on.follow && st.sel != null)) return S.extent;
+  const p = posAt(S, st.sel, t) || egoAt(S, t); if (!p) return S.extent;
+  // fit the selected agent: where it is now, its most-likely path and its actual future to the horizon
+  const pts = [p], W = activeWindow(S, t), k = W ? W.slot[st.sel] : null, P = W && k != null && st.model ? pred(S, W, st.model) : null;
+  if (P) for (let s = 0; s < st.h * 10; s++) { pts.push([P.ml[(k * PRED + s) * 2], P.ml[(k * PRED + s) * 2 + 1]]); if (W.fm[k * PRED + s]) pts.push([W.gt[(k * PRED + s) * 2], W.gt[(k * PRED + s) * 2 + 1]]); }
+  const xs = pts.map(q => q[0]), ys = pts.map(q => q[1]), m = 8;
+  let x0 = Math.min(...xs) - m, x1 = Math.max(...xs) + m, y0 = Math.min(...ys) - m, y1 = Math.max(...ys) + m;
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, w = Math.max(x1 - x0, span), h = Math.max(y1 - y0, span * 0.55);
+  return [cx - w / 2, cx + w / 2, cy - h / 2, cy + h / 2];
+}
+function axisStyle(C, range, title, extra = {}) {
+  return { range, title: { text: title, font: { size: 11, color: C.axis } }, gridcolor: C.grid, zeroline: false, linecolor: C.grid, tickfont: { size: 10, color: C.axis }, dtick: 10, ...extra };
+}
+const PERF = { n: 0, total: 0, max: 0 };
+function render() {
+  const t0 = performance.now();
+  renderFigure();
+  const dt = performance.now() - t0; PERF.n++; PERF.total += dt; PERF.max = Math.max(PERF.max, dt);
+  window.__perf = { renders: PERF.n, mean_ms: +(PERF.total / PERF.n).toFixed(1), max_ms: +PERF.max.toFixed(1) };
+}
+function renderFigure() {
+  const el = document.getElementById("plot"), C = THEMES[st.theme], W = activeWindow(S, st.t);
+  let traces = [], layout;
+  const egoNote = S.B.scene.dataset === "IDD-3D" ? "ego motion estimated from the annotations" : "the ego is the recorded AV";
+  let caption = (S.identity ? `${S.B.scene.dataset} world frame` : `Frame: the ego's initial pose (x forward, y left), a rigid transform of the ${S.B.scene.dataset} world frame`) +
+                `; ${egoNote} · metres · markers use nominal class sizes · ` +
+                (S.B.public ? `benchmark v2 IDD-trained models, seed 0` : `development results, not for publication`);
+  let title = `${S.B.scene.dataset} ${S.B.scene.split.replace("IDD val ", "val ")} · scene ${S.B.scene.id} · t = ${(st.t / S.fps).toFixed(2)} s · ` +
+              (W ? `predictions issued at ${(W.issue / S.fps).toFixed(1)} s` : `no prediction yet (models need 2 s of history; first at ${(S.windows[0].raw.issue_frame / S.fps).toFixed(1)} s)`);
+  if (st.mode === "F") {
+    const fm = st.model && (st.model.endsWith("_av2") || st.model === "cv") ? st.model : "led_av2";
+    title = `Cross-domain: ${modelLabel(fm).replace(/ \(.*\)$/, "")} trained on Argoverse 2, the same weights in both panels`;
+    caption = "Each panel in its own ego's initial pose (x forward, y left) · the same metres per pixel, units and 6 s horizon · " +
+              "IDD-3D ego motion estimated from the annotations · development results, not for publication";
+  }
+  const base = { paper_bgcolor: C.bg, plot_bgcolor: C.bg, font: { color: C.ink, family: "system-ui, Segoe UI, Roboto, sans-serif" }, uirevision: st.mode + st.scene + st.theme,
+                 margin: { l: 56, r: 14, t: 64, b: 96 }, hovermode: "closest", dragmode: "pan",
+                 legend: { orientation: "h", x: 0, y: -0.13, yanchor: "top", font: { size: 10.5 }, bgcolor: "rgba(0,0,0,0)", itemclick: false, itemdoubleclick: false } };
+  if (st.mode === "F") {
+    traces = []; layout = { ...base, grid: { rows: 1, columns: 2, pattern: "independent", xgap: 0.07 }, annotations: [] };
+    const fm = st.model && (st.model.endsWith("_av2") || st.model === "cv") ? st.model : "led_av2";
+    const order = [scenes.findIndex(s => s.B.scene.dataset === "Argoverse 2"), scenes.findIndex(s => s.B.scene.dataset === "IDD-3D")];
+    const keep = { S, t: st.t, sel: st.sel }, ranges = [], subs = [];
+    order.forEach((si, i) => {
+      S = scenes[si];
+      const idw = S.B.scene.dataset === "IDD-3D" ? (activeWindow(S, keep.S === S ? keep.t : 0) ? activeWindow(S, keep.t) : win(S, Math.min(3, S.windows.length - 1))) : win(S, 0);
+      st.t = idw.issue; st.sel = (keep.S === S && keep.sel != null && idw.slot[keep.sel] != null) ? keep.sel : (S.fSel ??= fastest(S, idw));
+      const saveOn = { ...st.on }; st.on.follow = 1;
+      traces.push(...panelTraces(fm, i ? "2" : "", { legend: true, multi: true }));
+      ranges.push(viewRange(S, st.t, 46)); st.on = saveOn;
+      const P = pred(S, idw, fm), k = idw.slot[st.sel], m = S.byKey[fm];
+      subs.push(`${S.B.scene.dataset === "IDD-3D" ? "IDD-3D " + S.B.scene.split.replace("IDD ", "") : S.B.scene.split} · ${m.domain.includes("in-domain") ? "in-domain" : "zero-shot"} · issued at ${(idw.issue / S.fps).toFixed(1)} s` +
+                (st.on.offline && P && P.ade[k] != null ? ` · agent ${S.B.agents.ids[st.sel]} ADE ${P.ade[k].toFixed(2)} m` : ""));
+      layout[i ? "xaxis2" : "xaxis"] = axisStyle(C, null, S.frameLabel[0]); layout[i ? "yaxis2" : "yaxis"] = axisStyle(C, null, i ? "" : S.frameLabel[1], { scaleanchor: i ? "x2" : "x", scaleratio: 1 });
+    });
+    S = keep.S; st.t = keep.t; st.sel = keep.sel;
+    const w = Math.max(...ranges.map(r => r[1] - r[0])), h = Math.max(...ranges.map(r => r[3] - r[2]));   // the same metres per pixel in both
+    ranges.forEach((r, i) => { const cx = (r[0] + r[1]) / 2, cy = (r[2] + r[3]) / 2, ax = i ? "2" : "";
+      layout["xaxis" + ax].range = [cx - w / 2, cx + w / 2]; layout["yaxis" + ax].range = [cy - h / 2, cy + h / 2];
+      layout.annotations.push({ text: `<b>${subs[i]}</b>`, xref: `x${ax} domain`, yref: `y${ax} domain`, x: 0, y: 1, xanchor: "left", yanchor: "bottom", showarrow: false, font: { size: 11.5 } }); });
+  } else if (st.mode === "D" || st.mode === "E") {
+    const panels = st.mode === "D" ? st.cmp.filter(Boolean).slice(0, 4) : [st.model, st.model];
+    const n = panels.length, cols = n <= 2 ? n : 2, rows = Math.ceil(n / cols), span = 44;
+    const r = viewRange(S, st.t, span);
+    layout = { ...base, grid: { rows, columns: cols, pattern: "independent", xgap: 0.06, ygap: 0.12 }, annotations: [] };
+    panels.forEach((m, i) => {
+      const ax = i === 0 ? "" : String(i + 1), saveE = { ...st.on };
+      if (st.mode === "E") { st.on = { ...st.on, density: i === 0 ? 1 : 0, band: i === 1 ? 1 : 0, alts: i === 0 ? 1 : 0 }; }
+      traces.push(...panelTraces(m, ax, { legend: true, multi: true }));
+      if (st.mode === "E" && i === 1) traces.push(...coverageMarks(W, m, ax, C));
+      st.on = saveE;
+      layout["xaxis" + ax] = axisStyle(C, [r[0], r[1]], S.frameLabel[0], i ? { matches: "x" } : {});
+      layout["yaxis" + ax] = axisStyle(C, [r[2], r[3]], i % cols ? "" : S.frameLabel[1], i ? { matches: "y" } : { scaleanchor: "x", scaleratio: 1 });
+      const k = W && st.sel != null ? W.slot[st.sel] : null, P = W && m ? pred(S, W, m) : null;
+      let sub = st.mode === "E" ? (i === 0 ? "Probability: the model's own distribution" : "Coverage: 90% conformal band (calibrated on the other half of IDD val)") : modelLabel(m);
+      if (P && k != null && st.on.offline && P.ade[k] != null) sub += st.mode === "E" ? (i === 1 && P.covered_steps ? ` · future inside the band at ${(100 * P.covered_steps[k]).toFixed(0)}% of steps` : "") : ` · ADE ${P.ade[k].toFixed(2)} m, FDE ${P.fde[k].toFixed(2)} m`;
+      layout.annotations.push({ text: `<b>${sub}</b>`, xref: `x${ax} domain`, yref: `y${ax} domain`, x: 0, y: 1.0, xanchor: "left", yanchor: "bottom", showarrow: false, font: { size: 11.5 } });
+    });
+    if (st.mode === "E") layout.annotations.push({ text: modelLabel(st.model), xref: "paper", yref: "paper", x: 1, y: 1.06, xanchor: "right", showarrow: false, font: { size: 11, color: C.axis } });
+  } else {
+    const span = st.mode === "B" ? 46 : 70;
+    const r = viewRange(S, st.t, span);
+    traces = panelTraces(st.model, "", { legend: true });
+    layout = { ...base, xaxis: axisStyle(C, [r[0], r[1]], S.frameLabel[0]), yaxis: axisStyle(C, [r[2], r[3]], S.frameLabel[1], { scaleanchor: "x", scaleratio: 1 }), annotations: [] };
+    if (W && st.model) layout.annotations.push({ text: modelLabel(st.model) + (S.byKey[st.model].caveat ? " · ⚠ see caveat" : ""), xref: "paper", yref: "paper", x: 1, y: 1.0, xanchor: "right", yanchor: "bottom", showarrow: false, font: { size: 11, color: C.axis } });
+  }
+  const seen = new Set();               // one legend entry per meaning, across panels
+  for (const tr of traces) if (tr.showlegend) { if (seen.has(tr.name)) tr.showlegend = false; else seen.add(tr.name); }
+  layout.annotations.push({ text: `<b>${title}</b>`, xref: "paper", yref: "paper", x: 0, y: 1, yshift: 38, xanchor: "left", yanchor: "bottom", showarrow: false, font: { size: 12.5 } });
+  layout.annotations.push({ text: caption, xref: "paper", yref: "paper", x: 0, y: 1, yshift: 22, xanchor: "left", yanchor: "bottom", showarrow: false, font: { size: 10, color: C.axis } });
+  Plotly.react(el, traces, layout, { displaylogo: false, scrollZoom: true, responsive: true, modeBarButtonsToRemove: ["select2d", "lasso2d", "autoScale2d"] });
+  updatePanels(W);
+}
+function coverageMarks(W, m, ax, C) {  // ground truth at 1..6 s, inside or outside the band (offline)
+  if (!W || !st.on.offline || st.sel == null || W.slot[st.sel] == null) return [];
+  const P = pred(S, W, m), k = W.slot[st.sel], inx = [], iny = [], outx = [], outy = [];
+  if (!P.rML) return [];
+  for (let s = 9; s < st.h * 10; s += 10) { if (!W.fm[k * PRED + s]) continue;
+    const g = [W.gt[(k * PRED + s) * 2], W.gt[(k * PRED + s) * 2 + 1]], q = [P.ml[(k * PRED + s) * 2], P.ml[(k * PRED + s) * 2 + 1]];
+    (Math.hypot(g[0] - q[0], g[1] - q[1]) <= P.rML[k * PRED + s] ? (inx.push(g[0]), iny) : (outx.push(g[0]), outy)).push(g[1]); }
+  return [{ type: "scatter", mode: "markers", x: inx, y: iny, xaxis: "x" + ax, yaxis: "y" + ax, marker: { symbol: "circle", size: 9, color: C.gt, line: { color: C.bg, width: 1 } }, name: "True position at 1–6 s, inside its own step's 90% disc (dotted)", hoverinfo: "skip" },
+          { type: "scatter", mode: "markers", x: outx, y: outy, xaxis: "x" + ax, yaxis: "y" + ax, marker: { symbol: "x", size: 10, color: C.conflict, line: { width: 2, color: C.conflict } }, name: "True position at 1–6 s, outside its own step's disc", hoverinfo: "skip" }];
+}
+
+// ---------------------------------------------------------------- side panels
+function fmt(v, d = 2, u = "") { return v == null ? "—" : v.toFixed(d) + u; }
+function updatePanels(W) {
+  const t = st.t, off = !!st.on.offline;
+  document.getElementById("clock").innerHTML = `<b>t = ${(t / S.fps).toFixed(2)} s</b> of ${((S.T - 1) / S.fps).toFixed(1)} s · ` + (W ? `predictions issued at <b>${(W.issue / S.fps).toFixed(1)} s</b>` : `predictions start at 1.9 s`);
+  document.getElementById("slider").value = t;
+  document.getElementById("offlineBadge").hidden = !off;
+  // selected-agent card
+  const sel = st.sel, card = document.getElementById("card");
+  if (sel == null) card.innerHTML = `<span class="note">Click an agent on the map or in the list.</span>`;
+  else {
+    const k = W ? W.slot[sel] : null, P = W && k != null && st.model ? pred(S, W, st.model) : null, v = speedAt(S, sel, t);
+    const rows = [["Agent", `ID ${S.B.agents.ids[sel]} · ${S.B.agents.cls[sel]}`], ["Speed (last 1 s)", fmt(v, 1, " m/s")],
+                  ["Heading", S.B.agents.has_heading[sel] ? "motion direction" : "unknown (never moved 1 m in 1 s)"]];
+    if (k == null) rows.push(["Prediction", W ? "none: no 2 s history at this issue time" : "none yet"]);
+    else {
+      rows.push(["Issued at", (W.issue / S.fps).toFixed(1) + " s"]);
+      if (P) {
+        if (P.fallback && P.fallback[k]) rows.push(["Note", "<span style='color:var(--warn)'>CV stand-in (no Trajectron++ node)</span>"]);
+        if (off) { rows.push(["ADE / FDE (most-likely)", `${fmt(P.ade[k])} / ${fmt(P.fde[k])} m`]);
+                   if (P.min_ade) rows.push([`Oracle best-of-${P.K} ADE / FDE`, `${fmt(P.min_ade[k])} / ${fmt(P.min_fde[k])} m`]);
+                   if (P.covered_steps) rows.push(["Future inside the 90% band", P.covered_steps[k] == null ? "—" : `${(100 * P.covered_steps[k]).toFixed(0)}% of steps${P.covered_all[k] ? " (all)" : ""}`]); }
+        if (P.danger_ml) rows.push(["Danger score D (band)", P.danger_ml[k] == null ? "—" : `${P.danger_ml[k].toFixed(2)}${P.danger_ml[k] <= 1 ? " · flagged" : ""}`]);
+      }
+      if (off && W.conflict) rows.push(["Conflict with ego (≤ 5 m)", W.conflict[k] ? "<b style='color:var(--accent)'>yes</b>" : "no"], ["Min. separation to ego", W.kin.min_sep_gt_m[k] == null ? "—" : `${W.kin.min_sep_gt_m[k].toFixed(1)} m at +${((W.kin.min_sep_gt_step[k] + 1) / 10).toFixed(1)} s`]);
+      if (W.kin) rows.push(["TTC, constant velocity, 5 m", W.kin.ttc_cv_s[k] == null ? "none within 6 s" : W.kin.ttc_cv_s[k].toFixed(1) + " s"]);
+    }
+    card.innerHTML = `<table>${rows.map(([a, b]) => `<tr><td class="k">${a}</td><td>${b}</td></tr>`).join("")}</table>`;
+  }
+  // agent list (present now)
+  const list = document.getElementById("agents"), items = [];
+  for (let a = 0; a < S.A; a++) { const p = posAt(S, a, t); if (!p) continue; const k = W ? W.slot[a] : null, v = speedAt(S, a, t);
+    const P = W && k != null && st.model ? pred(S, W, st.model) : null, G = GROUPS[S.B.agents.group[a]] || GROUPS.other;
+    const flags = [k != null ? "pred" : "", off && k != null && W.conflict && W.conflict[k] ? "conflict" : "", P && P.danger_ml && P.danger_ml[k] != null && P.danger_ml[k] <= 1 ? "danger" : ""].filter(Boolean).join(" · ");
+    items.push(`<div data-a="${a}" class="${a === st.sel ? "sel" : ""}"><span class="dot" style="background:${G.c};border:1px solid ${G.d}"></span><span>${S.B.agents.ids[a]}</span><span>${S.B.agents.cls[a]} ${v == null ? "" : `<span class="flags">${v.toFixed(1)} m/s</span>`}</span><span class="flags">${flags}</span></div>`); }
+  list.innerHTML = items.join("");
+}
+function modelOptions(selEl, value) {
+  selEl.innerHTML = "";
+  const groups = {};
+  S.models.forEach(m => (groups[m.domain] ||= []).push(m));
+  for (const [d, ms] of Object.entries(groups)) {
+    const inDom = d.includes("in-domain on AV2");
+    const og = document.createElement("optgroup"); og.label = d === "none (no training)" ? "Baseline" : d.startsWith("IDD") ? "Trained on IDD-3D (in-domain)" : inDom ? "Trained on Argoverse 2 (in-domain here)" : "Trained on Argoverse 2 (zero-shot on IDD-3D)";
+    const tag = d === "none (no training)" ? "baseline" : d.startsWith("IDD") ? "IDD" : inDom ? "AV2" : "AV2→IDD";
+    ms.forEach(m => { const o = document.createElement("option"); o.value = m.key; o.textContent = `${m.label} [${tag}]` + (m.available ? (m.kind !== "point" ? ` · ${m.kind} K=${m.K}` : "") : " · unavailable"); o.disabled = !m.available; o.title = m.available ? m.source : m.reason; og.appendChild(o); });
+    selEl.appendChild(og);
+  }
+  selEl.value = value;
+}
+function buildControls() {
+  const tabs = document.getElementById("modes"); tabs.innerHTML = "";
+  for (const [k, v] of Object.entries(MODES)) { const b = document.createElement("button"); b.textContent = v; b.className = st.mode === k ? "on" : ""; b.disabled = (k === "F" && !scenes.some(s => s.B.scene.dataset === "Argoverse 2")) || (k === "E" && !!S.B.public);
+    b.title = !b.disabled ? "" : k === "E" ? "Not in public files: they carry no calibrated bands" : "Needs an Argoverse 2 scene bundle (next step)"; b.onclick = () => setMode(k); tabs.appendChild(b); }
+  const sp0 = document.getElementById("scenePick"); document.getElementById("sceneBox").hidden = scenes.length < 2;
+  sp0.innerHTML = scenes.map((s, i) => `<option value="${i}">${s.B.scene.dataset} ${s.B.scene.split} · ${s.B.scene.id.slice(0, 26)}</option>`).join(""); sp0.value = st.scene;
+  sp0.onchange = () => { switchScene(+sp0.value); buildControls(); render(); };
+  modelOptions(document.getElementById("model"), st.model);
+  const m = S.byKey[st.model];
+  document.getElementById("modelMeta").innerHTML = m ? `${m.domain}<br>${m.status}<br>Most-likely: ${m.ml_definition}` + (m.set_definition ? `<br>Alternatives: ${m.set_definition} (K = ${m.K})` : "<br>One path only: no alternatives, no distribution") +
+    (m.caveat ? `<br><span class="caveat">⚠ ${m.caveat}</span>` : "") : "";
+  document.getElementById("compareBox").hidden = st.mode !== "D";
+  ["cmp1", "cmp2", "cmp3", "cmp4"].forEach((id, i) => { const e = document.getElementById(id); modelOptions(e, st.cmp[i]); e.onchange = () => { st.cmp[i] = e.value; render(); }; });
+  const hz = document.getElementById("horizon"); hz.innerHTML = "";
+  for (let h = 1; h <= 6; h++) { const b = document.createElement("button"); b.textContent = h + " s"; b.className = st.h === h ? "on" : ""; b.onclick = () => { st.h = h; buildControls(); render(); }; hz.appendChild(b); }
+  const tk = document.getElementById("topk"); tk.innerHTML = "";
+  for (const k of [1, 3, 6, 10, 20]) { const b = document.createElement("button"); b.textContent = k === 1 ? "none" : k; b.className = st.topk === k ? "on" : ""; b.onclick = () => { st.topk = k; buildControls(); render(); }; tk.appendChild(b); }
+  const ly = document.getElementById("layers"), C = THEMES[st.theme]; ly.innerHTML = "";
+  for (const [k, name, col] of LAYERS) {
+    if (S.B.public && PRIVATE_LAYERS.includes(k)) continue;
+    const l = document.createElement("label"), c = document.createElement("input"); c.type = "checkbox"; c.checked = !!st.on[k];
+    c.onchange = () => { st.on[k] = c.checked ? 1 : 0; render(); };
+    const sw = document.createElement("span"); sw.className = "sw"; const cc = C[col]; sw.style.background = Array.isArray(cc) ? cc[0] : (col === "density" ? `rgb(${cc})` : cc);
+    l.append(c, sw, name); ly.appendChild(l);
+  }
+  const sp = document.getElementById("speeds"); sp.innerHTML = "";
+  for (const s of [0.25, 0.5, 1, 2, 4]) { const b = document.createElement("button"); b.textContent = s + "×"; b.className = st.speed === s ? "on" : ""; b.onclick = () => { st.speed = s; buildControls(); }; sp.appendChild(b); }
+  const ticks = document.getElementById("ticks"); ticks.innerHTML = "";
+  S.windows.forEach(w => { const s = document.createElement("span"); s.style.left = (100 * w.raw.issue_frame / (S.T - 1)) + "%"; s.title = `prediction issued at ${(w.raw.issue_frame / S.fps).toFixed(1)} s`; ticks.appendChild(s); });
+  document.getElementById("sceneTitle").textContent = `${S.B.scene.id} · ${S.A} agents · ${(S.T / S.fps).toFixed(0)} s at ${S.fps} Hz`;
+  document.getElementById("about").innerHTML = [...S.B.scene.notes, `Frame: ${S.B.scene.frame}.`, ...(S.B.calibration ? [`Conformal bands calibrated on ${S.B.calibration.label} (${S.B.calibration.rows} agent-windows; never this scene).`] : []),
+    ...Object.entries(S.B.definitions).map(([k, v]) => `<b>${k}</b>: ${v}`), `Ego: ${S.B.ego.source}.`].map(x => `<li>${x}</li>`).join("");
+  document.documentElement.dataset.theme = st.theme;
+}
+
+// ---------------------------------------------------------------- events and playback
+let last = 0, lastDraw = 0;
+function tick(ts) {
+  if (st.playing) {
+    const dt = last ? (ts - last) / 1000 : 0; st.t = Math.min(S.T - 1, st.t + dt * S.fps * st.speed);
+    if (st.t >= S.T - 1) { st.playing = false; document.getElementById("playBtn").textContent = "▶ Play"; }
+    if (ts - lastDraw > 45) { render(); lastDraw = ts; }
+  }
+  last = ts; requestAnimationFrame(tick);
+}
+function wire() {
+  document.getElementById("model").onchange = e => { st.model = e.target.value; buildControls(); render(); };
+  document.getElementById("playBtn").onclick = () => { if (st.t >= S.T - 1) st.t = 0; st.playing = !st.playing; document.getElementById("playBtn").textContent = st.playing ? "⏸ Pause" : "▶ Play"; };
+  document.getElementById("resetBtn").onclick = () => { st.playing = false; st.t = 0; document.getElementById("playBtn").textContent = "▶ Play"; render(); };
+  const issues = () => S.windows.map(w => w.raw.issue_frame);
+  document.getElementById("prevBtn").onclick = () => { const p = issues().filter(f => f < st.t - 1e-6).pop(); if (p != null) { st.t = p; render(); } };
+  document.getElementById("nextBtn").onclick = () => { const n = issues().find(f => f > st.t + 1e-6); if (n != null) { st.t = n; render(); } };
+  document.getElementById("slider").oninput = e => { st.t = parseFloat(e.target.value); render(); };
+  document.getElementById("themeBtn").onclick = () => { st.theme = st.theme === "light" ? "dark" : "light"; buildControls(); render(); };
+  const exp = fmtx => Plotly.downloadImage("plot", { format: fmtx, scale: fmtx === "png" ? 4 : 1, width: document.getElementById("plot").clientWidth, height: document.getElementById("plot").clientHeight,
+                                                  filename: `dreamdrive_${S.B.scene.id}_${st.mode}_t${(st.t / S.fps).toFixed(1)}s_${st.model}` });
+  document.getElementById("pngBtn").onclick = () => exp("png");
+  document.getElementById("svgBtn").onclick = () => exp("svg");
+  document.getElementById("agents").onclick = e => { const d = e.target.closest("[data-a]"); if (d) { st.sel = +d.dataset.a; render(); } };
+  document.getElementById("plot").on("plotly_click", ev => { const p = ev.points.find(q => q.data.name === "agents"); if (p) { st.sel = p.customdata; render(); } });
+  window.addEventListener("keydown", e => { if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return; if (e.code === "Space") { e.preventDefault(); document.getElementById("playBtn").click(); } if (e.code === "ArrowRight") document.getElementById("nextBtn").click(); if (e.code === "ArrowLeft") document.getElementById("prevBtn").click(); });
+}
+// In-browser check of the rendering layer: after decoding, anchoring and the display transform, every
+// model's ADE for every agent of every window must equal the bundle's (computed in Python from the raw
+// files); the transform must be rigid; and each window's history must end where the recorded track is
+// at its issue frame (time and identity alignment). Results: window.__selftest and #selftest.
+function selfTest() {
+  const out = { checked: 0, worst_ade_m: 0, worst_track_m: 0, rigid_m: 0, failures: [] };
+  for (let i = 0; i < S.windows.length; i++) {
+    const W = win(S, i);
+    for (let k = 0; k < W.n; k++) {
+      const a = W.agents[k], p = posAt(S, a, W.issue), d = Math.hypot(p[0] - W.last[2 * k], p[1] - W.last[2 * k + 1]);
+      out.worst_track_m = Math.max(out.worst_track_m, d);
+    }
+    for (const m of S.models.filter(m => m.available)) {
+      const P = pred(S, W, m.key);
+      for (let k = 0; k < W.n; k++) {
+        if (P.ade[k] == null) continue;
+        let s = 0, n = 0;
+        for (let t = 0; t < PRED; t++) if (W.fm[k * PRED + t]) { s += Math.hypot(P.ml[(k * PRED + t) * 2] - W.gt[(k * PRED + t) * 2], P.ml[(k * PRED + t) * 2 + 1] - W.gt[(k * PRED + t) * 2 + 1]); n++; }
+        // prediction and truth are each stored to 0.5 cm per axis: a step's error moves by <= sqrt(2) * 1 cm
+        const e = Math.abs(s / n - P.ade[k]); out.worst_ade_m = Math.max(out.worst_ade_m, e); out.checked++;
+        if (e > 0.0142) out.failures.push(`${m.key} window ${W.t0} agent ${S.B.agents.ids[W.agents[k]]}: ${(s / n).toFixed(3)} vs ${P.ade[k]}`);
+      }
+    }
+  }
+  const raw = decXY(S.B.agents.track, S.B.scene.origin), A = S.A;   // rigidity: pairwise distances in both frames
+  for (let f = 0; f < S.T; f += 7) for (let a = 0; a + 1 < A; a += 3) {
+    const i = (f * A + a) * 2, j = (f * A + a + 1) * 2;
+    if (!isFinite(raw[i]) || !isFinite(raw[j])) continue;
+    out.rigid_m = Math.max(out.rigid_m, Math.abs(Math.hypot(raw[i] - raw[j], raw[i + 1] - raw[j + 1]) - Math.hypot(S.track[i] - S.track[j], S.track[i + 1] - S.track[j + 1])));
+  }
+  if (out.worst_track_m > 0.011) out.failures.push(`history end vs recorded track: ${out.worst_track_m.toFixed(3)} m`);
+  if (out.rigid_m > 1e-6) out.failures.push(`display transform not rigid: ${out.rigid_m}`);
+  out.pass = out.failures.length === 0;
+  window.__selftest = out;
+  document.body.insertAdjacentHTML("beforeend", `<pre id="selftest" hidden>${JSON.stringify(out)}</pre>`);
+}
+function fastest(Sc, W) { let best = null, bv = -1; W.agents.forEach(a => { const v = speedAt(Sc, a, W.issue) || 0; if (v > bv) { bv = v; best = a; } }); return best; }
+function switchScene(i) {
+  st.scene = i; S = scenes[i];
+  const avail = S.models.filter(m => m.available).map(m => m.key);
+  if (!avail.includes(st.model)) st.model = avail.includes("led_idd") ? "led_idd" : avail.includes("led_av2") ? "led_av2" : avail[0];
+  st.cmp = st.cmp.map(k => avail.includes(k) ? k : st.model);
+  const W = win(S, Math.min(3, S.windows.length - 1)); st.t = W.issue; st.sel = fastest(S, W);
+}
+function init() {
+  const avail = S.models.filter(m => m.available).map(m => m.key);
+  st.model = avail.includes("led_idd") ? "led_idd" : avail[0];
+  st.cmp = ["cv", "mlp_idd", "led_idd", "led_av2"].map(k => avail.includes(k) ? k : avail[0]);
+  st.t = S.windows[3] ? S.windows[3].raw.issue_frame : 0;
+  const W = win(S, Math.min(3, S.windows.length - 1));        // default selection: the fastest agent with a prediction
+  let best = null, bv = -1; W.agents.forEach(a => { const v = speedAt(S, a, W.issue) || 0; if (v > bv) { bv = v; best = a; } }); st.sel = best;
+  if (S.B.public) PRIVATE_LAYERS.forEach(k => { st.on[k] = 0; });
+  parseHash();
+  if (S.B.public) PRIVATE_LAYERS.forEach(k => { st.on[k] = 0; });
+  if (new URLSearchParams(location.hash.slice(1)).get("figure") === "1") {   // figure only: no controls (exports, README)
+    document.querySelector("header").hidden = true; document.querySelector("aside").hidden = true; document.querySelector("footer").hidden = true;
+    document.querySelector("main").style.gridTemplateColumns = "1fr"; document.getElementById("app").style.gridTemplateRows = "1fr";
+  }
+  document.getElementById("plot").style.height = "100%";
+  buildControls(); render(); wire(); requestAnimationFrame(tick);
+  const q = new URLSearchParams(location.hash.slice(1));
+  if (q.get("selftest") === "1") selfTest();
+  if (q.get("autoplay") === "1") { st.t = 0; st.speed = parseFloat(q.get("speed") || "1"); st.playing = true; }
+  window.__ready = true;
+}
+try { init(); } catch (err) { document.body.insertAdjacentHTML("afterbegin", `<pre id="fatal" style="color:#b00;padding:12px">Viewer error: ${err.stack || err}</pre>`); window.__error = String(err.stack || err); }
+window.addEventListener("error", e => { window.__error = String(e.message); });
+</script>

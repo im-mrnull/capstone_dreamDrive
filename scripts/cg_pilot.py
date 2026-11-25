@@ -8,7 +8,10 @@ validation pass. Each run's metrics JSON is kept (val = the AV2 val subset; test
 during development), but a few-epoch run says nothing about accuracy.
 
 CV and the MLP read the per-agent windows (scripts/9_make_agent_windows_from_canonical.py), the
-others the multi-agent file, as in the benchmark.
+others the multi-agent file, as in the benchmark. Every GPU model runs under --gpu-mem-frac (0.8
+by default): uncapped, Windows spills the CUDA cache into shared system memory instead of raising
+OOM (MFP on av2_x4_dev reached 58 GB of shared memory in its second epoch). The exit code is
+non-zero if any model's run failed.
 
 Usage:
     python scripts/cg_pilot.py --name av2_matched_dev --epochs 3
@@ -32,11 +35,11 @@ CG = REPO / "outputs" / "chaos_gap"
 EPOCH_LINE = re.compile(r"^(core |init )?epoch\s+\d+")
 
 
-def commands(name: str, epochs: int, out: Path, models: list[str]) -> dict[str, list[str]]:
+def commands(name: str, epochs: int, out: Path, models: list[str], gpu_mem_frac: float = 0.8) -> dict[str, list[str]]:
     py, data, agents = sys.executable, str(CG / f"{name}.npz"), str(CG / f"{name}_agents.npz")
     sp, e = str(REPO / "splits" / "chaos_gap" / f"{name}.json"), str(epochs)
     m = lambda k: str(out / f"{k}.json")                                   # noqa: E731
-    gpu = ["--device", "cuda", "--seed", "0", "--data", data, "--splits-file", sp]
+    gpu = ["--device", "cuda", "--seed", "0", "--data", data, "--splits-file", sp, "--gpu-mem-frac", str(gpu_mem_frac)]
     all_cmds = {
         "cv": [py, "scripts/model1_baseline_cv_eval.py", "--input-npz", agents, "--splits-file", sp, "--vel-k", "5",
                "--save-metrics-json", m("cv")],
@@ -50,6 +53,10 @@ def commands(name: str, epochs: int, out: Path, models: list[str]) -> dict[str, 
                 "--save-metrics-json", m("led"), "--save-ckpt", str(out / "led.pt")],
         "autobot": [py, "scripts/model9_autobot_train_eval.py", *gpu, "--epochs", e, "--save-metrics-json", m("autobot"),
                     "--save-ckpt", str(out / "autobot.pt")],
+        "agentformer": [py, "scripts/model6_agentformer_train_eval.py", *gpu, "--epochs", e,
+                        "--save-metrics-json", m("agentformer"), "--save-ckpt", str(out / "agentformer.pt")],
+        "mfp": [py, "scripts/model4_mfp_train_eval.py", *gpu, "--epochs", e, "--k", "10", "--select", "top1",
+                "--log-every", "1", "--save-metrics-json", m("mfp"), "--save-ckpt", str(out / "mfp.pt")],
     }
     return {k: all_cmds[k] for k in models}
 
@@ -88,6 +95,7 @@ def main() -> int:
     ap.add_argument("--name", required=True, help="chaos-gap dataset, e.g. av2_matched_dev")
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--models", nargs="+", default=["cv", "mlp", "stgat", "transformer", "led", "autobot"])
+    ap.add_argument("--gpu-mem-frac", type=float, default=0.8, help="CUDA cache cap passed to every GPU model")
     args = ap.parse_args()
     out = CG / "pilot" / args.name
     out.mkdir(parents=True, exist_ok=True)
@@ -101,12 +109,17 @@ def main() -> int:
     result = {"label": "development pilot (throughput only)", "dataset": args.name, "epochs": args.epochs,
               "train_agents": stats["train"]["agents"], "val_agents": stats["val"]["agents"],
               "models": json.loads(tp.read_text(encoding="utf-8"))["models"] if tp.exists() else {}}
-    for k, cmd in commands(args.name, args.epochs, out, args.models).items():
+    failed = []
+    for k, cmd in commands(args.name, args.epochs, out, args.models, args.gpu_mem_frac).items():
         print("+", " ".join(cmd), flush=True)
         result["models"][k] = run_timed(cmd, out / f"{k}.log")
         print(k, result["models"][k], flush=True)
         tp.write_text(json.dumps(result, indent=2), encoding="utf-8")       # a rerun replaces only its models
-    return 0
+        if result["models"][k]["returncode"]:
+            failed.append(k)
+    if failed:
+        print("failed:", " ".join(failed), flush=True)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

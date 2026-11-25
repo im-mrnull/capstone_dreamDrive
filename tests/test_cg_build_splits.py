@@ -41,7 +41,8 @@ def test_train_subset_has_exactly_the_target_agents_in_hash_order():
     sizes = np.full(8, 2)
     sizes[order[0]] = 100                                                # the hash-first one would overshoot
     assert cg.fill_exact(sizes, order, 4) == order[1:3].tolist()
-    assert [ids[i] for i in cg.hash_order(ids)]                          # the order depends on the ids, not positions == [list(reversed(ids))[i] for i in cg.hash_order(list(reversed(ids)))]
+    rev = list(reversed(ids))                                            # the order depends on the ids, not positions
+    assert [ids[i] for i in cg.hash_order(ids)] == [rev[i] for i in cg.hash_order(rev)]
 
 
 def test_merged_arrays_are_the_source_sequences():

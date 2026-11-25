@@ -1,0 +1,83 @@
+{
+ "method": "S = the first 8 non-empty IDD train scenes in sha256(dreamdrive-chaosgap-v1-stop:scene_id) order (early stopping only); train = sha256(dreamdrive-chaosgap-v1-ft0:scene_id) order without S, first 20; test = all of IDD val (both halves)",
+ "salt": "dreamdrive-chaosgap-v1",
+ "note": "DEV ONLY, option-2 diagnostic: val = held-out IDD train scenes; test = IDD-3D val; the frozen IDD-3D test is not in this file",
+ "k": 20,
+ "draw": 0,
+ "counts": {
+  "train": 20,
+  "val": 8,
+  "test": 10
+ },
+ "agents": {
+  "train": 2505,
+  "val": 698,
+  "test": 993
+ },
+ "composition": {
+  "stop_set": {
+   "scenes": 8,
+   "agents": 698,
+   "vehicle": 323,
+   "two-wheeler": 241,
+   "pedestrian": 98,
+   "other": 36,
+   "moving_share": 0.6447
+  },
+  "idd_train": {
+   "scenes": 72,
+   "agents": 7406,
+   "vehicle": 3236,
+   "two-wheeler": 2588,
+   "pedestrian": 1460,
+   "other": 122,
+   "moving_share": 0.7233
+  }
+ },
+ "splits": {
+  "train": [
+   "20220118103308_seq_11",
+   "20220118103308_seq_15",
+   "20220118103308_seq_29",
+   "20220118103308_seq_3",
+   "20220118103808_seq_13",
+   "20220118103808_seq_19",
+   "20220118103808_seq_29",
+   "20220118103808_seq_5",
+   "20220118104308_seq_1",
+   "20220118104308_seq_12",
+   "20220118104308_seq_14",
+   "20220118105838_seq_6",
+   "20220118110338_seq_10",
+   "20220118110338_seq_18",
+   "20220118111739_seq_16",
+   "20220118111739_seq_21",
+   "20220118111739_seq_24",
+   "20220118112945_seq_28",
+   "20220118115526_seq_3",
+   "20220118115526_seq_9"
+  ],
+  "val": [
+   "20220118103308_seq_26",
+   "20220118103308_seq_8",
+   "20220118103808_seq_26",
+   "20220118104308_seq_11",
+   "20220118110338_seq_13",
+   "20220118110338_seq_15",
+   "20220118111338_seq_1",
+   "20220118111739_seq_20"
+  ],
+  "test": [
+   "20220118103308_seq_10",
+   "20220118103308_seq_27",
+   "20220118103308_seq_5",
+   "20220118103308_seq_7",
+   "20220118103808_seq_27",
+   "20220118103808_seq_3",
+   "20220118103808_seq_6",
+   "20220118104308_seq_10",
+   "20220118105838_seq_8",
+   "20220118112945_seq_26"
+  ]
+ }
+}

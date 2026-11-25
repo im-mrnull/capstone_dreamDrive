@@ -1,0 +1,95 @@
+{
+ "method": "IDD train scenes with >= 1 agent in sha256(dreamdrive-chaosgap-v1-ft0:scene_id) order, first 40; val = IDD val half A of balanced_halves (minimax of the agent-count difference, class-group TV and moving-share difference; moving >= 0.5 m/s over the last observed second); test = IDD val half B",
+ "salt": "dreamdrive-chaosgap-v1",
+ "note": "DEV ONLY: val and test are halves A and B of IDD-3D val; the frozen IDD-3D test is not in this file",
+ "k": 40,
+ "draw": 0,
+ "counts": {
+  "train": 40,
+  "val": 5,
+  "test": 5
+ },
+ "agents": {
+  "train": 4044,
+  "val": 551,
+  "test": 442
+ },
+ "composition": {
+  "val": {
+   "scenes": 5,
+   "agents": 551,
+   "vehicle": 177,
+   "two-wheeler": 196,
+   "pedestrian": 152,
+   "other": 26,
+   "moving_share": 0.5735
+  },
+  "test": {
+   "scenes": 5,
+   "agents": 442,
+   "vehicle": 211,
+   "two-wheeler": 157,
+   "pedestrian": 74,
+   "other": 0,
+   "moving_share": 0.681
+  }
+ },
+ "splits": {
+  "train": [
+   "20220118103308_seq_11",
+   "20220118103308_seq_13",
+   "20220118103308_seq_14",
+   "20220118103308_seq_15",
+   "20220118103308_seq_18",
+   "20220118103308_seq_22",
+   "20220118103308_seq_26",
+   "20220118103308_seq_29",
+   "20220118103308_seq_3",
+   "20220118103308_seq_4",
+   "20220118103808_seq_10",
+   "20220118103808_seq_12",
+   "20220118103808_seq_13",
+   "20220118103808_seq_19",
+   "20220118103808_seq_26",
+   "20220118103808_seq_29",
+   "20220118103808_seq_4",
+   "20220118103808_seq_5",
+   "20220118104308_seq_1",
+   "20220118104308_seq_12",
+   "20220118104308_seq_14",
+   "20220118104308_seq_22",
+   "20220118105838_seq_10",
+   "20220118105838_seq_6",
+   "20220118110338_seq_10",
+   "20220118110338_seq_13",
+   "20220118110338_seq_15",
+   "20220118110338_seq_18",
+   "20220118111338_seq_1",
+   "20220118111338_seq_2",
+   "20220118111338_seq_3",
+   "20220118111739_seq_16",
+   "20220118111739_seq_18",
+   "20220118111739_seq_19",
+   "20220118111739_seq_20",
+   "20220118111739_seq_21",
+   "20220118111739_seq_24",
+   "20220118112945_seq_28",
+   "20220118115526_seq_3",
+   "20220118115526_seq_9"
+  ],
+  "val": [
+   "20220118103308_seq_10",
+   "20220118103308_seq_7",
+   "20220118103808_seq_27",
+   "20220118103808_seq_3",
+   "20220118112945_seq_26"
+  ],
+  "test": [
+   "20220118103308_seq_27",
+   "20220118103308_seq_5",
+   "20220118103808_seq_6",
+   "20220118104308_seq_10",
+   "20220118105838_seq_8"
+  ]
+ }
+}

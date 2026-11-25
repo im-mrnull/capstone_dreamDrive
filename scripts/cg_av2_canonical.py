@@ -83,15 +83,17 @@ def scenario_arrays(df) -> tuple:
     return pos, mask, agent_id, agent_type
 
 
-def scenario_window(pos, mask, agent_id, agent_type) -> dict | None:
-    """The canonical window at T0 (scripts/5_export_stgat_format.py, presence "obs+1fut"),
-    or None when fewer than MIN_AGENTS agents qualify."""
-    win_mask = mask[T0:T0 + OBS_LEN + PRED_LEN]
+def scenario_window(pos, mask, agent_id, agent_type, t0: int = T0) -> dict | None:
+    """The canonical window starting at frame t0 (default T0; scripts/5_export_stgat_format.py,
+    presence "obs+1fut"), or None when fewer than MIN_AGENTS agents qualify."""
+    if not 0 <= t0 <= T_SCENARIO - OBS_LEN - PRED_LEN:
+        raise ValueError(f"t0={t0}: the window must fit in the {T_SCENARIO}-frame scenario")
+    win_mask = mask[t0:t0 + OBS_LEN + PRED_LEN]
     keep = win_mask[:OBS_LEN].all(axis=0) & win_mask[OBS_LEN:].any(axis=0)
     idx = np.where(keep)[0]
     if idx.size < MIN_AGENTS:
         return None
-    traj = np.transpose(pos[T0:T0 + OBS_LEN + PRED_LEN, idx, :], (1, 2, 0)).astype(np.float32)
+    traj = np.transpose(pos[t0:t0 + OBS_LEN + PRED_LEN, idx, :], (1, 2, 0)).astype(np.float32)
     obs, pred = traj[:, :, :OBS_LEN], traj[:, :, OBS_LEN:]
     fut_mask = np.transpose(win_mask[OBS_LEN:, idx], (1, 0))
     pred = np.where(fut_mask[:, None, :], pred, 0.0).astype(np.float32)
